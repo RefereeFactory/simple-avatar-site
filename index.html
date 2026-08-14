@@ -3248,6 +3248,8 @@ const LSB = 'https://canvbkibjgcnqowjtarf.supabase.co';
 const LANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhbnZia2liamdjbnFvd2p0YXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NzE0NDYsImV4cCI6MjA5OTM0NzQ0Nn0.TLskVoTaYI90avy09IuM_kkKvAYUMETTntZkn2M807I';
 let lAvatar = null, lChat = [], lRec = null, lMic = false, lSystem = '', lAvatarId = '', lModel = 'claude-opus-4-8';
 let lGreeting = '', lStartedAt = 0, lWarnTimer = null;
+function lBtnSafe(d){ const b=document.getElementById('liveStartBtn'); if(b) b.disabled=d; }
+function heroRevive(){ const h=document.getElementById('heroInvite'); if(h) h.style.display='block'; }
 const lst = function (t) { document.getElementById('liveStatus').textContent = t; };
 
 async function lFetch(fn, body) {
@@ -3290,7 +3292,7 @@ window.startLiveHost = async function () {
   // Always re-read the freshest saved config, so a just-saved host works without a page reload.
   await loadLiveConfig();
   if (!lAvatarId) { lst('The live host isn’t set up yet. Founder: open the founder card, go to “Live host — her own face & voice”, pick her face and model, and press “Save live host”.'); return; }
-  document.getElementById('liveStartBtn').disabled = true;
+  lBtnSafe(true);
   // Instant feedback: play the recorded greeting so she appears at once while
   // the live session spins up behind it — no blank waiting.
   const gv = document.getElementById('greeterVideo');
@@ -3332,24 +3334,24 @@ window.startLiveHost = async function () {
     lAvatar.on(SEV.SESSION_DISCONNECTED, function () {
       if (lWarnTimer) { clearTimeout(lWarnTimer); lWarnTimer = null; }
       lStopMic();
-      document.getElementById('liveStartBtn').disabled = false;
+      lBtnSafe(false);
       // If the free four minutes ran their course, thank them and show the top-up.
       if (lStartedAt && (Date.now() - lStartedAt) >= 225000) {
         
-        lst('Session complete — press the card to talk again, or reveal the Factory below.');
+        heroRevive(); lst('Session complete — press the card to talk again, or reveal the Factory below.');
       } else {
         lst('Session ended.');
       }
     });
     await lAvatar.start();
     lChat = [];
-  } catch (e) { lst('Could not connect: ' + e.message); document.getElementById('liveStartBtn').disabled = false; }
+  } catch (e) { lst('Could not connect: ' + e.message); lBtnSafe(false); heroRevive(); }
 };
 window.stopLiveHost = async function () {
   try { if (lAvatar) await lAvatar.stop(); } catch (_) {}
-  lAvatar = null; document.getElementById('liveStartBtn').disabled = false;
+  lAvatar = null; lBtnSafe(false);
   document.getElementById('liveControls').style.display = 'none'; document.getElementById('liveVideo').style.display = 'none';
-  lStopMic(); lst('Ended — thank you.');
+  lStopMic(); heroRevive(); lst('Ended — thank you.');
 };
 window.sayToHost = async function () { const inp = document.getElementById('liveIn'); const t = inp.value.trim(); if (!t) return; inp.value = ''; await lSay(t); };
 async function lSay(text) {
