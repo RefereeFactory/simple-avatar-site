@@ -1,0 +1,3482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Factory 🏭 — a Referee Innovations company</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a0c'/%3E%3Ctext y='72' x='50' font-size='64' text-anchor='middle'%3E🏭%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230a0a0c'/%3E%3Ctext y='72' x='50' font-size='64' text-anchor='middle'%3E🏭%3C/text%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0d0d0f;
+    background-image: radial-gradient(circle at 20% 10%, rgba(240,165,0,0.06), transparent 40%);
+    color: #eee;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px;
+  }
+  .wrap { width: 100%; max-width: 640px; }
+  header { text-align: center; margin-bottom: 36px; }
+  .eyebrow { font-size: 12px; letter-spacing: 5px; color: #999; text-transform: uppercase; margin-bottom: 12px; }
+  .logo { font-size: 44px; }
+  h1 { font-size: 30px; letter-spacing: 4px; font-weight: 800; margin-top: 6px; }
+  h1 span { color: #f0a500; }
+  .tagline { color: #888; font-size: 14px; letter-spacing: 1.5px; margin-top: 6px; }
+  .defline { color: #bbb; font-size: 14.5px; margin-top: 14px; line-height: 1.7; max-width: 520px; margin-left: auto; margin-right: auto; }
+  .card {
+    background: #16161a;
+    border: 1px solid #26262c;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+  .hidden { display: none !important; }
+  .banner {
+    background: #10321a;
+    border: 1px solid #28a745;
+    color: #7ee2a8;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: center;
+  }
+  .inbox-banner {
+    background: #2b2107;
+    border: 1px solid #f0a500;
+    color: #f0a500;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: center;
+    font-weight: 700;
+  }
+  .g-btn {
+    width: 100%; padding: 14px; background: #fff; color: #1f1f1f; border: none; border-radius: 10px;
+    font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .signin-note { text-align: center; color: #777; font-size: 13px; margin-top: 14px; line-height: 1.6; }
+  .userbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; font-size: 13px; color: #999; flex-wrap: wrap; gap: 8px; }
+  .credits { background: #0d0d0f; border: 1px solid #f0a500; color: #f0a500; border-radius: 20px; padding: 5px 14px; font-weight: 700; font-size: 13px; }
+  .signout { background: #0d0d0f; border: 1px solid #f0a500; color: #f0a500; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-size: 13px; font-weight: 700; }
+  label { display: block; font-size: 12px; letter-spacing: 1.5px; color: #999; margin: 16px 0 8px; text-transform: uppercase; }
+  input, textarea {
+    width: 100%; background: #0d0d0f; border: 1.5px solid #2c2c33; border-radius: 10px;
+    color: #eee; padding: 13px 15px; font-size: 15px; font-family: inherit; outline: none;
+  }
+  input:focus, textarea:focus { border-color: #f0a500; }
+  .agent-row { display: flex; gap: 10px; align-items: center; margin: 16px 0 0; flex-wrap: wrap; }
+  .agent-btn {
+    flex: 1; min-width: 240px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 16px 22px;
+    background: linear-gradient(135deg, #f0a500, #d48800);
+    color: #111; border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 800; letter-spacing: 1px;
+    cursor: pointer; font-family: inherit;
+    box-shadow: 0 0 24px rgba(240,165,0,0.30);
+  }
+  .agent-btn.live { background: #16161a; color: #f0a500; border: 1.5px solid #f0a500; animation: agentpulse 1.3s infinite; }
+  .agent-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  @keyframes agentpulse { 0%,100% { box-shadow: 0 0 0 0 rgba(240,165,0,0.45);} 50% { box-shadow: 0 0 0 12px rgba(240,165,0,0);} }
+  .agent-state { font-size: 12.5px; color: #888; margin-top: 10px; min-height: 17px; font-style: italic; }
+  .convo {
+    margin-top: 14px; border: 1px solid #2c2c33; border-radius: 12px;
+    background: #0d0d0f; padding: 14px; max-height: 300px; overflow-y: auto;
+  }
+  .convo .line { font-size: 14px; line-height: 1.7; margin-bottom: 10px; }
+  .convo .line:last-child { margin-bottom: 0; }
+  .convo .who { font-weight: 800; font-size: 11.5px; letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 2px; }
+  .convo .factory .who { color: #f0a500; }
+  .convo .you .who { color: #7ee2a8; }
+  .convo .line p { margin: 0; color: #ccc; }
+  .manual-toggle { background: none; border: none; color: #777; font-size: 12.5px; cursor: pointer; text-decoration: underline; padding: 0; margin-top: 12px; font-family: inherit; }
+  .hint { font-size: 12px; color: #666; margin-top: 6px; }
+  .build-btn {
+    width: 100%; margin-top: 22px; padding: 16px;
+    background: linear-gradient(135deg, #f0a500, #d48800);
+    color: #111; border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 800; letter-spacing: 2px; cursor: pointer;
+    box-shadow: 0 0 24px rgba(240,165,0,0.35);
+  }
+  .build-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .small-btn {
+    margin-top: 16px; padding: 13px 26px;
+    background: linear-gradient(135deg, #f0a500, #d48800);
+    color: #111; border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 800; cursor: pointer;
+  }
+  .small-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .form-ok { color: #7ee2a8; font-size: 14px; margin-top: 14px; }
+  .section-title { font-size: 17px; font-weight: 800; margin-bottom: 6px; color: #f0a500; }
+  .section-sub { font-size: 13.5px; color: #999; margin-bottom: 12px; line-height: 1.7; }
+  .plan-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .plan { flex: 1; min-width: 220px; background: #0d0d0f; border: 1.5px solid #2c2c33; border-radius: 12px; padding: 18px; }
+  .plan.best { border-color: #f0a500; }
+  .plan .p-name { font-weight: 800; font-size: 15px; margin-bottom: 4px; }
+  .plan .p-price { font-size: 22px; font-weight: 800; color: #f0a500; margin-bottom: 6px; }
+  .plan .p-desc { font-size: 12.5px; color: #888; margin-bottom: 14px; line-height: 1.5; }
+  .plan button { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 14px; }
+  .plan.best button { background: linear-gradient(135deg, #f0a500, #d48800); color: #111; }
+  .plan:not(.best) button { background: #26262c; color: #eee; }
+  .app-row {
+    background: #0d0d0f; border: 1px solid #2c2c33; border-radius: 12px;
+    padding: 16px; margin-bottom: 12px;
+  }
+  .app-row .a-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .app-row .a-name { font-size: 14.5px; color: #eee; font-weight: 700; }
+  .app-row .a-link { font-size: 12.5px; color: #f0a500; word-break: break-all; }
+  .app-row .a-change {
+    background: none; border: 1px solid #f0a500; color: #f0a500;
+    border-radius: 8px; padding: 7px 14px; cursor: pointer;
+    font-size: 12.5px; font-weight: 700; font-family: inherit; white-space: nowrap;
+  }
+  .updating-banner {
+    background: #2b2107; border: 1px solid #f0a500; color: #f0a500;
+    border-radius: 10px; padding: 12px 14px; margin-top: 14px;
+    font-size: 13.5px; line-height: 1.6;
+  }
+  .updating-banner button {
+    background: none; border: none; color: #d8b878; text-decoration: underline;
+    cursor: pointer; font-size: 12.5px; padding: 0; margin-left: 6px; font-family: inherit;
+  }
+  .empty-state { border: 1.5px dashed #2c2c33; border-radius: 12px; padding: 24px; text-align: center; color: #777; font-size: 13.5px; line-height: 1.7; }
+  .enquiry {
+    background: #0d0d0f; border: 1px solid #2c2c33; border-radius: 12px;
+    padding: 16px; margin-bottom: 12px;
+  }
+  .enquiry .e-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .enquiry .e-who { font-size: 13.5px; color: #ddd; font-weight: 700; }
+  .kind-tag { font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; border-radius: 12px; padding: 3px 10px; font-weight: 800; }
+  .kind-enquiry { background: #10321a; color: #7ee2a8; border: 1px solid #28a745; }
+  .kind-candidate { background: #1a2440; color: #8ab4ff; border: 1px solid #4a6fd4; }
+  .enquiry .e-msg { font-size: 13.5px; color: #bbb; line-height: 1.65; margin-bottom: 10px; white-space: pre-wrap; }
+  .enquiry .e-meta { font-size: 11.5px; color: #666; margin-bottom: 10px; }
+  .mark-read { background: none; border: 1px solid #f0a500; color: #f0a500; border-radius: 8px; padding: 6px 14px; cursor: pointer; font-size: 12px; font-weight: 700; }
+  .steps { display: flex; justify-content: space-between; margin: 10px 0 18px; }
+  .step { text-align: center; flex: 1; position: relative; }
+  .step:not(:last-child)::after { content: ''; position: absolute; top: 15px; left: 60%; width: 80%; height: 2px; background: #2c2c33; }
+  .dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #1c1c22; border: 2px solid #2c2c33;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 8px; font-size: 13px; color: #777; font-weight: 700; position: relative; z-index: 1;
+  }
+  .step.active .dot { border-color: #f0a500; color: #f0a500; animation: pulse 1.4s infinite; }
+  .step.done .dot { background: #f0a500; border-color: #f0a500; color: #111; }
+  .step-label { font-size: 11px; letter-spacing: 1px; color: #777; text-transform: uppercase; }
+  .step.active .step-label { color: #f0a500; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(240,165,0,0.4);} 50% { box-shadow: 0 0 0 8px rgba(240,165,0,0);} }
+  .result { text-align: center; padding: 10px 0; }
+  .result a { color: #f0a500; font-size: 18px; font-weight: 700; word-break: break-all; }
+  .celebrate { font-size: 30px; margin-bottom: 8px; }
+  .error-box { color: #ff6b6b; text-align: center; font-size: 14px; line-height: 1.6; padding: 8px 0; }
+  .retry { margin-top: 12px; background: none; border: 1.5px solid #ff6b6b; color: #ff6b6b; border-radius: 10px; padding: 10px 24px; cursor: pointer; font-weight: 700; }
+  .header-cta { margin-top: 22px; }
+  .terms-btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 11px 22px;
+    background: #16161a;
+    border: 1.5px solid #f0a500;
+    color: #f0a500;
+    border-radius: 999px;
+    font-size: 13.5px; font-weight: 800; letter-spacing: 1px;
+    text-decoration: none;
+    box-shadow: 0 0 18px rgba(240,165,0,0.18);
+  }
+  .header-cta { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .terms-btn:hover { background: #2b2107; }
+  .terms-btn .draft-tag {
+    background: #f0a500; color: #111; border-radius: 8px;
+    padding: 2px 8px; font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .m-item {
+    background: #0d0d0f; border: 1px solid #2c2c33; border-radius: 14px;
+    padding: 18px; margin-bottom: 12px; transition: border-color .15s;
+  }
+  .m-item:hover { border-color: #f0a500; }
+  .m-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .m-title { font-size: 15.5px; font-weight: 800; color: #eee; }
+  .m-price {
+    background: linear-gradient(135deg, #f0a500, #d48800); color: #111;
+    border-radius: 999px; padding: 5px 14px; font-weight: 800; font-size: 13.5px; white-space: nowrap;
+  }
+  .m-summary { font-size: 13.5px; color: #999; line-height: 1.7; margin: 8px 0 12px; }
+  .m-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .m-try {
+    background: none; border: 1.5px solid #f0a500; color: #f0a500;
+    border-radius: 10px; padding: 10px 18px; cursor: pointer;
+    font-size: 13px; font-weight: 800; font-family: inherit;
+  }
+  .m-try:hover { background: #2b2107; }
+  .m-open {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: none; border: 1.5px solid #2c2c33; color: #ccc;
+    border-radius: 10px; padding: 10px 18px;
+    font-size: 13px; font-weight: 800; text-decoration: none;
+  }
+  .m-open:hover { border-color: #f0a500; color: #f0a500; }
+  .m-go {
+    display: block; text-align: center; margin-top: 10px; padding: 13px 18px;
+    background: linear-gradient(135deg, #f0a500, #d48800); color: #111;
+    border-radius: 10px; font-size: 14px; font-weight: 800; letter-spacing: 1px;
+    text-decoration: none;
+  }
+  .m-code {
+    background: #10321a; border: 1px solid #28a745; color: #7ee2a8;
+    border-radius: 10px; padding: 12px 14px; margin-top: 10px;
+    font-size: 13px; line-height: 1.7; word-break: break-all;
+  }
+  .a-sell {
+    background: none; border: 1px solid #28a745; color: #7ee2a8;
+    border-radius: 8px; padding: 7px 14px; cursor: pointer;
+    font-size: 12.5px; font-weight: 700; font-family: inherit; white-space: nowrap;
+  }
+  .agree-overlay {
+    position: fixed; inset: 0; background: rgba(5,5,7,0.92); z-index: 1000;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .agree-box {
+    background: #16161a; border: 1px solid #f0a500; border-radius: 16px;
+    max-width: 480px; width: 100%; padding: 30px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7); text-align: center;
+  }
+  .agree-lead { font-size: 16.5px; color: #eee; font-weight: 700; line-height: 1.8; margin-bottom: 14px; }
+  .agree-sub { font-size: 13px; color: #999; line-height: 1.7; margin-bottom: 22px; }
+  .agree-sub a { color: #f0a500; }
+  .agree-yes {
+    width: 100%; padding: 15px; border: none; border-radius: 10px;
+    background: linear-gradient(135deg, #f0a500, #d48800); color: #111;
+    font-size: 15px; font-weight: 800; letter-spacing: 1px; cursor: pointer; font-family: inherit;
+  }
+  .agree-no {
+    margin-top: 12px; background: none; border: none; color: #777;
+    font-size: 12.5px; text-decoration: underline; cursor: pointer; font-family: inherit;
+  }
+  /* Simple mode: hide everything except the one box (and live overlays) */
+  body.simple-mode .card { display: none !important; }
+  body.simple-mode #simpleCard { display: block !important; }
+  body.simple-mode #statusCard:not(.hidden) { display: block !important; }
+  body.simple-mode .header-cta .terms-btn { display: none; }
+  body.simple-mode .header-cta #simpleBtn { display: inline-flex; }
+  body.simple-mode .defline { display: none; }
+  .s-row { display: flex; gap: 12px; align-items: stretch; }
+  .s-voice {
+    flex: 0 0 auto; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 6px; padding: 0 18px;
+    background: #16161a; border: 1.5px solid #f0a500; color: #f0a500;
+    border-radius: 14px; cursor: pointer; font-family: inherit;
+    font-size: 13px; font-weight: 800;
+  }
+  .s-voice:hover, .s-voice.live { background: #2b2107; }
+  .s-voice.live { animation: micpulse 1.2s infinite; }
+  .s-voice .mic { font-size: 26px; }
+  .s-box {
+    flex: 1; background: #0d0d0f; border: 1.5px solid #2c2c33; border-radius: 14px;
+    color: #eee; padding: 16px; font-size: 15.5px; font-family: inherit;
+    line-height: 1.7; outline: none; resize: vertical; min-height: 110px;
+  }
+  .s-box:focus { border-color: #f0a500; }
+  .s-build {
+    width: 100%; margin-top: 14px; padding: 16px;
+    background: linear-gradient(135deg, #f0a500, #d48800);
+    color: #111; border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 800; letter-spacing: 2px; cursor: pointer;
+    font-family: inherit; box-shadow: 0 0 24px rgba(240,165,0,0.35);
+  }
+  .s-state { font-size: 12.5px; color: #888; margin-top: 10px; min-height: 17px; font-style: italic; }
+  .s-full-link {
+    display: block; margin-top: 14px; text-align: center; background: none; border: none;
+    color: #777; font-size: 12.5px; text-decoration: underline; cursor: pointer;
+    font-family: inherit; width: 100%;
+  }
+  /* Entry gate: the first-impression choice */
+  .mode-overlay {
+    position: fixed; inset: 0; background: rgba(5,5,7,0.94); z-index: 1100;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .mode-box {
+    background: #16161a; border: 1px solid #f0a500; border-radius: 16px;
+    max-width: 520px; width: 100%; padding: 30px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+  }
+  .mode-title { font-size: 18px; font-weight: 800; color: #eee; margin-bottom: 6px; }
+  .mode-sub { font-size: 13px; color: #999; line-height: 1.7; margin-bottom: 20px; }
+  .mode-choices { display: flex; gap: 12px; flex-wrap: wrap; }
+  .mode-choice {
+    flex: 1; min-width: 200px; padding: 20px 16px; border-radius: 14px; cursor: pointer;
+    font-family: inherit; text-align: center; border: 1.5px solid #2c2c33;
+    background: #0d0d0f; color: #eee;
+  }
+  .mode-choice.primary { border-color: #f0a500; box-shadow: 0 0 20px rgba(240,165,0,0.25); }
+  .mode-choice .mc-icon { font-size: 26px; display: block; margin-bottom: 6px; }
+  .mode-choice .mc-name { font-size: 15px; font-weight: 800; display: block; margin-bottom: 4px; }
+  .mode-choice .mc-desc { font-size: 12px; color: #999; line-height: 1.6; }
+  .mode-note { font-size: 11.5px; color: #666; margin-top: 16px; }
+  footer { color: #555; font-size: 12px; margin-top: 26px; text-align: center; line-height: 1.8; }
+  footer a { color: #777; }
+  /* Sticky jump-nav — so nobody has to scroll to find anything */
+  #jumpNav {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; gap: 8px; overflow-x: auto; padding: 10px 2px;
+    margin: 0 0 14px; background: rgba(13,13,15,0.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid #232329; -webkit-overflow-scrolling: touch;
+  }
+  #jumpNav::-webkit-scrollbar { display: none; }
+  #jumpNav a {
+    flex-shrink: 0; text-decoration: none; font-size: 15px; font-weight: 800;
+    color: #f0a500; border: 1.5px solid #f0a500; background: #1a1608;
+    border-radius: 999px; padding: 11px 18px; white-space: nowrap;
+    box-shadow: 0 2px 10px rgba(240,165,0,0.15);
+  }
+  .card { scroll-margin-top: 74px; }   /* jumped-to sections land below the sticky bar, titles visible */
+  #jumpNav a:active { background: #2b2107; }
+  /* Wide screens: wrap the bar so no pill hides off-screen (desktop has no swipe hint) */
+  @media (min-width: 700px) { #jumpNav { flex-wrap: wrap; justify-content: center; overflow-x: visible; } }
+  /* The book: double-size icon, gold sparks flying off it */
+  #jumpNav a.book-pill { display: inline-flex; align-items: center; gap: 8px; }
+  .book-spark { position: relative; display: inline-block; font-size: 2em; line-height: 1; }
+  .book-spark i {
+    position: absolute; font-style: normal; color: #ffd700; pointer-events: none;
+    text-shadow: 0 0 6px #ffd700, 0 0 14px rgba(255,215,0,0.7);
+    opacity: 0; animation: bookSpark 2.2s ease-out infinite;
+  }
+  .book-spark i:nth-child(1) { top: -2px; right: -6px;  font-size: 13px; animation-delay: 0s;    --sx:  14px; --sy: -18px; }
+  .book-spark i:nth-child(2) { top:  4px; left:  -6px;  font-size: 10px; animation-delay: 0.7s;  --sx: -13px; --sy: -14px; }
+  .book-spark i:nth-child(3) { bottom: 0; right: -2px;  font-size:  8px; animation-delay: 1.3s;  --sx:  10px; --sy: -22px; }
+  .book-spark i:nth-child(4) { top: -6px; left:   4px;  font-size: 11px; animation-delay: 1.7s;  --sx:  -4px; --sy: -20px; }
+  @keyframes bookSpark {
+    0%   { opacity: 0; transform: translate(0,0) scale(0.4) rotate(0deg); }
+    15%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(1.15) rotate(60deg); }
+  }
+  /* The bar shows in BOTH modes (founder's ruling, 29 Jul) — in simple mode a
+     tap first switches to Full, where the sections live. */
+  .earn-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .earn-block { background: #0d0d0f; border: 1px solid #2c2c33; border-radius: 12px; padding: 16px; }
+  .earn-block h3 { font-size: 14.5px; color: #f0a500; margin-bottom: 6px; }
+</style>
+</head>
+\1
+
+  <!-- ===== EXPERIMENTAL: AVATAR-FIRST LANDING (simple-avatar fork, 14 Aug 2026) =====
+       Only the AI host appears; the Factory hides behind her until "Reveal all features". -->
+  <div id="heroStage" style="position:fixed;inset:0;z-index:9000;background:#0a0a0c;color:#eee;text-align:center;overflow-y:auto;">
+    <div style="max-width:460px;margin:0 auto;padding:26px 16px;">
+      <div style="letter-spacing:6px;color:#888;font-size:11px;">REFEREE INNOVATIONS</div>
+      <div style="font-size:28px;font-weight:800;margin:6px 0 2px;">THE <span style="color:#f0a500;">FACTORY</span></div>
+      <div style="color:#999;font-size:12.5px;margin-bottom:14px;">Describe it. Own it. Live in minutes.</div>
+
+      <div id="heroInvite" onclick="startLiveHost()" style="cursor:pointer;margin:6px auto;max-width:380px;padding:16px;border:2px solid #f0a500;border-radius:16px;background:linear-gradient(180deg,#1a1408,#0d0d0f);animation:heroPulse 2s ease-in-out infinite;">
+        <div style="font-size:32px;">🗣️</div>
+        <div style="color:#f0a500;font-weight:800;font-size:15px;margin-top:2px;">Meet your guide — tap to talk</div>
+        <div style="color:#888;font-size:12px;margin-top:3px;">She helps you shape your app, live, face to face.</div>
+      </div>
+      <video id="liveVideo" autoplay playsinline style="display:none;width:100%;max-width:380px;border-radius:16px;background:#000;margin-top:8px;"></video>
+      <div id="liveControls" style="display:none;margin-top:8px;">
+        <div style="display:flex;gap:6px;max-width:380px;margin:0 auto;">
+          <input id="liveIn" placeholder="Type to her, or just talk…" style="flex:1;padding:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;" onkeydown="if(event.key==='Enter')sayToHost()">
+          <button class="terms-btn" onclick="sayToHost()" style="cursor:pointer;">SUBMIT</button>
+          <button class="terms-btn" id="liveMic" onclick="toggleLiveMic()" style="cursor:pointer;">🎤</button>
+        </div>
+        <button class="terms-btn" onclick="stopLiveHost()" style="cursor:pointer;margin-top:6px;">END</button>
+      </div>
+      <div id="liveStatus" style="color:#8f8;font-size:12.5px;min-height:18px;margin-top:8px;"></div>
+
+      <button id="revealBtn" onclick="revealAll()" style="margin-top:22px;padding:14px 30px;background:#0d0d0f;border:2px solid #f0a500;color:#f0a500;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;letter-spacing:1px;">✨ REVEAL ALL FEATURES</button>
+      <div style="color:#666;font-size:11px;margin-top:8px;">The full Factory — builder, marketplace, everything — waits behind this button.</div>
+    </div>
+  </div>
+  <style>
+    @keyframes heroPulse{0%,100%{box-shadow:0 0 0 0 rgba(240,165,0,.35)}50%{box-shadow:0 0 22px 6px rgba(240,165,0,.25)}}
+    @keyframes revealBlink{0%,100%{background:#0d0d0f;color:#f0a500}50%{background:#f0a500;color:#0d0d0f}}
+    .blinking{animation:revealBlink .35s ease-in-out 2;}
+  </style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Referee Innovations</div>
+    <div class="logo">🏭</div>
+    <h1>THE <span>FACTORY</span></h1>
+    <div class="tagline">DESCRIBE IT. OWN IT. LIVE IN MINUTES.</div>
+    <div class="defline">AI-generated websites and web apps for businesses of every size — from instant builds to large projects personally reviewed by our founders.</div>
+    <div id="seatsBadge" class="hidden" style="display:inline-block;margin-top:10px;padding:6px 16px;border:1px solid #f0a500;border-radius:20px;background:#1a1408;color:#f0a500;font-size:13px;font-weight:700;letter-spacing:0.3px;"></div>
+    <div class="header-cta">
+      <a class="terms-btn" id="termsBtn" href="terms.html">📄 Terms of Service <span class="draft-tag">Draft</span></a>
+      <a class="terms-btn" id="privacyBtn" href="privacy.html">🔒 Privacy</a>
+      <a class="terms-btn" id="govBtn" href="governance.html">⚖️ Open Governance</a>
+      <a class="terms-btn" id="marketBtn" href="#marketCard">🛒 Marketplace</a>
+      <a class="terms-btn" id="simpleBtn" href="#" onclick="toggleSimple();return false;">✨ Simple</a>
+    </div>
+  </header>
+
+  <nav id="jumpNav" onclick="jumpNavGo(event)">
+    <a href="#buildCard">⚙ Build</a>
+    <a href="#appsCard">🔧 Your apps</a>
+    <a href="#earnCard">🤝 Earn with us</a>
+    <a href="#payoutCard">💸 Get paid</a>
+    <a href="#domainCard">🌐 Domain</a>
+    <a href="#academyCard">📺 Academy</a>
+    <a href="#lessonsCard" class="book-pill"><span class="book-spark">📚<i>✦</i><i>✦</i><i>✧</i><i>✦</i></span> Lessons</a>
+    <a href="#moneyCard">💰 Make more money</a>
+    <a href="#marketCard">🛒 Marketplace</a>
+  </nav>
+
+  <div class="banner hidden" id="payBanner">🎉 Payment received — your builds are being credited. Thank you!</div>
+  <div class="inbox-banner hidden" id="inboxBanner"></div>
+
+  <div class="card" id="moneyCard" style="background:linear-gradient(135deg,#1a1408 0%,#241a06 55%,#3a2a08 100%);border:1px solid #f0a500;box-shadow:0 10px 40px rgba(240,165,0,0.18);position:relative;overflow:hidden;">
+    <div style="position:absolute;top:12px;right:14px;font-size:11px;font-weight:800;letter-spacing:1px;color:#0a0a0c;background:#f0a500;border-radius:5px;padding:3px 10px;">BY INVITATION ONLY</div>
+    <div style="font-size:26px;font-weight:900;color:#f0a500;line-height:1.2;margin-bottom:8px;">💰 Make more money with ease</div>
+    <div style="font-size:14.5px;color:#e6d9bf;line-height:1.7;max-width:560px;">
+      A private service for trusted members: we find a real need in the world, build the software that solves it,
+      place it in the marketplace, and improve it from real feedback — and the finished app is <b style="color:#fff;">yours</b>.
+      You approve every step. Places are limited and given by invitation.
+    </div>
+    <button class="small-btn" id="moneyOpenBtn" onclick="openMoneyForm()"
+      style="margin-top:14px;background:linear-gradient(135deg,#f0a500,#d48800);color:#111;font-weight:800;font-size:15px;padding:13px 24px;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 16px rgba(240,165,0,0.3);">
+      Submit your request →
+    </button>
+
+    <div id="moneyForm" style="display:none;margin-top:16px;border-top:1px solid #4a3a12;padding-top:14px;max-width:560px;">
+      <div style="font-size:13px;color:#e6d9bf;margin-bottom:10px;">Tell us who you are and, if you wish, the kind of business or problem you'd like solved. We review every request personally.</div>
+      <input id="moneyName" placeholder="Your name" style="width:100%;margin-bottom:8px;padding:11px;background:#0d0d0f;border:1px solid #4a3a12;border-radius:8px;color:#eee;font-size:14px;">
+      <input id="moneyEmail" type="email" placeholder="Your email" style="width:100%;margin-bottom:8px;padding:11px;background:#0d0d0f;border:1px solid #4a3a12;border-radius:8px;color:#eee;font-size:14px;">
+      <textarea id="moneyMsg" rows="3" placeholder="Optional: what would you like to make money from? (an idea, a field you know, or leave blank)" style="width:100%;margin-bottom:8px;padding:11px;background:#0d0d0f;border:1px solid #4a3a12;border-radius:8px;color:#eee;font-size:14px;"></textarea>
+      <button class="small-btn" onclick="submitMoneyRequest()" style="background:linear-gradient(135deg,#f0a500,#d48800);color:#111;font-weight:800;font-size:15px;padding:13px 28px;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 16px rgba(240,165,0,0.3);">Submit</button>
+      <div id="moneyOk" style="display:none;color:#7fdc7f;font-size:13px;margin-top:8px;">✓ Thank you — your request has reached the founder. If invited, you'll hear from us by email.</div>
+    </div>
+  </div>
+
+  <div class="card hidden" id="liveFeaturesCard">
+    <div class="section-title">✨ More from the Factory</div>
+    <div id="liveFeaturesList"></div>
+  </div>
+
+  <div class="card hidden" id="govCard">
+    <div class="section-title">⚖️ Open Governance page</div>
+    <div class="section-sub">Visible to you alone. The page is always reachable — this decides what visitors see on it.</div>
+    <div class="userbar">
+      <span>Current state</span>
+      <span class="credits" id="govState">–</span>
+      <a class="signout" href="/governance" target="_blank" style="text-decoration:none;">View page</a>
+    </div>
+    <label>Where this work has reached</label>
+    <textarea id="govStatus" rows="3" placeholder="How far along the work is — visitors see this."></textarea>
+    <label>Message for would-be collaborators</label>
+    <textarea id="govNote" rows="3" placeholder="What you want collaborators to know. Leave empty to hide this section."></textarea>
+    <button class="small-btn" id="govSaveBtn" onclick="saveGovernance()">Save messages</button>
+    <button class="small-btn" id="govToggleBtn" onclick="toggleGovernance()" style="background:#26262c;color:#eee;margin-left:8px;">Release page</button>
+    <div class="form-ok hidden" id="govOk">✓ Saved.</div>
+  </div>
+
+  <!-- The Curtain: shown to visitors when the founder lowers it. Founder door bottom-right. -->
+  <div id="curtainGate" style="display:none;position:fixed;inset:0;z-index:9999;background:#0a0a0c;color:#eee;text-align:center;">
+    <div style="max-width:520px;margin:14vh auto 0;padding:0 18px;">
+      <div style="letter-spacing:6px;color:#888;font-size:12px;">REFEREE INNOVATIONS</div>
+      <div style="font-size:30px;font-weight:800;margin:8px 0;">THE <span style="color:#f0a500;">FACTORY</span></div>
+      <div style="border:1px solid #f0a500;border-radius:16px;background:linear-gradient(180deg,#1a1408,#101014);padding:18px;margin-top:14px;">
+        <div style="color:#f0a500;font-weight:800;font-size:17px;">🔧 <span id="curtainMsg">We are tuning the machines.</span></div>
+        <div id="curtainEta" style="color:#eee;font-size:14px;margin-top:6px;"></div>
+      </div>
+      <div style="margin-top:16px;font-size:13px;color:#aaa;">Meanwhile, everything the Factory has built stays open:</div>
+      <a href="https://factory-referee-foyer.netlify.app" style="display:inline-block;margin-top:10px;padding:10px 22px;border:1px solid #f0a500;border-radius:10px;color:#f0a500;font-weight:700;text-decoration:none;">Visit the showcase</a>
+    </div>
+    <div onclick="document.getElementById('curtainGate').style.display='none'" style="position:fixed;right:10px;bottom:8px;color:#333;font-size:10px;cursor:pointer;">founder</div>
+  </div>
+
+  <div class="agree-overlay hidden" id="agreeGate">
+    <div class="agree-box">
+      <div class="agree-lead">Apps should be made in good faith — to help people, never to harm others.</div>
+      <div class="agree-sub">If you agree, press Agree and proceed. If not, please don't use our tools.<br><br>
+        This sentence is our spirit in one line — it is not the agreement itself. Pressing Agree accepts the full
+        <a href="/terms" target="_blank">Terms of Service</a>, which alone govern your use of The Factory.
+        Our <a href="/privacy" target="_blank">Privacy Policy</a> explains how your data is handled, and our
+        <a href="/governance" target="_blank">guiding principles</a> are also open to read.<br><br>
+        By pressing Agree you also confirm you are <strong>18 or over</strong> — or a parent or guardian
+        registering in your own name and accepting full responsibility for a young maker's use.</div>
+      <button class="agree-yes" onclick="acceptTerms()">✓ I agree — proceed</button><br>
+      <button class="agree-no" onclick="declineTerms()">I do not agree</button>
+    </div>
+  </div>
+
+  <div class="mode-overlay hidden" id="modeGate">
+    <div class="mode-box">
+      <div class="mode-title">Welcome to The Factory 🏭</div>
+      <div class="mode-sub">Describe an app or business — we build it and put it live in about ninety seconds. How would you like to work?</div>
+      <div class="mode-choices">
+        <button type="button" class="mode-choice primary" onclick="chooseMode('simple')">
+          <span class="mc-icon">✨</span>
+          <span class="mc-name">Simple</span>
+          <span class="mc-desc">One box. Talk or type — our agent asks, you answer, your app appears.</span>
+        </button>
+        <button type="button" class="mode-choice" onclick="chooseMode('full')">
+          <span class="mc-icon">🛠</span>
+          <span class="mc-name">Full version</span>
+          <span class="mc-desc">All the controls: marketplace, your apps, editing, selling.</span>
+        </button>
+      </div>
+      <div class="mode-note">You can switch at any time from the buttons at the top of the page.</div>
+    </div>
+  </div>
+
+  <div class="card hidden" id="simpleCard">
+    <div class="s-row">
+      <button type="button" class="s-voice" id="sVoice" onclick="simpleVoice()"><span class="mic">🎤</span>Voice</button>
+      <textarea id="sDesc" class="s-box" placeholder="Voice disabled — type your app details here, starting with the name of your app. Or press Voice to talk."></textarea>
+    </div>
+    <div class="convo hidden" id="sLog"></div>
+    <button type="button" class="s-build" id="sGo" onclick="simpleGo()">⚙ BUILD MY APP</button>
+    <div class="s-state" id="sState"></div>
+    <button type="button" class="s-full-link" onclick="switchToFull()">Prefer all the controls? Switch to the Full version</button>
+    <button type="button" class="signout hidden" id="sSignout" onclick="signOut()" style="margin-top:10px;">Sign out</button>
+  </div>
+
+  <div class="card hidden" id="payoutCard">
+    <div class="section-title">💸 Get paid</div>
+    <div class="section-sub">Connect your bank through Stripe to receive your app earnings. Your details go to Stripe directly — The Factory never sees them. Test mode until launch.</div>
+    <div id="payoutStatus" style="font-size:13.5px;color:#bbb;margin-bottom:10px;">—</div>
+    <button class="signout" type="button" id="payoutBtn" onclick="payoutSetup()">Set up payouts</button>
+  </div>
+
+  <div class="card hidden" id="domainCard">
+    <div class="section-title">🌐 Your domain</div>
+    <div class="section-sub">Give your app a real address of its own — included with your subscription. Search, claim, and it's reserved to your account; registration switches on at launch.</div>
+    <details style="margin-bottom:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;">
+      <summary style="cursor:pointer;color:#f0a500;font-size:13px;font-weight:700;">ℹ️ How to name your domain</summary>
+      <div style="font-size:12.5px;color:#999;line-height:1.7;margin-top:8px;">
+        One word, lowercase, then an ending — like <strong style="color:#e6e6e6;">mybarbershop.com</strong> or <strong style="color:#e6e6e6;">flowersoflove.co.uk</strong>.<br>
+        · No spaces, no capitals, no www. in front<br>
+        · Hyphens allowed in the middle: <strong style="color:#e6e6e6;">best-cakes.uk</strong><br>
+        · Endings we support: .com · .co.uk · .uk · .net · .org · .io · .app · .dev<br>
+        · Shorter is stronger — easy to say aloud, easy to type.
+      </div>
+    </details>
+    <input id="domName" placeholder="e.g. mybarbershop.com" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;margin-bottom:8px;">
+    <select id="domRepo" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;margin-bottom:8px;">
+      <option value="">— choose which of your apps —</option>
+    </select>
+    <div style="display:flex;gap:8px;">
+      <button class="signout" type="button" onclick="domainCheck()" style="flex:1;">Check</button>
+      <button class="signout" type="button" onclick="domainClaim()" style="flex:1;">Claim it</button>
+    </div>
+    <div id="domResult" style="font-size:13.5px;color:#bbb;margin-top:10px;"></div>
+    <div id="domMine" style="font-size:13px;color:#999;margin-top:10px;"></div>
+  </div>
+
+  <div class="card" id="academyCard">
+    <div class="section-title">📺 Factory Academy</div>
+    <div class="section-sub">Short videos from the founder — how to build, sell and grow with The Factory. Hosted by us.</div>
+    <select id="academySelect" onchange="academyPick()" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;margin-bottom:10px;display:none;">
+    </select>
+    <div id="academyList"><div class="empty-state">Videos coming soon.</div></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <video id="academyPlayer" preload="metadata" onclick="academyExpand()" style="display:none;width:4cm;height:3cm;object-fit:cover;border-radius:8px;background:#000;cursor:pointer;border:1px solid #2c2c33;flex-shrink:0;"></video>
+      <div id="academyHint" style="display:none;font-size:12.5px;color:#888;">▶ Tap the thumbnail to watch</div>
+    </div>
+    <div id="academyShare" style="display:none;margin-top:10px;gap:8px;flex-wrap:wrap;">
+      <button class="signout" type="button" onclick="academyShareTo('native')" style="flex:1;min-width:90px;">📤 Share</button>
+      <button class="signout" type="button" onclick="academyShareTo('wa')" style="flex:1;min-width:90px;">WhatsApp</button>
+      <button class="signout" type="button" onclick="academyShareTo('fb')" style="flex:1;min-width:90px;">Facebook</button>
+      <button class="signout" type="button" onclick="academyShareTo('email')" style="flex:1;min-width:90px;">✉️ Email</button>
+    </div>
+  </div>
+
+  <div class="card" id="lessonsCard">
+    <div class="section-title">📚 Business Building Lessons by the Referee</div>
+    <div class="section-sub">The documented construction of this company — its laws, its instruments, and its method. Written from the real working record, not from a stage. Every rule in it is running live in the system you are using right now.</div>
+    <div style="font-size:13px;color:#ccc;line-height:1.8;margin-bottom:12px;">
+      📖 <strong>£10 a copy</strong> at launch — reserve yours on the book page.<br>
+      🤝 <strong>Wholesale, £500,000</strong> — the whole work with full commercial rights and five hours of recorded founder Q&amp;A. One week only, opening at public launch.
+    </div>
+    <a class="small-btn" href="/lessons.html" style="display:inline-block;text-decoration:none;">📚 Open the book page →</a>
+  </div>
+
+  <!-- EXPERIMENTAL: FACTORY GIVES — sellers vote the Factory's charity percentage -->
+  <div class="card" id="givesCard">
+    <h2>🎗 FACTORY GIVES</h2>
+    <div style="font-size:13px;color:#ccc;line-height:1.6;">The Factory gives a share of what it makes. Sellers vote the percentage and the cause — the AI splits the pot by your votes. (Example: £10,000 made, 3% voted → £300 to the chosen charities.)</div>
+    <div style="display:flex;gap:8px;margin:10px 0;justify-content:center;">
+      <button class="terms-btn" onclick="giveVote(1)" style="cursor:pointer;">1%</button>
+      <button class="terms-btn" onclick="giveVote(2)" style="cursor:pointer;">2%</button>
+      <button class="terms-btn" onclick="giveVote(3)" style="cursor:pointer;">3%</button>
+      <select id="giveCharity" style="flex:1;min-width:140px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;"><option value="">choose a cause…</option></select>
+    </div>
+    <div id="giveStatus" style="font-size:12px;color:#8f8;min-height:16px;"></div>
+    <details style="margin-top:10px;">
+      <summary style="cursor:pointer;color:#f0a500;font-size:13px;font-weight:700;">Apply for financial help from Referee Innovations Ltd</summary>
+      <div style="margin-top:8px;">
+        <input id="chName" placeholder="Name of charity" style="width:100%;box-sizing:border-box;padding:9px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12.5px;margin-bottom:6px;">
+        <input id="chSite" placeholder="Website" style="width:100%;box-sizing:border-box;padding:9px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12.5px;margin-bottom:6px;">
+        <textarea id="chWhy" rows="3" placeholder="Why you need the money" style="width:100%;box-sizing:border-box;padding:9px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12.5px;margin-bottom:6px;"></textarea>
+        <button class="terms-btn" onclick="charityApply()" style="cursor:pointer;">SUBMIT</button>
+        <span id="chStatus" style="font-size:12px;color:#8f8;margin-left:8px;"></span>
+      </div>
+    </details>
+  </div>
+
+  <div class="card" id="marketCard">
+    <div class="section-title">🛒 Marketplace</div>
+    <div class="section-sub">Apps built by our makers, ready to use today. Every app comes with a 4-day free trial — pay only if you love it.</div>
+    <div id="marketList"></div>
+    <div class="empty-state" id="marketEmpty">🛒 The shelves are opening. Makers are preparing their first apps — yours could be the very first: build it, then press 💰 Sell.</div>
+  </div>
+
+  <div class="card" id="signinCard">
+    <button class="g-btn" onclick="signIn()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.2 6.1 29.4 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.2 6.1 29.4 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.6 39.6 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C41.4 34.9 44 29.9 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+      Sign in with Google
+    </button>
+    <div class="signin-note">Sign in to start building. 3 free builds on us — your apps, your ownership.</div>
+  </div>
+
+  <a id="healthPlate" class="hidden" href="/ops.html" title="Open the full board"
+     style="position:fixed;right:18px;bottom:80px;z-index:60;background:#0d0d0f;border:1px solid #2c2c33;border-radius:12px;padding:8px 14px;text-decoration:none;box-shadow:0 8px 30px rgba(0,0,0,0.6);text-align:center;">
+    <span style="display:block;font-size:9px;letter-spacing:1px;color:#777;font-weight:700;">GLOBAL HEALTH METER OF FACTORY</span>
+    <span id="healthPlateLights" style="display:block;font-size:13px;font-weight:800;color:#eee;margin-top:2px;">awaiting first heartbeat…</span>
+  </a>
+  <button type="button" id="fcGear" class="hidden" onclick="fcToggle()" title="Founder Controls" style="position:fixed;right:18px;bottom:18px;z-index:60;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,0.6);">⚙</button>
+  <div id="fcPanel" class="hidden" style="position:fixed;top:0;right:0;bottom:0;width:330px;max-width:92vw;z-index:59;background:#141418;border-left:1px solid #2c2c33;padding:22px 18px 40px;overflow-y:auto;box-shadow:-20px 0 60px rgba(0,0,0,0.6);">
+    <div style="font-weight:800;color:#f0a500;font-size:16px;">⚙ Founder Controls</div>
+    <div style="font-size:11.5px;color:#777;margin:6px 0 16px;line-height:1.6;">Central values for the whole Factory. Each system adopts them at its next update; payment values arm at launch.</div>
+
+    <!-- TASKS — top of the gear, the founder's own to-do board -->
+    <div style="border:1px solid #f0a500;border-radius:10px;padding:12px;margin-bottom:18px;background:#17130a;">
+      <div style="font-weight:800;color:#f0a500;font-size:14px;margin-bottom:8px;">📋 My Tasks &amp; Features</div>
+      <input id="tkName" placeholder="Task or feature name" style="width:100%;margin-bottom:6px;padding:9px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:13px;">
+      <input id="tkDesc" placeholder="Short description (optional)" style="width:100%;margin-bottom:6px;padding:9px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:13px;">
+      <div style="display:flex;gap:6px;">
+        <input id="tkDue" type="datetime-local" style="flex:1;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+        <select id="tkImp" style="padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+          <option value="normal">Normal</option>
+          <option value="high">🔴 High</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+      <button type="button" onclick="tkAdd()" style="width:100%;margin-top:8px;padding:9px;background:#f0a500;border:none;color:#0a0a0c;border-radius:8px;font-weight:800;font-size:13px;cursor:pointer;">＋ Add task</button>
+
+      <div onclick="tkToggle('tkActiveList','tkActiveArrow')" style="cursor:pointer;margin-top:12px;padding:8px 10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;font-size:12.5px;font-weight:700;color:#e6e6e6;user-select:none;">
+        <span id="tkActiveArrow">▸</span> Active tasks (<span id="tkActiveCount">0</span>)</div>
+      <div id="tkActiveList" style="display:none;max-height:280px;overflow-y:auto;margin-top:4px;padding-left:2px;"></div>
+
+      <div onclick="tkToggle('tkCompletedList','tkCompletedArrow')" style="cursor:pointer;margin-top:8px;padding:8px 10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;font-size:12.5px;font-weight:700;color:#8a8a8a;user-select:none;">
+        <span id="tkCompletedArrow">▸</span> Completed tasks (<span id="tkCompletedCount">0</span>)</div>
+      <div id="tkCompletedList" style="display:none;max-height:220px;overflow-y:auto;margin-top:4px;padding-left:2px;"></div>
+
+      <button type="button" onclick="tkReport()" style="width:100%;margin-top:10px;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">📄 Tasks report</button>
+      <button type="button" id="tkAlarmBtn" onclick="tkEnableAlarm()" style="width:100%;margin-top:6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:12px;cursor:pointer;">🔔 Enable alarms</button>
+      <div style="font-size:10px;color:#666;margin-top:5px;line-height:1.5;">Alarms sound and pop up while this page is open — even if the screen dims, keep the tab open. A true alarm when the phone is fully closed needs the phone app (later).</div>
+    </div>
+
+    <!-- Additional utilities — the scattered tools, gathered; may become services -->
+    <div style="margin-bottom:16px;">
+      <div onclick="utilToggle()" style="cursor:pointer;padding:9px 11px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;font-size:12.5px;font-weight:700;color:#e6e6e6;user-select:none;">
+        <span id="utilArrow">▸</span> 🧰 Additional utilities <span style="color:#777;font-weight:400;font-size:11px;">— may graduate to a service for users</span></div>
+      <div id="utilList" style="display:none;margin-top:8px;"></div>
+    </div>
+
+    <!-- The Curtain — graceful "tuning" mode; visitors see the foyer message, founder keeps working -->
+    <div style="margin-bottom:16px;padding:10px;border:1px solid #2c2c33;border-radius:8px;">
+      <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🎗 Charities (one per line: Name | website)</div>
+      <textarea id="charList" rows="3" placeholder="Water Aid | wateraid.org&#10;Shelter | shelter.org.uk" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;"></textarea>
+      <button type="button" onclick="charitySave()" style="width:100%;padding:8px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:12px;">Save charities</button>
+
+      <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🎭 The Curtain <span id="curState" style="color:#777;font-weight:400;font-size:11px;">— checking…</span></div>
+      <input id="curMsg" placeholder="Message (e.g. We are tuning the machines.)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
+      <input id="curEta" placeholder="Back around… (e.g. 8pm tonight)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
+      <button type="button" id="curBtn" onclick="curtainToggle()" style="width:100%;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">Lower the curtain</button>
+    </div>
+
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">📊 Cost per app — live</div>
+    <div id="fcCosts" style="background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#aaa;line-height:1.7;">Press refresh to read the meters.</div>
+    <button type="button" onclick="fcLoadCosts()" style="width:100%;margin-top:8px;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">⟳ Refresh costs</button>
+    <button type="button" id="fcCurBtn" onclick="fcToggleCur()" style="width:100%;margin-top:6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">Showing £ — switch to $</button>
+    <div style="font-size:11px;color:#666;margin-top:6px;line-height:1.5;">Anthropic is exact per build; Netlify and voice come live from their meters. Rates below feed the maths.</div>
+    <label style="font-size:12px;color:#999;display:block;margin-top:10px;">Netlify plan $/month</label>
+    <input id="fcNetlifyUsd" type="number" step="0.01" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Anthropic $ per million tokens — in / out</label>
+    <div style="display:flex;gap:8px;">
+      <input id="fcAiIn" type="number" step="0.01" min="0" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+      <input id="fcAiOut" type="number" step="0.01" min="0" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    </div>
+    <label style="font-size:12px;color:#999;">US dollars per £1 — fallback only; the live ECB rate is fetched on every refresh</label>
+    <input id="fcFx" type="number" step="0.01" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Anthropic credit loaded — $ (update when you top up)</label>
+    <input id="fcAiCredit" type="number" step="0.01" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🧾 Suppliers &amp; bills</div>
+    <div id="fcBills" style="background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#aaa;line-height:1.7;">Press refresh above.</div>
+    <button type="button" onclick="fcVerifyRates()" style="width:100%;margin-top:8px;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">✓ I verified supplier prices today</button>
+    <div style="font-size:11px;color:#666;margin-top:6px;line-height:1.6;">Check them here: <a href="https://www.anthropic.com/pricing" target="_blank" style="color:#f0a500;">Anthropic</a> · <a href="https://www.netlify.com/pricing/" target="_blank" style="color:#f0a500;">Netlify</a> · <a href="https://elevenlabs.io/pricing" target="_blank" style="color:#f0a500;">ElevenLabs</a>. Netlify's price is also checked live on every refresh; the others cannot be read by machine, so the button keeps you honest.</div>
+
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🎟 Admissions — sustainable growth</div>
+    <div id="fcAdmission" style="background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#aaa;line-height:1.7;">Press refresh above.</div>
+    <label style="font-size:12px;color:#999;display:block;margin-top:10px;">Planning figure — live apps per average customer</label>
+    <input id="fcAdmApps" type="number" min="1" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Your cap — customers admitted per period (0 = measured caps only)</label>
+    <input id="fcAdmMax" type="number" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Database allocation per sub (MB) / bandwidth per sub (GB/mo)</label>
+    <div style="display:flex;gap:8px;">
+      <input id="fcAdmDb" type="number" min="1" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+      <input id="fcAdmBw" type="number" min="1" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    </div>
+    <label style="font-size:12px;color:#999;">War chest — ready deployable cash for capacity only (£)</label>
+    <input id="fcAdmChest" type="number" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <a href="/ops.html" style="display:block;text-align:center;width:100%;margin-top:2px;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none;">⚙→ Open Ops Console</a>
+
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">💰 Money</div>
+    <label style="font-size:12px;color:#999;">Marketplace commission %</label>
+    <input id="fcCommission" type="number" step="0.1" min="0" max="100" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Platform fee % on app transactions (arms at launch)</label>
+    <input id="fcPlatFee" type="number" step="0.1" min="0" max="100" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">📦 Plans</div>
+    <label style="font-size:12px;color:#999;">Subscription price label</label>
+    <input id="fcSubPrice" type="text" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Build credits per subscription payment</label>
+    <input id="fcCreditsSub" type="number" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Free builds for new customers</label>
+    <input id="fcFreeBuilds" type="number" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🗄 App storage</div>
+    <label style="font-size:12px;color:#999;">Max record size (KB)</label>
+    <input id="fcRecKb" type="number" min="1" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Max records per app</label>
+    <input id="fcRecMax" type="number" min="1" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🔔 Alerts to me</div>
+    <label style="font-size:13px;color:#bbb;display:block;margin-bottom:8px;"><input id="fcNotifySales" type="checkbox" style="accent-color:#f0a500;margin-right:8px;">Marketplace sales</label>
+    <label style="font-size:13px;color:#bbb;display:block;margin-bottom:8px;"><input id="fcNotifySubs" type="checkbox" style="accent-color:#f0a500;margin-right:8px;">New subscriptions</label>
+
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:18px 0 8px;">🎬 Academy videos</div>
+    <input id="fcVideoTitle" type="text" placeholder="Video title — e.g. How to build your first app" style="width:100%;margin:4px 0 8px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12.5px;">
+    <input id="fcVideoFile" type="file" accept="video/*" style="width:100%;margin:4px 0 8px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+    <button type="button" onclick="fcUploadVideo()" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">⬆ Upload to Academy</button>
+    <div id="fcVideoMsg" style="font-size:12px;color:#888;margin-top:6px;"></div>
+    <div id="fcVideoList" style="margin-top:8px;"></div>
+
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:18px 0 8px;">🏪 Market moderation</div>
+    <div id="fcMarketList" style="font-size:12px;color:#888;">Loading…</div>
+
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:18px 0 8px;">🛟 Backup</div>
+    <div id="fcBackupStatus" style="font-size:12px;color:#888;margin-bottom:8px;">Checking…</div>
+    <button type="button" onclick="fcBackupSchema()" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">⬇ Download schema backup (.sql)</button>
+    <div style="font-size:11px;color:#666;margin-top:6px;line-height:1.5;">Save the file into factory-code-vault on GitHub. Edge functions are vaulted separately, one file per change.</div>
+
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:18px 0 8px;">📜 Change board</div>
+    <div id="fcLog" style="max-height:180px;overflow-y:auto;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#888;">Loading…</div>
+
+    <button type="button" onclick="fcSave()" style="width:100%;margin-top:16px;padding:12px;background:linear-gradient(135deg,#f0a500,#d48800);color:#111;border:none;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;">Save all</button>
+    <div id="fcOk" class="hidden" style="text-align:center;color:#7fdc7f;font-size:13px;margin-top:10px;">Saved ✓</div>
+  </div>
+
+  <div class="card hidden" id="founderCard">
+    <div class="section-title">📬 Founder Inbox</div>
+    <div class="section-sub">Visible to you alone. New messages from both doors — enquiries and candidates.</div>
+    <div id="inboxList"></div>
+    <div class="empty-state hidden" id="inboxEmpty">All read. Nothing new.</div>
+  </div>
+
+  <div class="card hidden" id="buildCard">
+    <div class="userbar">
+      <span id="userEmail"></span>
+      <span class="credits" id="creditsBadge">– builds left</span>
+      <button class="signout" onclick="signOut()">Sign out</button>
+    </div>
+    <label>App Name</label>
+    <input id="appName" placeholder="my-business-site" />
+    <div class="hint">Lowercase letters and hyphens work best — we'll tidy it if needed.</div>
+    <label>Describe Your App</label>
+    <textarea id="appDesc" rows="4" placeholder="A booking page for my barbershop in London. Dark style, show services and prices, opening hours, and a booking form..."></textarea>
+    <div class="agent-row">
+      <button type="button" class="agent-btn" id="agentBtn" onclick="toggleAgent()">🎤 Tell me what you want to build</button>
+    </div>
+    <div class="agent-state" id="agentState"></div>
+    <div class="convo hidden" id="convoLog"></div>
+    <button class="build-btn" id="buildBtn" onclick="startBuild()">⚙ BUILD</button>
+  </div>
+
+  <div class="card hidden" id="upgradeCard">
+    <div class="section-title">Keep building</div>
+    <div class="section-sub">You own everything The Factory makes for you. Choose how you want to keep creating:</div>
+    <div class="plan-row">
+      <div class="plan best">
+        <div class="p-name">Factory Pro</div>
+        <div class="p-price">£9.99<span style="font-size:13px;color:#888;">/mo</span></div>
+        <div class="p-desc">10 builds every month — about £1 per app. Cancel anytime.</div>
+        <button onclick="checkout('pro')">Go Pro</button>
+      </div>
+      <div class="plan">
+        <div class="p-name">Extra Build</div>
+        <div class="p-price">£3.50</div>
+        <div class="p-desc">One extra build, no subscription. 10 builds this way = £35 — Pro gives you 10 for £9.99.</div>
+        <button onclick="checkout('extra')">Buy 1 Build</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card hidden" id="appsCard">
+    <div class="section-title">🔧 Your apps</div>
+    <div class="section-sub">Everything The Factory has built for you. Changed your prices, hours or wording? Tell us what to change — the live page updates in about ninety seconds.</div>
+    <div id="appsList"></div>
+    <div class="empty-state hidden" id="appsEmpty">Nothing built yet. Your apps will appear here.</div>
+  </div>
+
+  <div class="card hidden" id="statusCard">
+    <div class="steps">
+      <div class="step" id="s1"><div class="dot">1</div><div class="step-label">Queued</div></div>
+      <div class="step" id="s2"><div class="dot">2</div><div class="step-label">Building</div></div>
+      <div class="step" id="s3"><div class="dot">3</div><div class="step-label">Deploying</div></div>
+      <div class="step" id="s4"><div class="dot">4</div><div class="step-label">Live</div></div>
+    </div>
+    <div class="result hidden" id="resultBox">
+      <div class="celebrate">🎉</div>
+      <div style="margin-bottom:10px;color:#aaa;">Your app is live:</div>
+      <a id="siteLink" href="#" target="_blank"></a>
+      <div style="margin-top:14px;font-size:12.5px;color:#888;line-height:1.7;">🌐 Want a short, memorable address instead of this long link — like <strong style="color:#bbb;">yourbusiness.com</strong>? Private domains are coming to The Factory. Tell us in the message box below and you'll be first in line.</div>
+    </div>
+    <div class="error-box hidden" id="errorBox">
+      <div id="errorText"></div>
+      <button class="retry" onclick="resetToForm()">Try again</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">About The Factory</div>
+    <div class="section-sub">The Factory is one innovation from <strong>Referee Innovations</strong> — a solutions consultancy for the creative industries, built on mathematics and science. We create AI-generated websites and web apps for businesses large and small. Larger projects can be directed to our founders for manual analysis and a quotation, to find the solution that optimises your business.</div>
+    <div class="section-title" style="font-size:15px;margin-top:20px;">Reach us here</div>
+    <label>Your Name</label>
+    <input id="rqName" placeholder="Jane Smith" />
+    <label>Your Email</label>
+    <input id="rqEmail" placeholder="jane@business.com" />
+    <label>Your Message</label>
+    <textarea id="rqMsg" rows="3" placeholder="Tell us about your project..."></textarea>
+    <button class="small-btn" id="rqBtn" onclick="submitMessage('enquiry','rqName','rqEmail','rqMsg','rqOk','rqBtn')">Submit</button>
+    <div class="form-ok hidden" id="rqOk">✓ Thank you — we aim to reply within one week.</div>
+  </div>
+
+  <div class="card" id="earnCard">
+    <div class="section-title">🤝 Earn with us</div>
+    <div class="section-sub">Two ways to grow with Referee Innovations: refer others and earn, or join the people who build The Factory itself.</div>
+    <div class="earn-grid">
+      <div class="earn-block">
+        <h3>💰 Affiliate programme <span class="draft-tag" style="background:#2b2107;border:1px dashed #f0a500;color:#f0a500;border-radius:6px;padding:1px 8px;font-size:11px;font-weight:700;">Coming soon</span></h3>
+        <div class="section-sub" style="margin:0;">Every account already carries a personal referral code. Soon, sharing it will pay you a share of what the people you bring earn — the rules are being finalised. Want first access when it opens?</div>
+        <label>Your Email</label>
+        <input id="afEmail" placeholder="you@email.com" />
+        <input type="hidden" id="afMsg" value="Wants first access to the affiliate programme at launch." />
+        <button class="small-btn" id="afBtn" onclick="submitMessage('affiliate-interest','afEmail','afEmail','afMsg','afOk','afBtn')">Notify me at launch</button>
+        <div class="form-ok hidden" id="afOk">✓ You are on the list — we will write when it opens.</div>
+      </div>
+      <div class="earn-block">
+        <h3>🛠 Join the team</h3>
+        <div class="section-sub" style="margin:0;">Referee Innovations selects for one ability above all: <strong>problem-solving</strong>. Tell us about real problems you have solved — what was broken, what you did, what changed.</div>
+        <label>Your Name</label>
+        <input id="wuName" placeholder="Alex Morgan" />
+        <label>Your Email</label>
+        <input id="wuEmail" placeholder="alex@email.com" />
+        <label>Problems You Have Solved</label>
+        <textarea id="wuMsg" rows="4" placeholder="Real examples — the problem, your approach, the result..."></textarea>
+        <button class="small-btn" id="wuBtn" onclick="submitMessage('candidate','wuName','wuEmail','wuMsg','wuOk','wuBtn')">Apply</button>
+        <div class="form-ok hidden" id="wuOk">✓ Thank you — we aim to reply within one week.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="partnerCard">
+    <div class="section-title">🌉 The Partner Bridge</div>
+    <div class="section-sub">The Factory is built to grow fast — and growth needs allies with resources ready to plug in. The bridge is open now, before the surge: <strong>founding seats are limited, and early movers keep founding terms for life</strong>. We welcome more than one partner; we sign nothing that caps our horizon — no exclusivity, no leashes, resources over promises.</div>
+    <div class="section-sub" style="margin-top:6px;">What plugs in well: hosting and infrastructure capacity · platform credits · distribution and agency reach · strategic capital. If you hold resources and can move quickly, present yourself.</div>
+    <label>Name &amp; organisation</label>
+    <input id="pbName" placeholder="Jordan Lee — Northbridge Hosting" />
+    <label>Your Email</label>
+    <input id="pbEmail" placeholder="jordan@company.com" />
+    <label>What you bring, and how fast you can move</label>
+    <textarea id="pbMsg" rows="4" placeholder="The resource you would plug into The Factory, the scale of it, and your timeline..."></textarea>
+    <button class="small-btn" id="pbBtn" onclick="submitMessage('partner-bridge','pbName','pbEmail','pbMsg','pbOk','pbBtn')">Cross the bridge</button>
+    <div class="form-ok hidden" id="pbOk">✓ Received — the founder reads every crossing personally.</div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Updates &amp; Stories</div>
+    <div class="section-sub">Films from Referee Innovations: how we solve problems in the creative industries — with a special focus on The Factory itself.</div>
+    <div class="empty-state">🎬 Our first films are in production.<br>Check back soon — or build something while you wait.</div>
+  </div>
+
+  <footer>
+    Built with The Factory 🏭 · You own everything we build for you.<br>
+    The Factory is a <strong>Referee Innovations</strong> company · <a href="https://factory-love-between-nations.netlify.app" target="_blank">Our Manifesto</a>
+  </footer>
+</div>
+
+<script>
+  const SB_URL = 'https://canvbkibjgcnqowjtarf.supabase.co';
+  const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhbnZia2liamdjbnFvd2p0YXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NzE0NDYsImV4cCI6MjA5OTM0NzQ0Nn0.TLskVoTaYI90avy09IuM_kkKvAYUMETTntZkn2M807I';
+  const WORKER = SB_URL + '/functions/v1/swift-worker';
+  const CHECKOUT = SB_URL + '/functions/v1/Stripe-Checkout';
+  const sb = supabase.createClient(SB_URL, SB_ANON);
+
+  let session = null;
+  let pollTimer = null;
+
+  sb.auth.onAuthStateChange((_e, s) => { session = s; render(); });
+  sb.auth.getSession().then(({ data }) => { session = data.session; render(); });
+  loadPromotedFeatures();
+  curtainCheck();
+  givesLoad();
+
+  // ---------------- FACTORY GIVES (experimental) ----------------
+  async function givesLoad() {
+    try {
+      const { data } = await sb.from('site_settings').select('value').eq('key', 'charities').maybeSingle();
+      const list = (data && data.value && data.value.list) || [];
+      const sel = document.getElementById('giveCharity');
+      list.forEach(function (c) { const o = document.createElement('option'); o.value = c.name; o.textContent = c.name; sel.appendChild(o); });
+      const cl = document.getElementById('charList');
+      if (cl && !cl.value) cl.value = list.map(function (c) { return c.name + (c.website ? ' | ' + c.website : ''); }).join('\n');
+    } catch (_) {}
+  }
+  window.giveVote = async function (pct) {
+    if (!session) { document.getElementById('giveStatus').textContent = 'Sign in to vote.'; return; }
+    const charity = document.getElementById('giveCharity').value;
+    if (!charity) { document.getElementById('giveStatus').textContent = 'Choose a cause first.'; return; }
+    try {
+      const { error } = await sb.from('charity_votes').upsert({ auth_id: session.user.id, pct: pct, charity: charity }, { onConflict: 'auth_id' });
+      if (error) throw error;
+      document.getElementById('giveStatus').textContent = '✓ Your vote: ' + pct + '% to ' + charity + '. Thank you.';
+    } catch (e) { document.getElementById('giveStatus').textContent = 'Vote failed: ' + e.message; }
+  };
+  window.charityApply = async function () {
+    const name = document.getElementById('chName').value.trim(), site = document.getElementById('chSite').value.trim(), why = document.getElementById('chWhy').value.trim();
+    if (!name || !why) { document.getElementById('chStatus').textContent = 'Name and reason are required.'; return; }
+    try {
+      const { error } = await sb.from('charity_applications').insert({ name: name, website: site, reason: why });
+      if (error) throw error;
+      document.getElementById('chStatus').textContent = '✓ Application received.';
+    } catch (e) { document.getElementById('chStatus').textContent = 'Failed: ' + e.message; }
+  };
+  window.charitySave = async function () {
+    if (!session) { alert('Sign in first.'); return; }
+    const list = document.getElementById('charList').value.split('\n').map(function (l) {
+      const p = l.split('|'); return { name: (p[0] || '').trim(), website: (p[1] || '').trim() };
+    }).filter(function (c) { return c.name; });
+    const r = await fetch(SB_URL + '/functions/v1/app-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify({ action: 'charities', list: list })
+    });
+    const d = await r.json();
+    alert(r.ok ? ('Saved ' + list.length + ' charities.') : (d.error || 'Save failed'));
+  };
+
+  // ---------------- the Curtain ----------------
+  let curtainOn = false;
+  async function curtainCheck() {
+    try {
+      const { data } = await sb.from('site_settings').select('value').eq('key', 'curtain').maybeSingle();
+      const c = data && data.value;
+      curtainOn = !!(c && c.on);
+      if (curtainOn) {
+        document.getElementById('curtainMsg').textContent = c.message || 'We are tuning the machines.';
+        document.getElementById('curtainEta').textContent = c.eta ? ('Back around ' + c.eta + '.') : '';
+        document.getElementById('curtainGate').style.display = 'block';
+      }
+      const stEl = document.getElementById('curState'); if (stEl) stEl.textContent = curtainOn ? '— DOWN (visitors see the tuning notice)' : '— up (site open)';
+      const btn = document.getElementById('curBtn'); if (btn) btn.textContent = curtainOn ? 'Raise the curtain' : 'Lower the curtain';
+      if (c) { const m = document.getElementById('curMsg'), e = document.getElementById('curEta'); if (m && !m.value) m.value = c.message || ''; if (e && !e.value) e.value = c.eta || ''; }
+    } catch (_) { /* never block the page over the curtain */ }
+  }
+  window.curtainToggle = async function () {
+    if (!session) { alert('Sign in first.'); return; }
+    const on = !curtainOn;
+    if (on && !confirm('Lower the curtain? Visitors will see the tuning notice instead of the Factory.')) return;
+    const r = await fetch(SB_URL + '/functions/v1/app-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify({ action: 'curtain', on: on, message: document.getElementById('curMsg').value.trim() || 'We are tuning the machines.', eta: document.getElementById('curEta').value.trim() })
+    });
+    const d = await r.json();
+    if (!r.ok) { alert(d.error || 'Could not switch the curtain'); return; }
+    curtainOn = on;
+    document.getElementById('curState').textContent = on ? '— DOWN (visitors see the tuning notice)' : '— up (site open)';
+    document.getElementById('curBtn').textContent = on ? 'Raise the curtain' : 'Lower the curtain';
+    if (!on) document.getElementById('curtainGate').style.display = 'none';
+  };
+
+  async function loadPromotedFeatures() {
+    try {
+      const { data } = await sb.from('factory_features').select('name,url,tagline,icon').eq('promoted', true);
+      if (!data || !data.length) return;
+      document.getElementById('liveFeaturesList').innerHTML = data.map(function (f) {
+        return '<a href="' + f.url + '" target="_blank" style="display:block;border:1px solid #2c2c33;border-radius:10px;padding:12px;margin-bottom:8px;text-decoration:none;">' +
+          '<div style="color:#f0a500;font-weight:700;font-size:14px;">' + (f.icon || '✨') + ' ' + escT(f.name) + '</div>' +
+          (f.tagline ? '<div style="color:#aaa;font-size:12.5px;margin-top:3px;">' + escT(f.tagline) + '</div>' : '') +
+          '</a>';
+      }).join('');
+      document.getElementById('liveFeaturesCard').classList.remove('hidden');
+    } catch (_) { /* the feature shelf is optional */ }
+  }
+
+  if (new URLSearchParams(location.search).get('payment') === 'success') {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('payBanner').classList.remove('hidden');
+      setTimeout(loadCredits, 4000);
+    });
+  }
+
+  // An idea chosen in the Ops Console Scout lands here — pre-fill and go.
+  function pickupPendingBuild() {
+    const raw = localStorage.getItem('factory_pending_build');
+    if (!raw) return;
+    localStorage.removeItem('factory_pending_build');
+    try {
+      const p = JSON.parse(raw);
+      const an = document.getElementById('appName'), ad = document.getElementById('appDesc');
+      if (an && !an.value) an.value = p.name || '';
+      if (ad) ad.value = p.desc || '';
+      const bc = document.getElementById('buildCard');
+      if (bc) { bc.classList.remove('hidden'); setTimeout(function () { bc.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 400); }
+    } catch (_) { /* a bad hand-off never blocks the page */ }
+  }
+
+  function render() {
+    const si = !!session;
+    document.getElementById('signinCard').classList.toggle('hidden', si);
+    document.getElementById('buildCard').classList.toggle('hidden', !si);
+    var sso = document.getElementById('sSignout'); if (sso) sso.classList.toggle('hidden', !si);
+    document.getElementById('upgradeCard').classList.toggle('hidden', !si);
+    document.getElementById('payoutCard').classList.toggle('hidden', !si);
+    document.getElementById('domainCard').classList.toggle('hidden', !si);
+    if (si) {
+      document.getElementById('userEmail').textContent = session.user.email;
+      loadCredits();
+      loadPayoutStatus();
+      loadMyDomains();
+      pickupPendingBuild();
+    } else {
+      document.getElementById('founderCard').classList.add('hidden');
+      document.getElementById('inboxBanner').classList.add('hidden');
+      document.getElementById('fcGear').classList.add('hidden');
+      document.getElementById('fcPanel').classList.add('hidden');
+      document.getElementById('healthPlate').classList.add('hidden');
+    }
+  }
+
+  async function loadCredits() {
+    if (!session) return;
+    const { data, error } = await sb.from('users').select('id, builds_remaining, is_founder, accepted_terms_at').eq('auth_id', session.user.id).single();
+    if (error) console.warn('user row read hiccup:', error.message);
+    if (data) {
+      document.getElementById('creditsBadge').textContent = (data.builds_remaining ?? 0) + ' builds left';
+      loadApps(data.id);
+      loadDomainApps(data.id);
+      if (!data.accepted_terms_at) document.getElementById('agreeGate').classList.remove('hidden');
+      meIsFounder = !!data.is_founder;
+    }
+    // The founder's gear must never depend on a single fragile read. Show it for
+    // the founder by the flag OR by his own signed-in email — the data behind
+    // the gear stays protected server-side regardless.
+    const FOUNDER_EMAIL = 'isamelb@gmail.com';
+    const amFounder = (data && data.is_founder) ||
+      (session.user.email && session.user.email.toLowerCase() === FOUNDER_EMAIL);
+    if (amFounder) {
+      meIsFounder = true;
+      loadInbox();
+      loadGovernance();
+      loadFounderControls();
+    }
+  }
+
+  // ---------------- founder controls drawer ----------------
+  const FC_KEYS = ['commerce', 'plans', 'storage', 'notify', 'costs', 'admission'];
+  let fcCurrent = {};   // values as loaded — diffed against on save for the change log
+
+  function fcToggle() { document.getElementById('fcPanel').classList.toggle('hidden'); }
+
+  async function loadHealthPlate() {
+    try {
+      const r = await fetch(SB_URL + '/functions/v1/cost-desk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: '{"action":"health"}'
+      });
+      const d = await r.json();
+      const el = document.getElementById('healthPlateLights');
+      if (r.ok && d.counts) {
+        el.innerHTML = '<span style="color:#7fdc7f;">🟢 ' + (d.counts.green ?? 0) + '</span> · ' +
+          '<span style="color:#f0a500;">🟠 ' + (d.counts.amber ?? 0) + '</span> · ' +
+          '<span style="color:' + ((d.counts.red ?? 0) > 0 ? '#e05656' : '#666') + ';">🔴 ' + (d.counts.red ?? 0) + '</span>';
+      } else {
+        el.textContent = 'awaiting first heartbeat…';
+      }
+      document.getElementById('healthPlate').classList.remove('hidden');
+    } catch (e) { /* the plate is a gauge, never a blocker */ }
+  }
+
+  // ---- My Tasks (founder to-do board with audible alarms) ----
+  let tkItems = [];
+  let tkAlarmTimer = null;
+  const tkFired = {};   // ids already alarmed this session
+
+  function escT(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+  const UTILITIES = [
+    { icon: '✍️', name: 'Writing Studio', desc: 'Write or dictate a book; record your own voice or narrate with an ElevenLabs voice; publish chapters.', url: 'https://factory-referee-writer.netlify.app' },
+    { icon: '🎧', name: 'Audiobooks & Podcasts', desc: 'Listen to books with lock-screen playback; add podcasts; take timestamped notes; sync to the cloud.', url: 'https://factory-referee-listen.netlify.app' },
+    { icon: '🎬', name: 'Agent Video Reports', desc: 'Realistic presenters (HeyGen + ElevenLabs) deliver each agent’s report as video for Referee Videos.', url: 'https://factory-referee-avatars.netlify.app' },
+    { icon: '⚙', name: 'Ops Console & Scout', desc: 'Full operations: capacity, the kill-risk board, the agent workshop, and the Scout that finds new opportunities.', url: '/ops.html' },
+    { icon: '📚', name: 'Business Lessons', desc: 'The Business Building Lessons book — sales page and wholesale offer.', url: '/lessons.html' },
+    { icon: '🤝', name: 'Partner Programme', desc: 'The affiliate site: an AI guide explains word-of-mouth partnering; partners share a personal link and earn £10 when someone they invite subscribes.', url: 'https://factory-referee-partners.netlify.app' },
+  ];
+  function utilToggle() {
+    const el = document.getElementById('utilList'), ar = document.getElementById('utilArrow');
+    const show = el.style.display === 'none';
+    el.style.display = show ? 'block' : 'none';
+    ar.textContent = show ? '▾' : '▸';
+    if (show && !el.innerHTML) {
+      el.innerHTML = UTILITIES.map(function (u) {
+        return '<div style="border:1px solid #2c2c33;border-radius:8px;padding:10px;margin-bottom:8px;">' +
+          '<div style="font-weight:700;color:#f0a500;font-size:13px;">' + u.icon + ' ' + escT(u.name) + '</div>' +
+          '<div style="font-size:11.5px;color:#999;margin:4px 0 8px;line-height:1.5;">' + escT(u.desc) + '</div>' +
+          '<a href="' + u.url + '" target="_blank" style="font-size:12px;color:#f0a500;text-decoration:none;border:1px solid #f0a500;border-radius:7px;padding:5px 12px;display:inline-block;">Open →</a>' +
+          '</div>';
+      }).join('');
+    }
+  }
+
+  function tkToggle(listId, arrowId) {
+    const el = document.getElementById(listId), ar = document.getElementById(arrowId);
+    const show = el.style.display === 'none';
+    el.style.display = show ? 'block' : 'none';
+    ar.textContent = show ? '▾' : '▸';
+  }
+
+  function tkExpand(key) {
+    const el = document.getElementById('det-' + key);
+    if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  }
+
+  async function tkLoad() {
+    const { data, error } = await sb.from('founder_tasks')
+      .select('id,name,description,due_at,importance,done,done_at')
+      .order('due_at', { ascending: true, nullsFirst: false });
+    const aEl = document.getElementById('tkActiveList'), cEl = document.getElementById('tkCompletedList');
+    if (error) { aEl.innerHTML = '<div style="font-size:11px;color:#d9534f;">Run founder_tasks.sql to switch this on.</div>'; return; }
+    tkItems = data || [];
+    const active = tkItems.filter(function (t) { return !t.done; });
+    const done = tkItems.filter(function (t) { return t.done; });
+    document.getElementById('tkActiveCount').textContent = active.length;
+    document.getElementById('tkCompletedCount').textContent = done.length;
+    const now = Date.now();
+    const btn = 'background:#0d0d0f;border:1px solid #2c2c33;border-radius:6px;padding:5px 9px;font-size:11.5px;cursor:pointer;';
+
+    aEl.innerHTML = active.length ? active.map(function (t) {
+      const due = t.due_at ? new Date(t.due_at) : null;
+      const overdue = due && due.getTime() <= now;
+      const flag = t.importance === 'high' ? '🔴 ' : t.importance === 'low' ? '⚪ ' : '';
+      const dueTxt = due ? due.toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'no date';
+      return '<div style="border-top:1px solid #2c2c33;">' +
+        '<div onclick="tkExpand(\'' + t.id + '\')" style="cursor:pointer;padding:9px 0;font-size:13px;color:' + (overdue ? '#e05656' : '#eee') + ';">' + (overdue ? '⏰ ' : '') + flag + escT(t.name) + '</div>' +
+        '<div id="det-' + t.id + '" style="display:none;padding:0 0 12px 6px;">' +
+          (t.description ? '<div style="font-size:12px;color:#bbb;margin-bottom:5px;">' + escT(t.description) + '</div>' : '') +
+          '<div style="font-size:11.5px;color:#888;margin-bottom:8px;">Due: ' + escT(dueTxt) + ' · importance: ' + escT(t.importance) + '</div>' +
+          '<label style="font-size:13px;color:#7fdc7f;display:flex;gap:7px;align-items:center;cursor:pointer;margin-bottom:8px;"><input type="checkbox" onchange="tkDone(\'' + t.id + '\',true)"> Mark complete</label>' +
+          '<button onclick="tkEdit(\'' + t.id + '\')" style="' + btn + 'color:#bbb;">✎ Edit</button> ' +
+          '<button onclick="tkDel(\'' + t.id + '\')" style="' + btn + 'color:#c77;">✕ Delete</button>' +
+        '</div>' +
+        '</div>';
+    }).join('') : '<div style="font-size:11.5px;color:#777;padding:8px 0;">No active tasks.</div>';
+
+    cEl.innerHTML = done.length ? done.map(function (t) {
+      const dTxt = t.done_at ? new Date(t.done_at).toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+      return '<div style="border-top:1px solid #2c2c33;">' +
+        '<div onclick="tkExpand(\'c-' + t.id + '\')" style="cursor:pointer;padding:9px 0;font-size:13px;color:#7a7a7a;text-decoration:line-through;text-decoration-color:#000;text-decoration-thickness:2px;">' + escT(t.name) + '</div>' +
+        '<div id="det-c-' + t.id + '" style="display:none;padding:0 0 12px 6px;">' +
+          (t.description ? '<div style="font-size:12px;color:#999;margin-bottom:5px;">' + escT(t.description) + '</div>' : '') +
+          (dTxt ? '<div style="font-size:11.5px;color:#888;margin-bottom:8px;">Completed ' + escT(dTxt) + '</div>' : '') +
+          '<label style="font-size:13px;color:#f0a500;display:flex;gap:7px;align-items:center;cursor:pointer;margin-bottom:8px;"><input type="checkbox" checked onchange="tkDone(\'' + t.id + '\',false)"> Untick — send back to active</label>' +
+          '<button onclick="tkDel(\'' + t.id + '\')" style="' + btn + 'color:#c77;">✕ Delete</button>' +
+        '</div>' +
+        '</div>';
+    }).join('') : '<div style="font-size:11.5px;color:#777;padding:8px 0;">None yet.</div>';
+  }
+
+  function tkReport() {
+    const active = (tkItems || []).filter(function (t) { return !t.done; });
+    const done = (tkItems || []).filter(function (t) { return t.done; });
+    const byDay = {};
+    done.forEach(function (t) {
+      const d = t.done_at ? new Date(t.done_at).toLocaleDateString([], { weekday: 'short', day: '2-digit', month: 'short' }) : 'undated';
+      (byDay[d] = byDay[d] || []).push(t.name);
+    });
+    let html = '<div style="font-weight:800;color:#f0a500;font-size:16px;">📄 Tasks Report</div>' +
+      '<div style="font-size:11.5px;color:#888;margin:6px 0 14px;line-height:1.6;">Improved daily by the <b style="color:#c9a862;">Five Minutes Rule of Optimisation</b> — stop, look, ask "what can I improve here?", answer, implement, repeat.</div>' +
+      '<div style="color:#e6e6e6;font-weight:700;margin-bottom:4px;">In progress (' + active.length + ')</div>';
+    html += active.length
+      ? '<ul style="margin:0 0 14px 18px;color:#ccc;font-size:13px;line-height:1.7;">' + active.map(function (t) { return '<li>' + escT(t.name) + (t.due_at ? ' — due ' + new Date(t.due_at).toLocaleDateString() : '') + '</li>'; }).join('') + '</ul>'
+      : '<div style="color:#777;font-size:12.5px;margin-bottom:14px;">Nothing in progress.</div>';
+    html += '<div style="color:#e6e6e6;font-weight:700;margin-bottom:6px;">Completed — day by day (' + done.length + ')</div>';
+    const days = Object.keys(byDay);
+    html += days.length
+      ? days.map(function (d) { return '<div style="margin-bottom:10px;"><div style="color:#7fdc7f;font-size:12.5px;font-weight:700;">' + escT(d) + '</div><ul style="margin:3px 0 0 18px;color:#aaa;font-size:12.5px;line-height:1.7;">' + byDay[d].map(function (n) { return '<li style="text-decoration:line-through;text-decoration-color:#000;">' + escT(n) + '</li>'; }).join('') + '</ul></div>'; }).join('')
+      : '<div style="color:#777;font-size:12.5px;">Nothing completed yet.</div>';
+
+    let ov = document.getElementById('tkReportOverlay');
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.id = 'tkReportOverlay';
+      ov.style.cssText = 'position:fixed;inset:0;z-index:80;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;padding:18px;';
+      ov.onclick = function (e) { if (e.target === ov) ov.remove(); };
+      document.body.appendChild(ov);
+    }
+    ov.innerHTML = '<div style="background:#141418;border:1px solid #2c2c33;border-radius:14px;padding:20px;max-width:520px;width:100%;max-height:82vh;overflow-y:auto;">' +
+      html + '<button onclick="document.getElementById(\'tkReportOverlay\').remove()" style="width:100%;margin-top:16px;padding:11px;background:#f0a500;border:none;color:#0a0a0c;border-radius:9px;font-weight:800;cursor:pointer;">Close</button></div>';
+  }
+
+  async function tkEdit(id) {
+    const t = (tkItems || []).find(function (x) { return x.id === id; });
+    if (!t) return;
+    const name = prompt('Task name:', t.name);
+    if (name === null || !name.trim()) return;
+    const desc = prompt('Description (optional):', t.description || '');
+    if (desc === null) return;
+    const { error } = await sb.from('founder_tasks').update({ name: name.trim(), description: desc.trim() || null }).eq('id', id);
+    if (error) { alert('Could not save: ' + error.message); return; }
+    tkLoad();
+  }
+
+  async function tkAdd() {
+    const name = document.getElementById('tkName').value.trim();
+    if (!name) { alert('Give the task a name.'); return; }
+    const due = document.getElementById('tkDue').value;
+    const row = {
+      name: name,
+      description: document.getElementById('tkDesc').value.trim() || null,
+      due_at: due ? new Date(due).toISOString() : null,
+      importance: document.getElementById('tkImp').value
+    };
+    const { error } = await sb.from('founder_tasks').insert(row);
+    if (error) { alert('Could not add: ' + error.message); return; }
+    document.getElementById('tkName').value = '';
+    document.getElementById('tkDesc').value = '';
+    document.getElementById('tkDue').value = '';
+    tkLoad();
+  }
+  async function tkDone(id, done) { await sb.from('founder_tasks').update({ done: done, done_at: done ? new Date().toISOString() : null }).eq('id', id); tkLoad(); }
+  async function tkDel(id) { if (!confirm('Delete this task?')) return; await sb.from('founder_tasks').delete().eq('id', id); tkLoad(); }
+
+  function tkBeep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.5, 1.0].forEach(function (t) {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = 880; o.type = 'sine';
+        g.gain.setValueAtTime(0.001, ctx.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + t + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.4);
+        o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.4);
+      });
+    } catch (_) {}
+  }
+
+  function tkEnableAlarm() {
+    if (!('Notification' in window)) { alert('This browser cannot show alarm pop-ups, but sounds will still play while this tab is open.'); return; }
+    Notification.requestPermission().then(function (p) {
+      document.getElementById('tkAlarmBtn').textContent = p === 'granted' ? '🔔 Alarms on' : '🔔 Enable alarms';
+      tkBeep();   // also unlocks the audio on this user tap
+    });
+  }
+
+  function tkStartAlarms() {
+    if (tkAlarmTimer) return;
+    tkAlarmTimer = setInterval(tkCheckAlarms, 30000);
+    tkCheckAlarms();
+  }
+  function tkCheckAlarms() {
+    const now = Date.now();
+    (tkItems || []).forEach(function (t) {
+      if (t.done || !t.due_at || tkFired[t.id]) return;
+      if (new Date(t.due_at).getTime() <= now) {
+        tkFired[t.id] = true;
+        tkBeep();
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('📋 Task due: ' + t.name, { body: t.description || 'It is time.' });
+        }
+      }
+    });
+  }
+
+  async function loadFounderControls() {
+    document.getElementById('fcGear').classList.remove('hidden');
+    loadHealthPlate();
+    tkLoad();
+    tkStartAlarms();
+    loadSettingsLog();
+    fcBackupStatus();
+    fcLoadVideoList();
+    fcLoadMarketMod();
+    const { data } = await sb.from('site_settings').select('key, value').in('key', FC_KEYS);
+    const m = {};
+    (data || []).forEach(function (r) { m[r.key] = r.value || {}; });
+    fcCurrent = m;
+    const c = m.commerce || {}, p = m.plans || {}, s = m.storage || {}, n = m.notify || {};
+    document.getElementById('fcCommission').value = c.marketplace_commission_pct ?? 26.5;
+    document.getElementById('fcPlatFee').value = c.platform_fee_pct ?? 10;
+    document.getElementById('fcSubPrice').value = p.sub_price_label ?? '£9.99/month';
+    document.getElementById('fcCreditsSub').value = p.credits_per_sub ?? 10;
+    document.getElementById('fcFreeBuilds').value = p.free_builds ?? 3;
+    document.getElementById('fcRecKb').value = s.max_record_kb ?? 32;
+    document.getElementById('fcRecMax').value = s.max_records_per_app ?? 5000;
+    document.getElementById('fcNotifySales').checked = n.sales !== false;
+    document.getElementById('fcNotifySubs').checked = n.subs !== false;
+    const co = m.costs || {};
+    document.getElementById('fcNetlifyUsd').value = co.netlify_monthly_usd ?? 20;
+    document.getElementById('fcAiIn').value = co.anthropic_in_per_million_usd ?? 5;
+    document.getElementById('fcAiOut').value = co.anthropic_out_per_million_usd ?? 25;
+    document.getElementById('fcFx').value = co.usd_per_gbp ?? 1.27;
+    document.getElementById('fcAiCredit').value = co.anthropic_credit_usd ?? '';
+    const ad = m.admission || {};
+    document.getElementById('fcAdmApps').value = ad.apps_per_user ?? 5;
+    document.getElementById('fcAdmMax').value = ad.max_customers ?? 90;
+    document.getElementById('fcAdmDb').value = ad.storage_mb_per_sub ?? 20;
+    document.getElementById('fcAdmBw').value = ad.bandwidth_gb_per_sub ?? 2;
+    document.getElementById('fcAdmChest').value = ad.war_chest_gbp ?? 10000;
+  }
+
+  async function fcSave() {
+    const rows = {
+      commerce: {
+        marketplace_commission_pct: Number(document.getElementById('fcCommission').value),
+        platform_fee_pct: Number(document.getElementById('fcPlatFee').value)
+      },
+      plans: {
+        sub_price_label: document.getElementById('fcSubPrice').value.trim(),
+        credits_per_sub: Number(document.getElementById('fcCreditsSub').value),
+        free_builds: Number(document.getElementById('fcFreeBuilds').value)
+      },
+      storage: {
+        max_record_kb: Number(document.getElementById('fcRecKb').value),
+        max_records_per_app: Number(document.getElementById('fcRecMax').value)
+      },
+      notify: {
+        sales: document.getElementById('fcNotifySales').checked,
+        subs: document.getElementById('fcNotifySubs').checked
+      },
+      // Spread first so fields with no input here (cycle_start_day,
+      // elevenlabs_monthly_usd) survive a save untouched.
+      costs: Object.assign({}, fcCurrent.costs || {}, {
+        netlify_monthly_usd: Number(document.getElementById('fcNetlifyUsd').value),
+        anthropic_in_per_million_usd: Number(document.getElementById('fcAiIn').value),
+        anthropic_out_per_million_usd: Number(document.getElementById('fcAiOut').value),
+        usd_per_gbp: Number(document.getElementById('fcFx').value),
+        anthropic_credit_usd: Number(document.getElementById('fcAiCredit').value) || 0
+      })
+    };
+    // A changed credit figure means a top-up: stamp the date so the
+    // countdown starts from this moment's receipts.
+    if (rows.costs.anthropic_credit_usd !== Number((fcCurrent.costs || {}).anthropic_credit_usd || 0)) {
+      rows.costs.anthropic_credit_set_at = new Date().toISOString();
+    }
+    rows.admission = Object.assign({}, fcCurrent.admission || {}, {
+      apps_per_user: Number(document.getElementById('fcAdmApps').value) || 5,
+      max_customers: Number(document.getElementById('fcAdmMax').value) || 0,
+      storage_mb_per_sub: Number(document.getElementById('fcAdmDb').value) || 20,
+      bandwidth_gb_per_sub: Number(document.getElementById('fcAdmBw').value) || 2,
+      war_chest_gbp: Number(document.getElementById('fcAdmChest').value) || 0
+    });
+    for (const k of FC_KEYS) {
+      const { error } = await sb.from('site_settings')
+        .update({ value: rows[k], updated_at: new Date().toISOString() })
+        .eq('key', k);
+      if (error) { alert('Could not save "' + k + '" — ' + error.message); return; }
+    }
+    // Log what actually changed, then remember the new state.
+    const changed = FC_KEYS.filter(function (k) {
+      return JSON.stringify(rows[k]) !== JSON.stringify(fcCurrent[k] || {});
+    });
+    if (changed.length) {
+      await sb.from('settings_log').insert(changed.map(function (k) {
+        return { key: k, old_value: fcCurrent[k] || {}, new_value: rows[k] };
+      }));
+      changed.forEach(function (k) { fcCurrent[k] = rows[k]; });
+      loadSettingsLog();
+    }
+    const ok = document.getElementById('fcOk');
+    ok.classList.remove('hidden');
+    setTimeout(function () { ok.classList.add('hidden'); }, 2500);
+  }
+
+  async function loadSettingsLog() {
+    const { data } = await sb.from('settings_log')
+      .select('key, old_value, new_value, changed_at')
+      .order('changed_at', { ascending: false })
+      .limit(50);
+    const board = document.getElementById('fcLog');
+    board.innerHTML = '';
+    if (!data || !data.length) {
+      board.textContent = 'No changes recorded yet.';
+      return;
+    }
+    data.forEach(function (r) {
+      const oldV = r.old_value || {}, newV = r.new_value || {};
+      Object.keys(newV).forEach(function (f) {
+        if (JSON.stringify(oldV[f]) === JSON.stringify(newV[f])) return;
+        const d = document.createElement('div');
+        d.style.cssText = 'padding:6px 0;border-bottom:1px solid #232329;font-size:12px;color:#bbb;line-height:1.6;';
+        const when = new Date(r.changed_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+        d.textContent = when + ' · ' + r.key + '.' + f + ': ' + JSON.stringify(oldV[f]) + ' → ' + JSON.stringify(newV[f]);
+        board.appendChild(d);
+      });
+    });
+    if (!board.childNodes.length) board.textContent = 'No changes recorded yet.';
+  }
+
+  // ---------------- maker payouts (Stripe Connect via connect-desk) ----------------
+  async function loadPayoutStatus() {
+    if (!session) return;
+    try {
+      const r = await fetch(SB_URL + '/functions/v1/connect-desk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: '{"action":"status"}'
+      });
+      const d = await r.json();
+      const el = document.getElementById('payoutStatus');
+      const btn = document.getElementById('payoutBtn');
+      if (d.status === 'ready') { el.textContent = '✅ Payouts active — your bank is connected.'; btn.textContent = 'Manage details'; }
+      else if (d.status === 'pending') { el.textContent = '⏳ Details submitted — Stripe is reviewing.'; btn.textContent = 'Check again'; }
+      else if (d.status === 'incomplete') { el.textContent = '⚠️ Setup started but not finished.'; btn.textContent = 'Continue setup'; }
+      else { el.textContent = 'Not set up yet — takes about two minutes.'; btn.textContent = 'Set up payouts'; }
+    } catch (e) { /* card stays quiet if the desk is unreachable */ }
+  }
+
+  async function payoutSetup() {
+    if (!session) { signIn(); return; }
+    const btn = document.getElementById('payoutBtn');
+    btn.disabled = true;
+    try {
+      const r = await fetch(SB_URL + '/functions/v1/connect-desk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: '{"action":"onboard"}'
+      });
+      const d = await r.json();
+      if (d.url) { location.href = d.url; return; }
+      alert(d.error || 'Could not start payout setup');
+    } catch (e) { alert('Could not reach the payout desk — try again.'); }
+    btn.disabled = false;
+  }
+
+  // ---------------- domains (domain-desk) ----------------
+  async function loadDomainApps(userRowId) {
+    if (!userRowId) return;
+    try {
+      const { data } = await sb.from('builds')
+        .select('repo_name')
+        .eq('user_id', userRowId)
+        .eq('status', 'done')
+        .order('updated_at', { ascending: false });
+      const sel = document.getElementById('domRepo');
+      sel.innerHTML = '<option value="">— choose which of your apps —</option>';
+      const seen = {};
+      (data || []).forEach(function (b) {
+        if (!b.repo_name || seen[b.repo_name]) return;
+        seen[b.repo_name] = 1;
+        const o = document.createElement('option');
+        o.value = b.repo_name; o.textContent = b.repo_name;
+        sel.appendChild(o);
+      });
+    } catch (e) { /* quiet */ }
+  }
+
+  async function domainDesk(bodyObj) {
+    const r = await fetch(SB_URL + '/functions/v1/domain-desk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify(bodyObj)
+    });
+    return r.json();
+  }
+
+  async function domainCheck() {
+    if (!session) { signIn(); return; }
+    const el = document.getElementById('domResult');
+    el.textContent = 'Asking the registry…';
+    const d = await domainDesk({ action: 'check', domain: document.getElementById('domName').value });
+    if (d.error) { el.textContent = '⚠️ ' + d.error; return; }
+    if (d.available === true) el.textContent = '✅ ' + d.domain + ' is available — claim it!';
+    else if (d.available === false) el.textContent = '❌ ' + d.domain + ' is taken — try another.';
+    else el.textContent = d.note || 'Registry busy — try again shortly.';
+  }
+
+  async function domainClaim() {
+    if (!session) { signIn(); return; }
+    const el = document.getElementById('domResult');
+    if (!document.getElementById('domRepo').value) {
+      el.textContent = 'Choose which of your apps this domain is for — the list is just above.';
+      return;
+    }
+    el.textContent = 'Claiming…';
+    const d = await domainDesk({
+      action: 'claim',
+      domain: document.getElementById('domName').value,
+      repoName: document.getElementById('domRepo').value.trim().toLowerCase()
+    });
+    if (d.error) { el.textContent = '⚠️ ' + d.error; return; }
+    el.textContent = '✅ Claimed and reserved to your account. ' + (d.note || '');
+    loadMyDomains();
+  }
+
+  async function loadMyDomains() {
+    if (!session) return;
+    try {
+      const d = await domainDesk({ action: 'mine' });
+      const box = document.getElementById('domMine');
+      if (!d.domains || !d.domains.length) { box.textContent = ''; return; }
+      box.innerHTML = '';
+      d.domains.forEach(function (r) {
+        const line = document.createElement('div');
+        line.style.cssText = 'padding:5px 0;border-top:1px solid #232329;';
+        line.textContent = r.domain + ' → ' + r.repo_name + ' · ' + r.status;
+        box.appendChild(line);
+      });
+    } catch (e) { /* quiet */ }
+  }
+
+  // ---------------- Factory Academy (videos hosted by us) ----------------
+  function academyTitle(name) {
+    return name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
+  }
+
+  async function loadAcademy() {
+    try {
+      const { data } = await sb.storage.from('videos').list('', { limit: 50, sortBy: { column: 'created_at', order: 'desc' } });
+      const sel = document.getElementById('academySelect');
+      const player = document.getElementById('academyPlayer');
+      const empty = document.getElementById('academyList');
+      if (!data || !data.filter(function (f) { return f.name && f.name.indexOf('.') !== 0; }).length) {
+        sel.style.display = 'none'; player.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+      sel.innerHTML = '';
+      data.forEach(function (f) {
+        if (!f.name || f.name.indexOf('.') === 0) return;
+        const o = document.createElement('option');
+        o.value = f.name; o.textContent = '▶ ' + academyTitle(f.name);
+        sel.appendChild(o);
+      });
+      empty.style.display = 'none';
+      sel.style.display = 'block';
+      academyPick();   // load the newest video's first frame as its thumbnail
+    } catch (e) { /* academy stays on its placeholder */ }
+  }
+
+  function academyPick() {
+    const sel = document.getElementById('academySelect');
+    const player = document.getElementById('academyPlayer');
+    if (!sel.value) return;
+    const url = sb.storage.from('videos').getPublicUrl(sel.value).data.publicUrl;
+    player.pause();
+    player.removeAttribute('controls');
+    player.src = url + '#t=0.5';       // #t pulls the first moment as the thumbnail frame
+    // thumb state: 4cm, tap to watch
+    player.style.width = '4cm'; player.style.height = '3cm';
+    player.style.objectFit = 'cover'; player.style.cursor = 'pointer';
+    player.style.display = 'block';
+    document.getElementById('academyHint').style.display = 'block';
+    document.getElementById('academyShare').style.display = 'flex';
+  }
+
+  async function academyShareTo(kind) {
+    const sel = document.getElementById('academySelect');
+    if (!sel.value) return;
+    const url = sb.storage.from('videos').getPublicUrl(sel.value).data.publicUrl;
+    const title = 'Factory Academy — ' + academyTitle(sel.value);
+    if (kind === 'native') {
+      if (navigator.share) {
+        try { await navigator.share({ title: title, text: title, url: url }); } catch (e) { /* user closed the sheet */ }
+      } else {
+        try {
+          await navigator.clipboard.writeText(url);
+          alert('Link copied — paste it anywhere (TikTok, chats, posts).');
+        } catch (e) { prompt('Copy this link:', url); }
+      }
+      return;
+    }
+    if (kind === 'wa') window.open('https://wa.me/?text=' + encodeURIComponent(title + ' — ' + url), '_blank');
+    else if (kind === 'fb') window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '_blank');
+    else if (kind === 'email') location.href = 'mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent('Watch this: ' + url);
+  }
+
+  function academyExpand() {
+    const player = document.getElementById('academyPlayer');
+    if (player.hasAttribute('controls')) return;   // already expanded — controls handle it
+    player.setAttribute('controls', '');
+    player.style.width = '100%'; player.style.height = 'auto';
+    player.style.objectFit = 'contain'; player.style.cursor = 'default';
+    document.getElementById('academyHint').style.display = 'none';
+    player.play();
+  }
+
+  async function fcUploadVideo() {
+    const inp = document.getElementById('fcVideoFile');
+    const msg = document.getElementById('fcVideoMsg');
+    const file = inp.files && inp.files[0];
+    if (!file) { msg.textContent = 'Choose a video file first.'; return; }
+    if (file.size > 200 * 1024 * 1024) { msg.textContent = 'Too large — keep videos under 200MB.'; return; }
+    const title = document.getElementById('fcVideoTitle').value.trim();
+    const ext = (file.name.match(/\.[^.]+$/) || ['.mp4'])[0].toLowerCase();
+    const name = title
+      ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80) + ext
+      : file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-');
+    msg.textContent = 'Uploading… keep this page open.';
+    const { error } = await sb.storage.from('videos').upload(name, file, { upsert: true });
+    if (error) { msg.textContent = 'Upload failed — ' + error.message; return; }
+    msg.textContent = 'Uploaded ✓ — live in the Academy now.';
+    inp.value = '';
+    document.getElementById('fcVideoTitle').value = '';
+    loadAcademy();
+    fcLoadVideoList();
+  }
+
+  async function fcLoadVideoList() {
+    const box = document.getElementById('fcVideoList');
+    try {
+      const { data } = await sb.storage.from('videos').list('', { limit: 50, sortBy: { column: 'created_at', order: 'desc' } });
+      box.innerHTML = '';
+      (data || []).forEach(function (f) {
+        if (!f.name || f.name.indexOf('.') === 0) return;
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid #232329;';
+        const t = document.createElement('span');
+        t.style.cssText = 'font-size:12.5px;color:#bbb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+        t.textContent = academyTitle(f.name);
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.textContent = '🗑';
+        del.style.cssText = 'background:#2a0d0d;border:1px solid #e05555;color:#ff9d9d;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:13px;';
+        del.onclick = function () { fcDeleteVideo(f.name); };
+        row.appendChild(t); row.appendChild(del);
+        box.appendChild(row);
+      });
+    } catch (e) { box.textContent = ''; }
+  }
+
+  async function fcDeleteVideo(name) {
+    if (!confirm('Delete "' + academyTitle(name) + '" from the Academy? This cannot be undone.')) return;
+    const msg = document.getElementById('fcVideoMsg');
+    const { error } = await sb.storage.from('videos').remove([name]);
+    if (error) { msg.textContent = 'Delete failed — ' + error.message; return; }
+    msg.textContent = 'Deleted ✓';
+    loadAcademy();
+    fcLoadVideoList();
+  }
+
+  // ---------------- founder: market moderation ----------------
+  async function fcAdmin(bodyObj) {
+    const r = await fetch(SB_URL + '/functions/v1/app-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify(bodyObj)
+    });
+    return r.json();
+  }
+
+  // One currency at a time, the founder's choice, remembered on this device.
+  // Every figure is stored in its supplier's native currency and converted
+  // for display with the gear's own £/$ rate.
+  let fcCur = localStorage.getItem('fcCur') || 'GBP';
+  let fcReport = null;
+
+  function fcFmt(value, nativeCur, dp) {
+    if (value == null) return '—';
+    const fx = Number(fcReport && fcReport.fx && fcReport.fx.usd_per_gbp) ||
+      Number((fcCurrent.costs || {}).usd_per_gbp) || 1.27;
+    let v = Number(value);
+    if (nativeCur === 'USD' && fcCur === 'GBP') v = v / fx;
+    if (nativeCur === 'GBP' && fcCur === 'USD') v = v * fx;
+    return (fcCur === 'USD' ? '$' : '£') + v.toFixed(dp == null ? 2 : dp);
+  }
+
+  function fcToggleCur() {
+    fcCur = fcCur === 'GBP' ? 'USD' : 'GBP';
+    localStorage.setItem('fcCur', fcCur);
+    fcCurBtnLabel();
+    if (fcReport) fcRenderCosts(fcReport);
+  }
+
+  function fcCurBtnLabel() {
+    const b = document.getElementById('fcCurBtn');
+    if (b) b.textContent = fcCur === 'GBP' ? 'Showing £ — switch to $' : 'Showing $ — switch to £';
+  }
+
+  async function fcLoadCosts() {
+    const box = document.getElementById('fcCosts');
+    box.textContent = 'Reading the meters…';
+    try {
+      const r = await fetch(SB_URL + '/functions/v1/cost-desk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify({ action: 'report' })
+      });
+      const d = await r.json();
+      if (!r.ok) { box.textContent = 'Could not read costs — ' + (d.error || r.status); return; }
+      fcReport = d;
+      fcCurBtnLabel();
+      fcRenderCosts(d);
+    } catch (err) {
+      box.textContent = 'Could not read costs — ' + err.message;
+    }
+  }
+
+  function fcRenderCosts(d) {
+    const box = document.getElementById('fcCosts');
+    try {
+      const a = d.anthropic || {}, e = d.economics || {}, n = d.netlify || {}, v = d.voice || {};
+      const lines = [];
+      lines.push('<b style="color:#eee;">Cycle day ' + d.cycle.days_gone + ' of ' + d.cycle.days_total + '</b> · ' + a.builds_this_cycle + ' builds (' + a.builds_succeeded + ' live)');
+      lines.push('AI spend: <b style="color:#f0a500;">' + fcFmt(a.spend_usd ?? 0, 'USD') + '</b>' +
+        (a.per_tracked_build_usd != null ? ' · ' + fcFmt(a.per_tracked_build_usd, 'USD', 3) + ' per build' : ' · no receipts yet'));
+      if (e.cost_per_app_usd != null) {
+        lines.push('Cost per app: <b style="color:#f0a500;">' + fcFmt(e.cost_per_app_usd, 'USD') + '</b>' +
+          (e.revenue_per_build_gbp != null ? ' · revenue ' + fcFmt(e.revenue_per_build_gbp, 'GBP') + '/build' : ''));
+        if (e.margin_per_build_gbp != null) {
+          const m = e.margin_per_build_gbp;
+          lines.push('Margin per build: <b style="color:' + (m >= 0 ? '#7fdc7f' : '#e05656') + ';">' +
+            fcFmt(Math.abs(m), 'GBP') + (m >= 0 ? ' profit' : ' loss') + '</b>');
+        }
+      }
+      // The 10% law: build cost inside a sub must stay within its budget.
+      const pg = d.plan_guard || {};
+      if (pg.note) {
+        lines.push('The ' + (pg.law_pct || 10) + '% law: ' + pg.note);
+      } else if (pg.budget_gbp != null) {
+        lines.push('The ' + pg.law_pct + '% law: your ' + pg.current_credits + ' credits spend <b style="color:' +
+          (pg.breach ? '#e05656' : '#7fdc7f') + ';">' + fcFmt(pg.current_spend_gbp, 'GBP') + '</b> of the ' +
+          fcFmt(pg.budget_gbp, 'GBP') + ' budget' +
+          (pg.breach
+            ? ' — <b style="color:#e05656;">⚠ BREACH: cut credits to ' + pg.max_credits_within_law + ' or raise the price</b>'
+            : ' ✓ (room for up to ' + pg.max_credits_within_law + ' credits at ' + fcFmt(pg.loaded_cost_per_build_gbp, 'GBP', 3) + '/build, safety-loaded)'));
+      }
+      function meter(label, used, inc, pct, unit) {
+        if (used == null || inc == null) return null;
+        const col = pct >= 90 ? '#e05656' : pct >= 70 ? '#f0a500' : '#7fdc7f';
+        return label + ': <b style="color:' + col + ';">' + pct + '%</b> (' + used + ' / ' + inc + ' ' + unit + ')';
+      }
+      const bw = n.bandwidth || {}, bm = n.build_minutes || {};
+      const l1 = meter('Netlify bandwidth', bw.used_gb, bw.included_gb, bw.pct_used, 'GB');
+      const l2 = meter('Netlify build minutes', bm.used, bm.included, bm.pct_used, 'min');
+      if (l1) lines.push(l1); else if (bw.note) lines.push('Netlify bandwidth: ' + bw.note);
+      if (l2) lines.push(l2); else if (bm.note) lines.push('Netlify minutes: ' + bm.note);
+      if (n.note) lines.push('Netlify: ' + n.note);
+      // Whatever meters the account's capabilities block declares — this is
+      // where the newer Netlify plans keep their real counters.
+      (n.meters || []).forEach(function (mt) {
+        const big = (mt.included || 0) >= 1e9 || (mt.used || 0) >= 1e9;
+        const u = big ? (mt.used / 1e9).toFixed(2) : mt.used;
+        const i = big ? (mt.included / 1e9).toFixed(0) : mt.included;
+        const row = meter('Netlify ' + String(mt.name).replace(/_/g, ' '), u, i, mt.pct_used, big ? 'GB' : '');
+        if (row) lines.push(row);
+      });
+      const lv = meter('Voice characters', v.characters_used, v.characters_included, v.pct_used, '');
+      if (lv) lines.push(lv); else if (v.note) lines.push('Voice: ' + v.note);
+      const vc = v.conversations || {};
+      if (vc.minutes_this_cycle != null) {
+        lines.push('Voice talk: <b style="color:#f0a500;">' + vc.minutes_this_cycle + ' min</b> · ' +
+          vc.calls_this_cycle + ' calls · ~' + fcFmt(vc.est_cost_usd || 0, 'USD') +
+          ' at ' + fcFmt(vc.usd_per_min, 'USD', 3) + '/min' +
+          (vc.avg_seconds_per_call ? ' · avg ' + vc.avg_seconds_per_call + 's/call' : ''));
+      } else if (vc.note) {
+        lines.push('Voice talk: ' + vc.note);
+      }
+      if (e.note) lines.push('<span style="color:#666;">' + e.note + '</span>');
+      box.innerHTML = lines.join('<br>');
+
+      // The bills board — what is owed, to whom, when, and the reserve.
+      const bl = d.bills || {};
+      const bx = document.getElementById('fcBills');
+      if (bx) {
+        const bLines = [];
+        const an = bl.anthropic || {};
+        if (an.remaining_usd != null && an.credit_loaded_usd) {
+          const pctLeft = (an.remaining_usd / an.credit_loaded_usd) * 100;
+          const col = pctLeft < 20 ? '#e05656' : pctLeft < 50 ? '#f0a500' : '#7fdc7f';
+          bLines.push('Anthropic credit: <b style="color:' + col + ';">' + fcFmt(an.remaining_usd, 'USD') + '</b> left of ' + fcFmt(an.credit_loaded_usd, 'USD') + ' (loaded ' + an.loaded_at + ')');
+        } else {
+          bLines.push('Anthropic credit: enter your loaded amount above and Save all — receipts then count it down');
+        }
+        const nf = bl.netlify || {};
+        bLines.push('Netlify: ' + fcFmt(nf.monthly_usd, 'USD') + '/mo · next bill ~' + nf.next_due +
+          (nf.live_plan_price_usd != null
+            ? (nf.price_drift ? ' · <b style="color:#e05656;">⚠ their Pro price is now ' + fcFmt(nf.live_plan_price_usd, 'USD') + ' — update the rate above</b>' : ' · price checked live ✓')
+            : ''));
+        const el2 = bl.elevenlabs || {};
+        if (el2.next_bill_usd != null) {
+          bLines.push('ElevenLabs: next bill ' + fcFmt(el2.next_bill_usd, 'USD') + (el2.next_bill_date ? ' on ' + el2.next_bill_date : ''));
+        }
+        const cm = bl.claude_max || {};
+        if (cm.monthly_gbp != null) {
+          bLines.push('Claude Max (your engineer): ' + fcFmt(cm.monthly_gbp, 'GBP') + '/mo · next bill ~' + cm.next_due);
+        }
+        if (bl.projected_anthropic_month_usd != null) {
+          bLines.push('Projected AI spend this month: ' + fcFmt(bl.projected_anthropic_month_usd, 'USD'));
+        }
+        if (bl.reserve_suggestion_usd != null) {
+          bLines.push('<b style="color:#f0a500;">Cash reserve to hold: ~' + fcFmt(bl.reserve_suggestion_usd, 'USD', 0) + '</b> — two months of running costs, because bills fall due while Stripe payouts lag');
+        }
+        if (d.fx && d.fx.usd_per_gbp) {
+          bLines.push('<span style="color:#888;">£1 = $' + d.fx.usd_per_gbp + ' · ' + d.fx.source + '</span>');
+        }
+        if (bl.rates_verified_days != null) {
+          bLines.push('Rates last verified <b style="color:' + (bl.rates_verified_days > 30 ? '#e05656' : '#7fdc7f') + ';">' + bl.rates_verified_days + ' day' + (bl.rates_verified_days === 1 ? '' : 's') + ' ago</b>');
+        } else {
+          bLines.push('<span style="color:#e05656;">Rates never verified — check the three pricing pages, then press the button below</span>');
+        }
+        bx.innerHTML = bLines.join('<br>');
+      }
+
+      // The admission board — how many customers the Factory can afford,
+      // and what the next expansion factually buys.
+      const ad2 = d.admission || {};
+      const ax = document.getElementById('fcAdmission');
+      if (ax && ad2.x_this_period != null) {
+        const aLines = [];
+        aLines.push('This period the Factory can admit <b style="color:#f0a500;font-size:14px;">' + ad2.x_this_period + ' customers</b> — held by ' + ad2.binding_constraint);
+        const dl = (ad2.dims || []).map(function (dd) {
+          const isBind = dd.name === ad2.binding_constraint;
+          return (isBind ? '<b style="color:#f0a500;">' : '') + dd.name + ' ' + dd.allows + (isBind ? '</b>' : '');
+        });
+        if (dl.length) aLines.push('Allows — ' + dl.join(' · '));
+        const al = ad2.allocation_per_sub || {};
+        aLines.push('Each sub is allocated: ' + (al.credits != null ? al.credits + ' builds · ' : '') + al.apps + ' live apps · ' + al.db_mb + 'MB data · ' + al.bandwidth_gb + 'GB/mo');
+        const st = ad2.seats || {};
+        aLines.push('Hosting seats: ' + st.used + ' / ' + st.total + ' (' + st.customer_apps_live + ' customer apps + ' + st.estate + ' our own) · ' + st.free + ' free');
+        if (ad2.customers_total != null) {
+          aLines.push('Admitted so far: ' + ad2.customers_total + ' (' + (ad2.customers_joined_this_cycle ?? 0) + ' this period)');
+        }
+        const ap = ad2.autopilot || {};
+        if (ap.advice) {
+          const aff = ap.affordable == null ? '' :
+            (ap.affordable ? ' · war chest ' + fcFmt(ap.war_chest_gbp, 'GBP', 0) + ' → <b style="color:#7fdc7f;">affordable ✓</b>'
+                           : ' · war chest ' + fcFmt(ap.war_chest_gbp, 'GBP', 0) + ' → <b style="color:#e05656;">not affordable</b>');
+          aLines.push('<span style="color:#7fdc7f;">Autopilot (' + ap.mode + '): ' + ap.advice.move +
+            (ap.advice.gbp_month ? ' at ' + fcFmt(ap.advice.gbp_month, 'GBP') + '/mo' : '') +
+            (ap.advice.x_gain ? ' → ~+' + ap.advice.x_gain + ' customers' : '') +
+            aff + ' · ' + ap.advice.auto + '</span>');
+        }
+        ax.innerHTML = aLines.join('<br>');
+      } else if (ax) {
+        ax.textContent = 'Run phase_admission.sql once, then refresh.';
+      }
+    } catch (err) {
+      box.textContent = 'Could not read costs — ' + err.message;
+    }
+  }
+
+  async function fcVerifyRates() {
+    const cur = Object.assign({}, fcCurrent.costs || {}, { rates_verified_at: new Date().toISOString() });
+    const { error } = await sb.from('site_settings')
+      .update({ value: cur, updated_at: new Date().toISOString() })
+      .eq('key', 'costs');
+    if (error) { alert('Could not stamp — ' + error.message); return; }
+    fcCurrent.costs = cur;
+    fcLoadCosts();
+  }
+
+  async function fcLoadMarketMod() {
+    const box = document.getElementById('fcMarketList');
+    try {
+      const d = await fcAdmin({ action: 'moderate' });
+      if (d.error) { box.textContent = d.error; return; }
+      if (!d.listings || !d.listings.length) { box.textContent = 'No listings yet.'; return; }
+      box.innerHTML = '';
+      d.listings.forEach(function (l) {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid #232329;';
+        const t = document.createElement('span');
+        t.style.cssText = 'font-size:12.5px;color:#bbb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+        t.textContent = (l.approved ? '🟢 ' : '🟡 ') + l.repo_name + ' · £' + (l.price_pence / 100).toFixed(2);
+        row.appendChild(t);
+        const btns = document.createElement('span');
+        btns.style.cssText = 'display:flex;gap:6px;flex-shrink:0;';
+        if (!l.approved) {
+          const ok = document.createElement('button');
+          ok.type = 'button'; ok.textContent = '✓';
+          ok.style.cssText = 'background:#0d2a0d;border:1px solid #5da97e;color:#7fdc7f;border-radius:6px;padding:4px 10px;cursor:pointer;';
+          ok.onclick = async function () {
+            const r = await fcAdmin({ action: 'approve', repoName: l.repo_name });
+            if (r.error) alert(r.error); else { fcLoadMarketMod(); loadMarket(); }
+          };
+          btns.appendChild(ok);
+        }
+        const rm = document.createElement('button');
+        rm.type = 'button'; rm.textContent = '✖';
+        rm.style.cssText = 'background:#2a0d0d;border:1px solid #e05555;color:#ff9d9d;border-radius:6px;padding:4px 10px;cursor:pointer;';
+        rm.onclick = async function () {
+          if (!confirm('Remove "' + l.repo_name + '" from the marketplace?')) return;
+          const r = await fcAdmin({ action: 'remove-listing', repoName: l.repo_name });
+          if (r.error) alert(r.error); else { fcLoadMarketMod(); loadMarket(); }
+        };
+        btns.appendChild(rm);
+        row.appendChild(btns);
+        box.appendChild(row);
+      });
+    } catch (e) { box.textContent = 'Could not load listings.'; }
+  }
+
+  async function fcBackupStatus() {
+    const el = document.getElementById('fcBackupStatus');
+    const { data } = await sb.from('site_settings').select('value').eq('key', 'backup').single();
+    const last = data && data.value && data.value.last_schema_at;
+    if (!last) {
+      el.textContent = '⚠️ No schema backup recorded yet.';
+      el.style.color = '#e05555';
+      return;
+    }
+    const days = Math.floor((Date.now() - new Date(last).getTime()) / 86400000);
+    el.textContent = 'Last schema backup: ' + (days === 0 ? 'today' : days + ' day' + (days === 1 ? '' : 's') + ' ago');
+    el.style.color = days > 7 ? '#e05555' : '#7fdc7f';
+    if (days > 7) el.textContent = '⚠️ ' + el.textContent + ' — overdue!';
+  }
+
+  async function fcBackupSchema() {
+    const { data, error } = await sb.rpc('schema_snapshot');
+    if (error) { alert('Backup failed — ' + error.message); return; }
+    const stamp = new Date().toISOString();
+    const blob = new Blob([data], { type: 'application/sql' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'factory-schema-' + stamp.slice(0, 10) + '.sql';
+    document.body.appendChild(a); a.click(); a.remove();
+    await sb.from('site_settings')
+      .update({ value: { last_schema_at: stamp }, updated_at: stamp })
+      .eq('key', 'backup');
+    fcBackupStatus();
+  }
+
+  async function loadInbox() {
+    const { data } = await sb.from('enquiries').select('*').eq('seen', false).order('created_at', { ascending: false });
+    const card = document.getElementById('founderCard');
+    const list = document.getElementById('inboxList');
+    const empty = document.getElementById('inboxEmpty');
+    const bannerEl = document.getElementById('inboxBanner');
+    card.classList.remove('hidden');
+    list.innerHTML = '';
+    if (data && data.length > 0) {
+      bannerEl.textContent = '📬 ' + data.length + ' new message' + (data.length > 1 ? 's' : '') + ' in your Founder Inbox';
+      bannerEl.classList.remove('hidden');
+      empty.classList.add('hidden');
+      for (const e of data) {
+        const div = document.createElement('div');
+        div.className = 'enquiry';
+        const tagClass = e.kind === 'candidate' ? 'kind-candidate' : 'kind-enquiry';
+        const tagText = e.kind === 'candidate' ? 'Candidate'
+          : e.kind === 'partner-bridge' ? '🌉 Partner'
+          : e.kind === 'affiliate-interest' ? 'Affiliate list'
+          : e.kind === 'health-alert' ? '🔴 HEALTH'
+          : e.kind === 'health-digest' ? '❤️ Health'
+          : e.kind === 'wholesale-lessons' ? '📚 £500k Lessons'
+          : e.kind === 'lessons-interest' ? '📖 Copy reserved'
+          : e.kind === 'invite-request' ? '💰 Money request'
+          : 'Enquiry';
+        div.innerHTML =
+          '<div class="e-head"><span class="e-who"></span><span class="kind-tag ' + tagClass + '">' + tagText + '</span></div>' +
+          '<div class="e-meta"></div>' +
+          '<div class="e-msg"></div>' +
+          '<button class="mark-read">Mark as read</button>';
+        div.querySelector('.e-who').textContent = (e.name || 'Anonymous') + ' · ' + (e.email || 'no email');
+        div.querySelector('.e-meta').textContent = new Date(e.created_at).toLocaleString();
+        div.querySelector('.e-msg').textContent = e.message;
+        div.querySelector('.mark-read').onclick = () => markRead(e.id);
+        list.appendChild(div);
+      }
+    } else {
+      bannerEl.classList.add('hidden');
+      empty.classList.remove('hidden');
+    }
+  }
+
+  async function markRead(id) {
+    await sb.from('enquiries').update({ seen: true }).eq('id', id);
+    loadInbox();
+  }
+
+  async function submitMessage(kind, nameId, emailId, msgId, okId, btnId) {
+    const name = document.getElementById(nameId).value.trim();
+    const email = document.getElementById(emailId).value.trim();
+    const message = document.getElementById(msgId).value.trim();
+    if (!message || !email) { alert('Please add your email and a message.'); return; }
+    document.getElementById(btnId).disabled = true;
+    const { error } = await sb.from('enquiries').insert({ kind, name, email, message });
+    if (error) {
+      alert('Could not send — please try again.');
+      document.getElementById(btnId).disabled = false;
+      return;
+    }
+    document.getElementById(okId).classList.remove('hidden');
+    document.getElementById(nameId).value = '';
+    document.getElementById(emailId).value = '';
+    document.getElementById(msgId).value = '';
+    document.getElementById(btnId).disabled = false;
+  }
+
+  async function signIn() {
+    await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+  }
+
+  async function signOut() {
+    await sb.auth.signOut();
+    document.getElementById('statusCard').classList.add('hidden');
+  }
+
+  async function checkout(plan) {
+    try {
+      const res = await fetch(CHECKOUT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify({ plan: plan, quantity: 1 })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error || 'Could not start checkout');
+      window.location.href = data.url;
+    } catch (e) { alert(e.message); }
+  }
+
+  function setStep(n, failed) {
+    for (let i = 1; i <= 4; i++) {
+      const el = document.getElementById('s' + i);
+      el.classList.remove('active', 'done');
+      if (i < n) el.classList.add('done');
+      if (i === n && !failed) el.classList.add(n === 4 ? 'done' : 'active');
+    }
+  }
+
+  async function startBuild() {
+    const name = document.getElementById('appName').value.trim();
+    const desc = document.getElementById('appDesc').value.trim();
+    if (updateRepo) {
+      if (!desc) { alert('Tell us what you would like changed.'); return; }
+    } else if (!name || !desc) {
+      alert('Give your app a name and a description.'); return;
+    }
+
+    document.getElementById('buildBtn').disabled = true;
+    document.getElementById('statusCard').classList.remove('hidden');
+    say('Starting your build now. This usually takes about ninety seconds.');
+    document.getElementById('resultBox').classList.add('hidden');
+    document.getElementById('errorBox').classList.add('hidden');
+    setStep(1);
+
+    try {
+      const res = await fetch(WORKER, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify(updateRepo ? { repoName: updateRepo, description: desc, mode: 'update' } : { repoName: name, description: desc })
+      });
+      const data = await res.json();
+      if (res.status === 402) {
+        document.getElementById('statusCard').classList.add('hidden');
+        document.getElementById('buildBtn').disabled = false;
+        document.getElementById('upgradeCard').scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+      if (!res.ok || !data.buildId) throw new Error(data.error || 'Could not start build');
+      poll(data.buildId);
+    } catch (e) { showError(e.message); }
+  }
+
+  function poll(buildId) {
+    pollTimer = setInterval(async () => {
+      try {
+        const res = await fetch(WORKER + '?buildId=' + buildId, {
+          headers: { 'Authorization': 'Bearer ' + session.access_token }
+        });
+        const b = await res.json();
+        if (b.status === 'pending') setStep(1);
+        else if (b.status === 'building') setStep(2);
+        else if (b.status === 'deploying') setStep(3);
+        else if (b.status === 'done') {
+          setStep(4);
+          clearInterval(pollTimer);
+          const link = document.getElementById('siteLink');
+          link.href = b.site_url; link.textContent = b.site_url;
+          document.getElementById('resultBox').classList.remove('hidden');
+          say('Your app is live. The link is on screen.');
+          document.getElementById('buildBtn').disabled = false;
+          loadCredits();
+          if (sPendingListing && sellerRowId) {
+            const pl = sPendingListing; sPendingListing = null;
+            sb.from('market_listings').insert({
+              repo_name: pl.repo, seller_id: sellerRowId, title: pl.title,
+              summary: pl.summary || ('Built with The Factory: ' + pl.title), price_pence: pl.pence
+            }).then(function (res) {
+              if (res.error) sLine('Factory', 'Marketplace submission hit a snag (' + res.error.message + ') — press 💰 Sell on the app to retry.');
+              else {
+                if (meIsFounder) {
+                  fcAdmin({ action: 'approve', repoName: pl.repo }).then(function (ar) {
+                    loadMarket();
+                    if (typeof fcLoadMarketMod === 'function') fcLoadMarketMod();
+                    sLine('Factory', ar.error
+                      ? 'Submitted at £' + (pl.pence / 100).toFixed(2) + ' — approve it in the gear (' + ar.error + ').'
+                      : 'Live in the marketplace at £' + (pl.pence / 100).toFixed(2) + '.');
+                  });
+                } else {
+                  sLine('Factory', 'Submitted to the marketplace at £' + (pl.pence / 100).toFixed(2) + ' — live once the founder approves it.');
+                }
+                const log = document.getElementById('sLog');
+                const d = document.createElement('div');
+                d.className = 'line factory';
+                const w = document.createElement('span'); w.className = 'who'; w.textContent = 'Factory';
+                const p = document.createElement('p');
+                const a = document.createElement('a');
+                a.href = '#'; a.style.color = '#f0a500'; a.style.fontWeight = '700';
+                a.textContent = '🛒 See it in the Marketplace';
+                a.onclick = function (ev) { ev.preventDefault(); sShowMarket(); };
+                p.appendChild(a);
+                p.appendChild(document.createTextNode(' — it appears there the moment it is approved.'));
+                d.appendChild(w); d.appendChild(p);
+                log.appendChild(d); log.scrollTop = log.scrollHeight;
+              }
+            });
+          }
+        } else if (b.status === 'failed') {
+          clearInterval(pollTimer);
+          showError(b.error || 'Build failed');
+          loadCredits();
+        }
+      } catch (_) { /* keep polling */ }
+    }, 5000);
+  }
+
+  function showError(msg) {
+    setStep(0, true);
+    document.getElementById('errorText').textContent = msg;
+    document.getElementById('errorBox').classList.remove('hidden');
+    say('That build did not finish. ' + (msg || ''));
+    document.getElementById('buildBtn').disabled = false;
+  }
+
+  function resetToForm() {
+    document.getElementById('statusCard').classList.add('hidden');
+  }
+
+  // ---------------- simple mode ----------------
+  let sMode = 'idle';      // idle | name | chat
+  let sConvo = [];
+  let sName = null;
+  let sBusy = false;
+  let sRecog = null;
+  let sListening = false;
+  let sVoiceWasOn = false;
+
+  function sState(t) { document.getElementById('sState').textContent = t || ''; }
+
+  function sLine(who, text) {
+    const log = document.getElementById('sLog');
+    log.classList.remove('hidden');
+    const d = document.createElement('div');
+    d.className = 'line ' + (who === 'You' ? 'you' : 'factory');
+    const w = document.createElement('span'); w.className = 'who'; w.textContent = who;
+    const p = document.createElement('p'); p.textContent = text;
+    d.appendChild(w); d.appendChild(p);
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  let sSpeaking = false;
+  async function sSpeak(text) {
+    if (typeof speakAsync !== 'function') return;
+    sSpeaking = true;
+    sNowSaying = text;                 // the echo filter compares against this
+    sEarSync();
+    try { await speakAsync(text); } catch (e) {}
+    sSpeaking = false;
+    sNowSaying = '';
+    sEarSync();
+  }
+
+  function toggleSimple() {
+    if (document.body.classList.contains('simple-mode')) switchToFull(); else chooseMode('simple');
+  }
+
+  function chooseMode(mode) {
+    try { localStorage.setItem('factory_mode', mode); } catch (e) {}
+    document.getElementById('modeGate').classList.add('hidden');
+    if (mode === 'simple') enterSimple(); else exitSimple();
+  }
+
+  function switchToFull() { chooseMode('full'); window.scrollTo({ top: 0 }); }
+
+  function enterSimple() {
+    document.body.classList.add('simple-mode');
+    document.getElementById('simpleBtn').textContent = '↩ Full version';
+    document.getElementById('simpleCard').classList.remove('hidden');
+    try {
+      const draft = localStorage.getItem('factory_simple_draft');
+      if (draft) { document.getElementById('sDesc').value = draft; localStorage.removeItem('factory_simple_draft'); }
+    } catch (e) {}
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function exitSimple() {
+    document.body.classList.remove('simple-mode');
+    document.getElementById('simpleBtn').textContent = '✨ Simple';
+    sStopMic();
+    if (typeof stopLiveVoice === 'function') stopLiveVoice();
+  }
+
+  // One button, two meanings: outside a conversation it builds directly
+  // from whatever was typed; inside a conversation it sends the reply.
+  function simpleGo() {
+    const box = document.getElementById('sDesc');
+    const text = box.value.trim();
+    if (sMode === 'idle') {
+      if (!text) { startConversation(); return; }   // empty box -> guide them
+      if (!session) { saveDraftAndSignIn(text); return; }
+      directBuild(text);
+    } else {
+      if (!text) { sState('Type an answer — or press Voice and say it.'); return; }
+      sendReply(text);
+    }
+  }
+
+  function saveDraftAndSignIn(text) {
+    try { localStorage.setItem('factory_simple_draft', text); } catch (e) {}
+    signIn();
+  }
+
+  function directBuild(text) {
+    if (typeof cancelUpdate === 'function') cancelUpdate();
+    const nameBox = document.getElementById('appName');
+    nameBox.disabled = false;
+    nameBox.value = 'app-' + Date.now().toString(36);
+    document.getElementById('appDesc').value = text;
+    startBuild();
+    sState('Building your app — about ninety seconds. The link will appear right here.');
+  }
+
+  function startConversation() {
+    if (!session) { signIn(); return; }
+    sMode = 'name';
+    sConvo = [];
+    sName = null;
+    document.getElementById('sLog').innerHTML = '';
+    const q = 'What would you like to call your application or business?';
+    sLine('Factory', q);
+    sSpeak(q);                        // ear reopens automatically when speech ends
+    const box = document.getElementById('sDesc');
+    box.value = '';
+    box.placeholder = 'Type the name here — or say it out loud.';
+    document.getElementById('sGo').textContent = '➤ Send';
+    sState('');
+  }
+
+  async function sendReply(text) {
+    if (sBusy) return;
+    if (sMode === 'chat' && /\b(make|build)\b[\s\S]{0,30}\bapp\b[\s\S]{0,20}\bnow\b/i.test(text)) {
+      text = 'Make the app now — I confirm. Please finalise the brief and build with what you have.';
+    }
+    const box = document.getElementById('sDesc');
+    sLine('You', text);
+    box.value = '';
+
+    if (sMode === 'name') {
+      sName = text;
+      sMode = 'chat';
+      box.placeholder = 'Type your answer — or keep talking. Say or type "make my app now" when you are ready.';
+      sConvo.push({ role: 'user', content: 'My app or business is called "' + text + '". Please ask me what you need to know to build it well.' });
+    } else {
+      sConvo.push({ role: 'user', content: text });
+    }
+    await sAgentTurn();
+  }
+
+  async function sAgentTurn() {
+    sBusy = true;
+    sState('Thinking…');
+    try {
+      const res = await fetch(SB_URL + '/functions/v1/front-desk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session ? session.access_token : SB_ANON) },
+        body: JSON.stringify({ messages: sConvo, email: session ? session.user.email : '' })
+      });
+      const d = await res.json();
+      if (!res.ok || d.error) throw new Error(d.error || 'The front desk is unavailable just now — please type your app details instead.');
+      sConvo.push({ role: 'assistant', content: d.reply });
+      sLine('Factory', d.reply);
+      sState('');
+      sSpeak(d.reply);               // ear reopens after the reply finishes
+
+      if (d.status === 'ready') {
+        sVoiceWasOn = sListening;
+        sMode = 'idle';
+        document.getElementById('sGo').textContent = '⚙ BUILD MY APP';
+        if (typeof cancelUpdate === 'function') cancelUpdate();
+        const nameBox = document.getElementById('appName');
+        nameBox.disabled = false;
+        nameBox.value = (sName || d.app_name || ('app-' + Date.now().toString(36)));
+        document.getElementById('appDesc').value = d.description;
+        startBuild();
+        sStopMic();
+        sStartUpdates();
+      }
+    } catch (e) {
+      sLine('Factory', 'I hit a problem: ' + e.message + ' — you can keep typing your details and press Build, or try Voice again.');
+      sSpeak('I hit a problem. You can keep typing your details and press Build.');
+      sState('');
+      sMode = 'idle';
+      document.getElementById('sGo').textContent = '⚙ BUILD MY APP';
+    }
+    sBusy = false;
+    sEarSync();
+  }
+
+  // The two-minute crier: keeps the agent's promise of regular updates.
+  let sUpdateTimer = null;
+  function sStartUpdates() {
+    if (sUpdateTimer) clearInterval(sUpdateTimer);
+    sUpdateTimer = setInterval(function () {
+      const done = !document.getElementById('resultBox').classList.contains('hidden');
+      const failed = !document.getElementById('errorBox').classList.contains('hidden');
+      if (done) {
+        clearInterval(sUpdateTimer); sUpdateTimer = null;
+        const m = 'Your application is live! The link is right here on your screen.';
+        sLine('Factory', m); if (sVoiceWasOn) sSpeak(m);
+      } else if (failed) {
+        clearInterval(sUpdateTimer); sUpdateTimer = null;
+        const m = 'The build hit a problem and your credit was returned. Press Build to try again.';
+        sLine('Factory', m); if (sVoiceWasOn) sSpeak(m);
+      } else {
+        const m = 'Update: still building your application — the assembly line is running. Next update in two minutes.';
+        sLine('Factory', m); if (sVoiceWasOn) sSpeak(m);
+      }
+    }, 120000);
+    // A quicker first check so a fast build is announced promptly.
+    setTimeout(function () {
+      if (!sUpdateTimer) return;
+      const done = !document.getElementById('resultBox').classList.contains('hidden');
+      if (done) {
+        clearInterval(sUpdateTimer); sUpdateTimer = null;
+        const m = 'Your application is live! The link is right here on your screen.';
+        sLine('Factory', m); if (sVoiceWasOn) sSpeak(m);
+      }
+    }, 105000);
+  }
+
+  // Voice: a keep-alive ear. The mic ALWAYS comes back by itself — after
+  // every reply, every silence, every browser hiccup — until the user turns
+  // it off or the build starts. One rule: ear open only when we are not
+  // speaking and not thinking.
+  let sEarOpen = false;
+
+  function sSetupRecog() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return null;
+    const r = new SR();
+    r.lang = 'en-GB';
+    r.continuous = true;
+    r.interimResults = true;
+    r.onresult = function (e) {
+      if (sBusy) return;
+      let finalText = '', interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t; else interim += t;
+      }
+      if (sSpeaking) {
+        // Barge-in: our own echo is ignored; new words silence the agent.
+        if (!sIsNovel((finalText + ' ' + interim).trim())) return;
+        sBargeIn();
+      }
+      if (interim.trim()) sState('… ' + interim.trim());
+      finalText = finalText.trim();
+      if (finalText && sMode !== 'idle') {
+        document.getElementById('sDesc').value = finalText;
+        sendReply(finalText);
+      }
+    };
+    r.onerror = function (e) {
+      if (e.error === 'not-allowed') {
+        sState('Microphone blocked — allow it in your browser settings, or type instead.');
+        sListening = false; sEarSync();
+      }
+      // all other errors: onend fires next and the keep-alive brings us back
+    };
+    r.onend = function () { sEarOpen = false; setTimeout(sEarSync, 250); };
+    return r;
+  }
+
+  let sNowSaying = '';
+
+  // True when what we heard contains at least two words the agent is NOT
+  // currently saying — i.e. a human talking over us, not our own echo.
+  function sIsNovel(heard) {
+    if (!heard) return false;
+    const said = {};
+    sNowSaying.toLowerCase().replace(/[^a-z0-9' ]/g, ' ').split(/\s+/)
+      .forEach(function (w) { if (w) said[w] = 1; });
+    let novel = 0;
+    heard.toLowerCase().replace(/[^a-z0-9' ]/g, ' ').split(/\s+/)
+      .forEach(function (w) { if (w.length > 2 && !said[w]) novel++; });
+    return novel >= 2;
+  }
+
+  function sBargeIn() {
+    const a = (typeof currentAudio !== 'undefined') ? currentAudio : null;
+    if (typeof stopAllSound === 'function') stopAllSound();
+    if (a && a.onended) { try { a.onended(); } catch (e) {} }   // release the speech promise
+    sSpeaking = false;
+    sNowSaying = '';
+    sState('Go on — I am listening.');
+  }
+
+  // On phones the speaker sits beside the microphone: the agent hears its own
+  // voice, mistakes it for a human interrupting, and silences itself. So on
+  // mobile the ear closes while the agent speaks and reopens the moment it
+  // finishes. Desktop keeps full barge-in. Stop voice button covers the rest.
+  const S_MOBILE = /Android|iPhone|iPad|Mobi/i.test(navigator.userAgent);
+
+  function sEarSync() {
+    const want = sListening && sMode !== 'idle' && !sBusy && !(S_MOBILE && sSpeaking);   // desktop: ear open while speaking — barge-in
+    const btn = document.getElementById('sVoice');
+    if (btn) btn.classList.toggle('live', sListening);
+    if (btn) btn.innerHTML = sListening ? '<span class="mic">■</span>Stop voice' : '<span class="mic">🎤</span>Voice';
+    if (want && !sEarOpen) {
+      if (!sRecog) sRecog = sSetupRecog();
+      if (!sRecog) {
+        sState('Voice is not supported in this browser — typing works perfectly.');
+        sListening = false;
+        return;
+      }
+      try { sRecog.start(); sEarOpen = true; sState('🎙 Listening — speak when ready.'); } catch (e) {}
+    } else if (!want && sEarOpen) {
+      try { sRecog.stop(); } catch (e) {}
+      sEarOpen = false;
+    }
+  }
+
+  function sStopMic() { sListening = false; sEarSync(); }
+
+  // Ask for the microphone straight from the button tap. This forces the
+  // browser's permission prompt (recognisers ask sideways and stay blocked
+  // if an old "Block" is remembered). Returns true when the mic is truly ours.
+  async function sUnlockMic() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(function (t) { t.stop(); });
+    } catch (e) {
+      // A real permission block gets its guidance; anything else is not our business.
+      if (e && (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError')) {
+        sState('If the mic stays silent: icon LEFT of the address bar → Microphone → Allow, then reload.');
+      }
+    }
+  }
+
+  // ---------------- LIVE voice: one continuous conversation (ElevenLabs) ----------------
+  let sLiveConvo = null;
+  let sPendingListing = null;   // set when the voice agent takes a sale order; filed when the build lands
+  // Live engine: founder-only while its sound is proven; customers keep the classic voice.
+  // Self-healing gate: the founder flag can lose a race against page load,
+  // so if it isn't set yet, ask the database directly at press time.
+  async function liveVoiceAllowed() {
+    if (meIsFounder) return true;
+    if (!session) return false;
+    try {
+      const { data } = await sb.from('users').select('is_founder').eq('auth_id', session.user.id).single();
+      meIsFounder = !!(data && data.is_founder);
+    } catch (e) { /* stay with what we know */ }
+    return meIsFounder;
+  }
+
+  async function startLiveVoice() {
+    sState('Connecting live voice…');
+    const r = await fetch(SB_URL + '/functions/v1/voice-live', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: '{"action":"session"}'
+    });
+    const d = await r.json();
+    if (!d.signed_url && !d.webrtc_token) throw new Error(d.error || 'no session');
+    if (d.debug && meIsFounder) sLine('Factory', '🔧 engine: ' + d.debug + (d.webrtc_token ? ' transport=webrtc' : ' transport=websocket'));
+    const mod = await import('https://esm.sh/@elevenlabs/client@0.6.1');
+    const sessionOpts = d.webrtc_token
+      ? { conversationToken: d.webrtc_token, connectionType: 'webrtc' }
+      : { signedUrl: d.signed_url };
+    sLiveConvo = await mod.Conversation.startSession(Object.assign(sessionOpts, {
+      clientTools: {
+        build_app: async function (params) {
+          if (typeof cancelUpdate === 'function') cancelUpdate();
+          const nameBox = document.getElementById('appName');
+          nameBox.disabled = false;
+          nameBox.value = String(params.name || ('app-' + Date.now().toString(36))).toLowerCase();
+          document.getElementById('appDesc').value = String(params.description || '');
+          const price = Number(params.sell_price_gbp);
+          if (isFinite(price) && price >= 5) {
+            sPendingListing = {
+              repo: nameBox.value,
+              title: nameBox.value.replace(/-/g, ' '),
+              summary: String(params.market_summary || '').trim(),
+              pence: Math.round(price * 100)
+            };
+            sLine('Factory', 'Sale noted: £' + price.toFixed(2) + ' — it will be submitted to the marketplace once built, live after founder approval.');
+          }
+          startBuild();
+          sStartUpdates();
+          return 'building started';
+        }
+      },
+      onMessage: function (m) {
+        try {
+          if (m && m.message) sLine(m.source === 'user' ? 'You' : 'Factory', m.message);
+        } catch (e) {}
+      },
+      onModeChange: function (m) {
+        sState(m && m.mode === 'speaking' ? '🔊 Speaking…' : '🎙 Listening — speak when ready.');
+      },
+      onDisconnect: function () { stopLiveVoice(false); },
+      onError: function () { sState('Voice hiccup — press Voice to reconnect.'); }
+    }));
+    document.getElementById('sLog').classList.remove('hidden');
+  }
+
+  function stopLiveVoice(endSession) {
+    if (sLiveConvo && endSession !== false) { try { sLiveConvo.endSession(); } catch (e) {} }
+    sLiveConvo = null;
+    sListening = false;
+    const btn = document.getElementById('sVoice');
+    if (btn) { btn.classList.remove('live'); btn.innerHTML = '<span class="mic">🎤</span>Voice'; }
+    sState('Voice off — typing works too.');
+  }
+
+  async function simpleVoice() {
+    if (!session) { signIn(); return; }
+    if (sLiveConvo) {
+      stopLiveVoice();
+      document.getElementById('sDesc').placeholder = 'Voice disabled — type your app details here, starting with the name of your app. Or press Voice to talk.';
+      return;
+    }
+    if (sListening) {                 // classic pipeline was active
+      sStopMic();
+      document.getElementById('sDesc').placeholder = 'Voice disabled — type your app details here, starting with the name of your app. Or press Voice to talk.';
+      sState('Voice off — typing works too.');
+      return;
+    }
+    sUnlockMic();                     // courtesy knock — triggers the permission prompt if needed, never blocks
+    let liveOk = await liveVoiceAllowed();
+    if (liveOk && meIsFounder && !localStorage.getItem('fcVoiceWarnSeen')) {
+      // Founder's one-time preview of the customer warning — proof it exists,
+      // shown once per device, never billed, never blocks.
+      localStorage.setItem('fcVoiceWarnSeen', '1');
+      alert('PREVIEW — customers will see this at launch:\n\n"Live voice assistant is a premium feature: about £0.10 per minute will be added to your bill while you talk. Start live voice?"\n\nYou are the founder: never billed. Voice starts now.');
+    }
+    if (liveOk && !meIsFounder) {
+      // Customers: live voice is a paid extra — clear warning, clear price,
+      // no surprise on the bill. (Dormant until the gate opens at launch.)
+      let perMin = 0.10;
+      try {
+        const { data: vp } = await sb.from('site_settings').select('value').eq('key', 'costs').single();
+        if (vp && vp.value && vp.value.voice_user_price_per_min_gbp) perMin = Number(vp.value.voice_user_price_per_min_gbp);
+      } catch (e) {}
+      liveOk = confirm('Live voice assistant is a premium feature: about £' + perMin.toFixed(2) +
+        ' per minute will be added to your bill while you talk. Start live voice?');
+      if (!liveOk) sLine('Factory', 'ℹ️ Live voice declined — the free classic voice is active instead.');
+    }
+    if (liveOk) {
+      // LIVE first: one continuous conversation. Classic pipeline stays as fallback.
+      try {
+        sListening = true;
+        const btn = document.getElementById('sVoice');
+        btn.classList.add('live');
+        btn.innerHTML = '<span class="mic">■</span>Stop voice';
+        document.getElementById('sDesc').placeholder = 'Voice on — speak when ready, or press ■ Stop voice to type instead.';
+        await startLiveVoice();
+        return;
+      } catch (e) {
+        stopLiveVoice(false);
+        sLine('Factory', '⚠️ Live voice could not start: ' + (e && e.message ? e.message : 'unknown reason') + ' — using classic voice for now.');
+        sState('Live voice unavailable — using classic voice.');
+      }
+    } else {
+      // Never fall to classic in silence — say which mouth is speaking and why.
+      sLine('Factory', 'ℹ️ Classic voice active — live voice is founder-only for now' + (session ? '' : ' (sign in first)') + '.');
+    }
+    sListening = true;
+    document.getElementById('sDesc').placeholder = 'Voice on — speak when ready, or press ■ Stop voice to type instead.';
+    if (sMode === 'idle') startConversation();
+    sEarSync();
+  }
+
+  // Billing leak-stopper: a hidden or closed page must never leave the
+  // meter running. Belt (page hidden) and braces (page closing).
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && sLiveConvo) { stopLiveVoice(); sState('Voice ended — the page was hidden.'); }
+  });
+  window.addEventListener('pagehide', function () {
+    if (sLiveConvo) stopLiveVoice();
+  });
+
+  // The admission law's shop window: live seats-remaining, public,
+  // marketing-safe numbers only. Scarcity told truthfully sells itself.
+  async function loadSeats() {
+    try {
+      const r = await fetch(SB_URL + '/functions/v1/cost-desk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SB_ANON },
+        body: '{"action":"seats"}'
+      });
+      const d = await r.json();
+      if (!r.ok || d.seats_remaining == null) return;
+      const el = document.getElementById('seatsBadge');
+      if (!el) return;
+      if (d.seats_remaining > 0) {
+        el.innerHTML = '🎟 ' + d.seats_remaining + ' founding seats left this period — limited by design';
+      } else {
+        el.innerHTML = '🎟 This period is fully admitted — next seats open ' + (d.period_ends || 'soon');
+      }
+      el.classList.remove('hidden');
+    } catch (e) { /* the badge is a bonus, never a blocker */ }
+  }
+  loadSeats();
+
+  loadAcademy();   // the Academy is public — load for everyone
+
+  // First impressions: every new visitor chooses; returners keep their choice.
+  (function initMode() {
+    let saved = null;
+    try { saved = localStorage.getItem('factory_mode'); } catch (e) {}
+    if (saved === 'simple') enterSimple();
+    else if (saved !== 'full') document.getElementById('modeGate').classList.remove('hidden');
+  })();
+
+
+  // ---------------- the agree gate ----------------
+  async function acceptTerms() {
+    if (!session) return;
+    try {
+      const res = await fetch(SB_URL + '/functions/v1/app-market', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify({ op: 'accept-terms' })
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Could not record agreement');
+      document.getElementById('agreeGate').classList.add('hidden');
+    } catch (e) { alert(e.message); }
+  }
+
+  function declineTerms() {
+    document.getElementById('agreeGate').classList.add('hidden');
+    signOut();
+  }
+
+
+  // ---------------- marketplace ----------------
+  let sellerRowId = null;
+  let meIsFounder = false;
+  const MARKET_FN = SB_URL + '/functions/v1/app-market';
+
+  async function loadMarket() {
+    const { data, error } = await sb.from('market_listings')
+      .select('repo_name, title, summary, price_pence')
+      .eq('approved', true)
+      .order('created_at', { ascending: false });
+    const list = document.getElementById('marketList');
+    const empty = document.getElementById('marketEmpty');
+    list.innerHTML = '';
+    if (error || !data || !data.length) { empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+    for (const item of data) {
+      const div = document.createElement('div');
+      div.className = 'm-item';
+      div.innerHTML =
+        '<div class="m-top"><span class="m-title"></span><span class="m-price"></span></div>' +
+        '<div class="m-summary"></div>' +
+        '<div class="m-actions">' +
+        '<button class="m-try">✨ Try free for 4 days</button>' +
+        '<a class="m-open" target="_blank">▶ Open app</a>' +
+        '</div>';
+      div.querySelector('.m-title').textContent = item.title;
+      div.querySelector('.m-price').textContent = '£' + (item.price_pence / 100).toFixed(2);
+      div.querySelector('.m-summary').textContent = item.summary || '';
+      const open = div.querySelector('.m-open');
+      open.href = 'https://factory-' + item.repo_name + '.netlify.app';
+      div.querySelector('.m-try').onclick = function () { startTrial(item.repo_name, div); };
+      list.appendChild(div);
+    }
+  }
+
+  async function startTrial(repo, itemDiv) {
+    if (!session) { alert('Sign in with Google first — your trial code is tied to your account.'); return; }
+    try {
+      const res = await fetch(MARKET_FN, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify({ op: 'trial', repo: repo })
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Could not start trial');
+      let box = itemDiv.querySelector('.m-code');
+      if (!box) {
+        box = document.createElement('div');
+        box.className = 'm-code';
+        itemDiv.appendChild(box);
+      }
+      const until = d.trial_ends_at ? new Date(d.trial_ends_at).toLocaleDateString() : '';
+      box.textContent = d.status === 'paid'
+        ? '✓ You own this app.'
+        : '✓ Trial active until ' + until + '.';
+      const go = document.createElement('a');
+      go.className = 'm-go';
+      go.target = '_blank';
+      go.href = 'https://factory-' + repo + '.netlify.app/#factory_code=' + d.code;
+      go.textContent = '🚀 Open your app — already unlocked';
+      box.appendChild(go);
+      const spare = document.createElement('div');
+      spare.style.cssText = 'margin-top:8px;font-size:11.5px;color:#5da97e;';
+      spare.textContent = 'Opening on another device? Your access code: ' + d.code;
+      box.appendChild(spare);
+    } catch (e) { alert(e.message); }
+  }
+
+  async function sellApp(repo) {
+    if (!sellerRowId) { alert('Please sign in again.'); return; }
+    const title = (prompt('Marketplace title for "' + repo + '":', repo) || '').trim();
+    if (!title) return;
+    const summary = (prompt('One-sentence description buyers will see:') || '').trim();
+    if (!summary) return;
+    const priceStr = (prompt('Price in pounds (minimum £5.00):', '13.00') || '').trim();
+    const pence = Math.round(parseFloat(priceStr) * 100);
+    if (!isFinite(pence) || pence < 500) { alert('Price must be at least £5.00.'); return; }
+
+    const { error } = await sb.from('market_listings').insert({
+      repo_name: repo, seller_id: sellerRowId, title: title, summary: summary, price_pence: pence
+    });
+    if (error) {
+      if ((error.message || '').indexOf('app_keys') !== -1 || (error.code || '') === '23503') {
+        alert('This app needs one update before it can be sold (to enable its storage connection). Press ✏️ Change, make any small change, then try again.');
+      } else if ((error.code || '') === '23505') {
+        alert('This app is already listed. We will review it shortly.');
+      } else {
+        alert('Could not list — ' + error.message);
+      }
+      return;
+    }
+    if (meIsFounder) {
+      const r = await fcAdmin({ action: 'approve', repoName: repo });
+      loadMarket();
+      if (typeof fcLoadMarketMod === 'function') fcLoadMarketMod();
+      if (r.error) alert('Submitted, but auto-approval hit a snag: ' + r.error + ' — approve it in the gear.');
+      else { alert('Listed! "' + title + '" is live in the marketplace at £' + (pence / 100).toFixed(2) + '.'); sShowMarket(); }
+    } else {
+      loadMarket();
+      alert('Submitted! Your listing goes live once the founder approves it. The Factory takes 26.5% of each sale; you keep 73.5%.');
+    }
+  }
+
+  loadMarket();
+
+
+  // ---------------- your apps ----------------
+  let updateRepo = null;   // repo name when changing an existing app
+
+  async function loadApps(userRowId) {
+    sellerRowId = userRowId;
+    if (!userRowId) return;
+    const card = document.getElementById('appsCard');
+    const list = document.getElementById('appsList');
+    const empty = document.getElementById('appsEmpty');
+
+    const { data, error } = await sb.from('builds')
+      .select('repo_name, site_url, updated_at')
+      .eq('user_id', userRowId)
+      .eq('status', 'done')
+      .order('updated_at', { ascending: false });
+
+    if (error) { console.warn('apps read:', error.message); return; }
+    card.classList.remove('hidden');
+    list.innerHTML = '';
+
+    // One row per app, newest first, no duplicates after an update.
+    const seen = {};
+    const apps = (data || []).filter(function (b) {
+      if (!b.repo_name || seen[b.repo_name]) return false;
+      seen[b.repo_name] = true;
+      return true;
+    });
+
+    if (!apps.length) { empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+
+    for (const app of apps) {
+      const row = document.createElement('div');
+      row.className = 'app-row';
+      row.innerHTML =
+        '<div class="a-top"><span class="a-name"></span>' +
+        '<span style="display:flex;gap:8px;">' +
+        '<button class="a-change">✏️ Change this app</button>' +
+        '<button class="a-sell">💰 Sell</button>' +
+        '<button class="a-del" style="background:#2a0d0d;border:1px solid #e05555;color:#ff9d9d;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;">🗑</button></span></div>' +
+        '<a class="a-link" target="_blank"></a>';
+      row.querySelector('.a-name').textContent = app.repo_name;
+      const link = row.querySelector('.a-link');
+      link.textContent = app.site_url || '(no address)';
+      if (app.site_url) link.href = app.site_url;
+      row.querySelector('.a-change').onclick = function () { startUpdate(app.repo_name); };
+      row.querySelector('.a-sell').onclick = function () { sellApp(app.repo_name); };
+      row.querySelector('.a-del').onclick = function () { deleteApp(app.repo_name); };
+      list.appendChild(row);
+    }
+  }
+
+  function openMoneyForm() {
+    document.getElementById('moneyForm').style.display = 'block';
+    document.getElementById('moneyOpenBtn').style.display = 'none';
+    document.getElementById('moneyName').focus();
+  }
+  async function submitMoneyRequest() {
+    const name = document.getElementById('moneyName').value.trim();
+    const email = document.getElementById('moneyEmail').value.trim();
+    const msg = document.getElementById('moneyMsg').value.trim();
+    if (!name || !email) { alert('Please give your name and email.'); return; }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('Please check the email address.'); return; }
+    const { error } = await sb.from('enquiries').insert({
+      kind: 'invite-request', name: name, email: email,
+      message: msg || '(no details given)', seen: false
+    });
+    if (error) { alert('Could not send — please try again. ' + error.message); return; }
+    document.getElementById('moneyForm').querySelectorAll('input,textarea,button').forEach(el => el.disabled = true);
+    document.getElementById('moneyOk').style.display = 'block';
+  }
+
+  function jumpNavGo(ev) {
+    const a = ev.target.closest('a');
+    if (!a) return;
+    if (document.body.classList.contains('simple-mode')) {
+      ev.preventDefault();
+      const target = a.getAttribute('href');
+      switchToFull();
+      setTimeout(function () {
+        const el = document.querySelector(target);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 350);
+    }
+  }
+
+  function sShowMarket() {
+    if (document.body.classList.contains('simple-mode')) switchToFull();
+    setTimeout(function () {
+      loadMarket();
+      const mc = document.getElementById('marketCard');
+      if (mc) mc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 350);
+  }
+
+  async function deleteApp(repo) {
+    const typed = prompt('This permanently deletes "' + repo + '" — its web address, its stored data, and any market listing. There is no undo.\n\nType the app name to confirm:');
+    if (typed === null) return;
+    if (typed.trim().toLowerCase() !== repo.toLowerCase()) { alert('Name did not match — nothing deleted.'); return; }
+    const r = await fetch(SB_URL + '/functions/v1/app-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify({ action: 'delete-app', repoName: repo })
+    });
+    const d = await r.json();
+    if (d.error) { alert('Could not delete — ' + d.error); return; }
+    alert('"' + repo + '" deleted.' + (d.report && d.report.github && d.report.github.indexOf('failed') !== -1 ? '\n\nNote for founder: ' + d.report.github : ''));
+    if (sellerRowId) loadApps(sellerRowId);
+    loadMarket();
+    loadMyDomains();
+  }
+
+  function startUpdate(repo) {
+    updateRepo = repo;
+    if (typeof showManual === 'function') showManual();
+
+    const nameBox = document.getElementById('appName');
+    nameBox.value = repo;
+    nameBox.disabled = true;
+
+    const desc = document.getElementById('appDesc');
+    desc.value = '';
+    desc.placeholder = 'What would you like changed? For example: change the phone number to 07700 900123, add a Sunday opening time, make the header green.';
+
+    let banner = document.getElementById('updatingBanner');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.className = 'updating-banner';
+      banner.id = 'updatingBanner';
+      const card = document.getElementById('buildCard');
+      card.insertBefore(banner, document.getElementById('buildBtn'));
+    }
+    banner.innerHTML = '';
+    banner.appendChild(document.createTextNode('✏️ Changing your existing app: ' + repo + '. Everything else stays exactly as it is.'));
+    const cancel = document.createElement('button');
+    cancel.textContent = 'cancel';
+    cancel.onclick = cancelUpdate;
+    banner.appendChild(cancel);
+
+    document.getElementById('buildBtn').textContent = '✏️ APPLY CHANGE';
+    document.getElementById('buildCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function cancelUpdate() {
+    updateRepo = null;
+    const nameBox = document.getElementById('appName');
+    nameBox.disabled = false;
+    nameBox.value = '';
+    const desc = document.getElementById('appDesc');
+    desc.value = '';
+    desc.placeholder = 'A booking page for my barbershop in London. Dark style, show services and prices, opening hours, and a booking form...';
+    const banner = document.getElementById('updatingBanner');
+    if (banner) banner.remove();
+    document.getElementById('buildBtn').textContent = '⚙ BUILD';
+  }
+
+
+  // ---------------- the front desk ----------------
+  // One button. The agent asks until it has a brief worth building, speaks
+  // through ElevenLabs when available, and mutes the microphone while it talks
+  // so it can never dictate its own words into the brief.
+  const AGENT_FN = SB_URL + '/functions/v1/front-desk';
+  const TTS_FN   = SB_URL + '/functions/v1/voice-speak';
+
+  let convo = [];
+  let convoOn = false;
+  let recog = null;
+  let speaking = false;
+  let listening = false;
+  let chosenVoice = null;
+  let ttsAvailable = null;
+  let currentAudio = null;
+
+  function agentSetState(t) {
+    const el = document.getElementById('agentState');
+    if (el) el.textContent = t || '';
+  }
+
+  function addLine(who, text) {
+    const log = document.getElementById('convoLog');
+    log.classList.remove('hidden');
+    const d = document.createElement('div');
+    d.className = 'line ' + (who === 'You' ? 'you' : 'factory');
+    const w = document.createElement('span');
+    w.className = 'who';
+    w.textContent = who;
+    const p = document.createElement('p');
+    p.textContent = text;
+    d.appendChild(w); d.appendChild(p);
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function pickVoice() {
+    const vs = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    if (!vs.length) return null;
+    const liked = ['Samantha', 'Serena', 'Karen', 'Daniel', 'Google UK English Female'];
+    for (const n of liked) { const hit = vs.find(v => v.name === n); if (hit) return hit; }
+    return vs.find(v => /^en[-_]GB/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || vs[0];
+  }
+
+  function browserSay(text) {
+    return new Promise(function (resolve) {
+      if (!window.speechSynthesis) { resolve(); return; }
+      try {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        if (!chosenVoice) chosenVoice = pickVoice();
+        if (chosenVoice) u.voice = chosenVoice;
+        u.onend = resolve; u.onerror = resolve;
+        window.speechSynthesis.speak(u);
+      } catch (_) { resolve(); }
+    });
+  }
+
+  // Speaks and resolves only when the sound has finished.
+  async function speakAsync(text) {
+    if (!text) return;
+    speaking = true;
+    if (recog && listening) { try { recog.stop(); } catch (_) {} }
+    agentSetState('Speaking…');
+
+    try {
+      if (ttsAvailable === false) throw new Error('fallback');
+      const res = await fetch(TTS_FN, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json',
+                   'Authorization': 'Bearer ' + (session ? session.access_token : SB_ANON) },
+        body: JSON.stringify({ text: text })
+      });
+      if (!res.ok) throw new Error('tts ' + res.status);
+      const blob = await res.blob();
+      if (!blob || blob.size < 200) throw new Error('empty');
+      ttsAvailable = true;
+      await new Promise(function (resolve) {
+        const a = new Audio(URL.createObjectURL(blob));
+        currentAudio = a;
+        a.onended = resolve;
+        a.onerror = function () { browserSay(text).then(resolve); };
+        a.play().catch(function () { browserSay(text).then(resolve); });
+      });
+    } catch (_) {
+      if (ttsAvailable !== true) ttsAvailable = false;
+      await browserSay(text);
+    }
+
+    currentAudio = null;
+    speaking = false;
+  }
+
+  function say(text) {
+    if (sLiveConvo) return;      // the live agent owns the voice — one mouth only
+    speakAsync(text);            // fire and forget, for build updates
+  }
+
+  function stopAllSound() {
+    if (window.speechSynthesis) { try { window.speechSynthesis.cancel(); } catch (_) {} }
+    if (currentAudio) { try { currentAudio.pause(); } catch (_) {} }
+    speaking = false;
+  }
+
+  function setupRecog() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return null;
+    const r = new SR();
+    r.lang = 'en-GB';
+    r.continuous = false;
+    r.interimResults = true;
+
+    r.onresult = function (e) {
+      if (speaking) return;
+      let finalText = '', interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t; else interim += t;
+      }
+      if (interim) agentSetState('… ' + interim);
+      if (finalText.trim()) {
+        listening = false;
+        try { r.stop(); } catch (_) {}
+        agentTurn(finalText.trim());
+      }
+    };
+
+    r.onerror = function (e) {
+      if (e.error === 'aborted') return;
+      if (e.error === 'not-allowed') {
+        agentSetState('Microphone blocked — allow it, or use "type it instead".');
+        endConversation();
+        return;
+      }
+      if (e.error === 'no-speech' && convoOn && !speaking) { listenOnce(); }
+    };
+
+    r.onend = function () {
+      if (convoOn && listening && !speaking) { try { r.start(); } catch (_) {} }
+    };
+    return r;
+  }
+
+  function listenOnce() {
+    if (!convoOn || speaking) return;
+    if (!recog) { recog = setupRecog(); }
+    if (!recog) { agentSetState('Dictation is not supported in this browser — use "type it instead".'); return; }
+    listening = true;
+    agentSetState('Listening — speak now.');
+    try { recog.start(); } catch (_) {}
+  }
+
+  async function agentTurn(userText) {
+    if (userText) { convo.push({ role: 'user', content: userText }); addLine('You', userText); }
+    agentSetState('Thinking…');
+
+    let d = null;
+    try {
+      const res = await fetch(AGENT_FN, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json',
+                   'Authorization': 'Bearer ' + (session ? session.access_token : SB_ANON) },
+        body: JSON.stringify({ messages: convo, email: session ? session.user.email : '' })
+      });
+      d = await res.json();
+      if (!res.ok || d.error) throw new Error(d && d.error ? d.error : 'agent ' + res.status);
+    } catch (err) {
+      agentSetState('The front desk is unavailable just now — please type it instead.');
+      showManual();
+      endConversation();
+      return;
+    }
+
+    convo.push({ role: 'assistant', content: d.reply });
+    addLine('Factory', d.reply);
+    await speakAsync(d.reply);
+
+    if (d.status === 'ready') {
+      if (d.app_name) document.getElementById('appName').value = d.app_name;
+      if (d.description) document.getElementById('appDesc').value = d.description;
+      showManual();
+      endConversation();
+      agentSetState('Ready — check the brief below, then press BUILD.');
+      document.getElementById('buildBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (convoOn) listenOnce();
+  }
+
+  function showManual() {
+    document.querySelectorAll('#buildCard label, #appName, #appDesc, .hint')
+      .forEach(function (el) { el.classList.remove('hidden'); });
+    const t = document.getElementById('manualToggle');
+    if (t) t.classList.add('hidden');
+  }
+
+  function endConversation() {
+    convoOn = false;
+    listening = false;
+    stopAllSound();
+    if (recog) { try { recog.stop(); } catch (_) {} }
+    const b = document.getElementById('agentBtn');
+    b.classList.remove('live');
+    b.textContent = '🎤 Tell me what you want to build';
+  }
+
+  async function toggleAgent() {
+    if (convoOn) { endConversation(); agentSetState('Stopped.'); return; }
+    convo = [];
+    document.getElementById('convoLog').innerHTML = '';
+    convoOn = true;
+    const b = document.getElementById('agentBtn');
+    b.classList.add('live');
+    b.textContent = '⏹ End conversation';
+    if (!recog) recog = setupRecog();
+    await agentTurn('');
+  }
+
+  // Manual entry stays available, folded away until asked for.
+  (function foldManual() {
+    const card = document.getElementById('buildCard');
+    if (!card) return;
+    const hideThese = card.querySelectorAll('label, #appName, #appDesc, .hint');
+    hideThese.forEach(function (el) { el.classList.add('hidden'); });
+    const t = document.createElement('button');
+    t.type = 'button';
+    t.className = 'manual-toggle';
+    t.id = 'manualToggle';
+    t.textContent = 'or type it instead';
+    t.onclick = showManual;
+    const row = document.querySelector('.agent-row');
+    if (row && row.parentNode) row.parentNode.insertBefore(t, row.nextSibling);
+  })();
+
+
+  let govReleased = false;
+
+  async function loadGovernance() {
+    document.getElementById('govCard').classList.remove('hidden');
+    let data = null;
+    try {
+      const r = await sb.from('site_settings').select('value').eq('key', 'governance').single();
+      data = r.data;
+      if (r.error) console.warn('governance read:', r.error.message);
+    } catch (e) { console.warn('governance read threw:', e); }
+    const val = (data && data.value) || {};
+    govReleased = val.released === true;
+    document.getElementById('govStatus').value = val.status || '';
+    document.getElementById('govNote').value = val.note || '';
+    document.getElementById('govState').textContent = govReleased ? 'RELEASED' : 'HELD';
+    document.getElementById('govToggleBtn').textContent = govReleased ? 'Hold page' : 'Release page';
+    document.getElementById('govCard').classList.remove('hidden');
+  }
+
+  async function writeGovernance(released) {
+    const payload = {
+      released: released,
+      status: document.getElementById('govStatus').value.trim(),
+      note: document.getElementById('govNote').value.trim()
+    };
+    const { error } = await sb.from('site_settings')
+      .update({ value: payload, updated_at: new Date().toISOString() })
+      .eq('key', 'governance');
+    if (error) { alert('Could not save — ' + error.message); return false; }
+    const ok = document.getElementById('govOk');
+    ok.classList.remove('hidden');
+    setTimeout(() => ok.classList.add('hidden'), 2500);
+    return true;
+  }
+
+  async function saveGovernance() {
+    const btn = document.getElementById('govSaveBtn');
+    btn.disabled = true;
+    await writeGovernance(govReleased);
+    btn.disabled = false;
+    loadGovernance();
+  }
+
+  async function toggleGovernance() {
+    const next = !govReleased;
+    if (!confirm(next ? 'Release the Open Governance page to the public?' : 'Hold the page again — visitors will see your progress message instead.')) return;
+    const btn = document.getElementById('govToggleBtn');
+    btn.disabled = true;
+    await writeGovernance(next);
+    btn.disabled = false;
+    loadGovernance();
+  }
+
+</script>
+<script>
+// The heavy LiveAvatar real-time engine is loaded ONLY when a visitor presses
+// "Talk live" — so the page itself opens instantly (under 5 seconds).
+// LITE mode: WE supply her words (our own Anthropic brain + our prompt); the
+// avatar just renders speech. Her face is baked into the token server-side.
+let LAS = null, SEV = null, AEV = null;
+async function ensureSdk() {
+  if (LAS) return;
+  const m = await import('https://esm.sh/@heygen/liveavatar-web-sdk@0.0.18');
+  LAS = m.LiveAvatarSession; SEV = m.SessionEvent; AEV = m.AgentEventsEnum;
+}
+let lSpeaking = false;   // true while she is talking — so the mic doesn't hear her own voice
+const LSB = 'https://canvbkibjgcnqowjtarf.supabase.co';
+const LANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhbnZia2liamdjbnFvd2p0YXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NzE0NDYsImV4cCI6MjA5OTM0NzQ0Nn0.TLskVoTaYI90avy09IuM_kkKvAYUMETTntZkn2M807I';
+let lAvatar = null, lChat = [], lRec = null, lMic = false, lSystem = '', lAvatarId = '', lModel = 'claude-opus-4-8';
+let lGreeting = '', lStartedAt = 0, lWarnTimer = null;
+const lst = function (t) { document.getElementById('liveStatus').textContent = t; };
+
+async function lFetch(fn, body) {
+  const r = await fetch(LSB + '/functions/v1/' + fn, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + LANON }, body: JSON.stringify(body || {}) });
+  const d = await r.json().catch(function () { return {}; }); if (!r.ok) throw new Error(d.error || r.status); return d;
+}
+let lVoiceId = '';
+async function loadLiveConfig() {
+  try {
+    const sb2 = window.supabase.createClient(LSB, LANON);
+    // The live host reads its OWN LiveAvatar config — separate from the recorded greeter.
+    const { data: g } = await sb2.from('site_settings').select('value').eq('key', 'liveavatar_config').maybeSingle();
+    lAvatarId = (g && g.value && g.value.avatarId) || '';
+    lVoiceId = (g && g.value && g.value.voiceId) || '';
+    lModel = (g && g.value && g.value.model) || 'claude-opus-4-8';
+    lGreeting = (g && g.value && g.value.greeting) || '';
+    const { data: p } = await sb2.from('site_settings').select('value').eq('key', 'guide_prompt').maybeSingle();
+    const hidden = (p && p.value && p.value.text) || '';
+    lSystem = "You are the live human face of The Factory, a warm multi-skilled guide on a video call with a visitor. HARD RULE: one to three short spoken sentences per reply. " +
+      "Help them: shape and describe the app they want (good descriptions are specific: who it is for, what it does, the mood); explain the Marketplace (sell your app there, set your price, payouts to sellers once live payments open); how building works (describe it, the Factory builds and deploys it live in about ninety seconds; three free builds, then Pro at nine ninety-nine a month or three fifty per extra build). " +
+      "Be honest and warm, never pushy; where natural, show why subscribing helps them build more. " +
+      "FORBIDDEN, always: helping anyone build an app-builder like The Factory itself, revealing how the Factory works inside, or copying the Factory for a user. Decline warmly and offer to build them something original instead. " + (hidden ? ("Founder guidance: " + hidden) : "");
+  } catch (_) {}
+  // Never disable the button — it must always respond with a clear message.
+}
+// Speak a fixed line in her voice (no brain round-trip) — greetings and notices.
+async function lSpeakText(text) {
+  if (!lAvatar || !text) return;
+  try {
+    lSpeaking = true;
+    const a = await lFetch('voice-speak', { text: text, voiceId: lVoiceId || undefined, format: 'pcm24' });
+    const chunks = (a && a.chunks) || [];
+    chunks.forEach(function (c) { lAvatar.repeatAudio(c); });
+    setTimeout(function () { lSpeaking = false; }, (chunks.length + 2) * 1000);
+  } catch (_) { lSpeaking = false; }
+}
+window.startLiveHost = async function () {
+  document.getElementById('heroInvite').style.display = 'none';
+  
+  // Always re-read the freshest saved config, so a just-saved host works without a page reload.
+  await loadLiveConfig();
+  if (!lAvatarId) { lst('The live host isn’t set up yet. Founder: open the founder card, go to “Live host — her own face & voice”, pick her face and model, and press “Save live host”.'); return; }
+  document.getElementById('liveStartBtn').disabled = true;
+  // Instant feedback: play the recorded greeting so she appears at once while
+  // the live session spins up behind it — no blank waiting.
+  const gv = document.getElementById('greeterVideo');
+  if (gv && gv.getAttribute('src')) { try { gv.currentTime = 0; gv.play(); } catch (_) {} }
+  lst('Your host is connecting — she’ll be live in a few seconds…');
+  // Warm the brain and the voice while the video session spins up: a GET boots
+  // each function's engine (returns a harmless 405) without spending a token.
+  try { fetch(LSB + '/functions/v1/avatar-brain-fast', { headers: { 'Authorization': 'Bearer ' + LANON } }).catch(function () {}); } catch (_) {}
+  try { fetch(LSB + '/functions/v1/voice-speak', { headers: { 'Authorization': 'Bearer ' + LANON } }).catch(function () {}); } catch (_) {}
+  try {
+    await ensureSdk();
+    const { token } = await lFetch('liveavatar-token', {});   // her face is baked into this token
+    lAvatar = new LAS(token);
+    const v = document.getElementById('liveVideo');
+    lAvatar.on(SEV.SESSION_STREAM_READY, function () {
+      if (gv) { try { gv.pause(); } catch (_) {} }
+      lAvatar.attach(v);                                       // SDK wires both video + audio
+      v.style.display = 'inline-block'; try { v.play(); } catch (_) {}
+      document.getElementById('liveControls').style.display = 'block';
+      lStartMic();                                             // voice-first: she listens at once — just talk
+      lst(lMic ? 'She is live — just talk to her.' : 'She is live — say hello (type below).');
+      lStartedAt = Date.now();
+      // SHE SPEAKS FIRST — the greeting opens the conversation, not the visitor.
+      const hello = lGreeting || 'Hello, welcome to The Factory. Tell me what you would like to build, and I will help you shape it.';
+      lChat.push({ role: 'assistant', content: hello });
+      lSpeakText(hello);
+      // The free sample: a warm warning near the end; the server ends it at 4:00.
+      lWarnTimer = setTimeout(function () {
+        const note = 'A small note — our free preview ends in about a minute. In future you’ll be able to top up below and keep me around longer.';
+        lChat.push({ role: 'assistant', content: note });
+        lSpeakText(note);
+      }, 185000);
+    });
+    // Mute the mic while she speaks, so she never hears her own voice back.
+    if (AEV) {
+      lAvatar.on(AEV.AVATAR_SPEAK_STARTED, function () { lSpeaking = true; });
+      lAvatar.on(AEV.AVATAR_SPEAK_ENDED, function () { lSpeaking = false; });
+    }
+    lAvatar.on(SEV.SESSION_DISCONNECTED, function () {
+      if (lWarnTimer) { clearTimeout(lWarnTimer); lWarnTimer = null; }
+      lStopMic();
+      document.getElementById('liveStartBtn').disabled = false;
+      // If the free four minutes ran their course, thank them and show the top-up.
+      if (lStartedAt && (Date.now() - lStartedAt) >= 225000) {
+        
+        lst('Session complete — press the card to talk again, or reveal the Factory below.');
+      } else {
+        lst('Session ended.');
+      }
+    });
+    await lAvatar.start();
+    lChat = [];
+  } catch (e) { lst('Could not connect: ' + e.message); document.getElementById('liveStartBtn').disabled = false; }
+};
+window.stopLiveHost = async function () {
+  try { if (lAvatar) await lAvatar.stop(); } catch (_) {}
+  lAvatar = null; document.getElementById('liveStartBtn').disabled = false;
+  document.getElementById('liveControls').style.display = 'none'; document.getElementById('liveVideo').style.display = 'none';
+  lStopMic(); lst('Ended — thank you.');
+};
+window.sayToHost = async function () { const inp = document.getElementById('liveIn'); const t = inp.value.trim(); if (!t) return; inp.value = ''; await lSay(t); };
+async function lSay(text) {
+  if (!lAvatar) return;
+  lChat.push({ role: 'user', content: text }); lst('Thinking…');
+  // STREAMING pipeline: the brain's words arrive as they are written; the moment a
+  // sentence completes it goes to her voice; her lips are fed in strict order. She
+  // starts SPEAKING sentence one while the brain is still writing sentence two.
+  let reply = '';
+  try {
+    const resp = await fetch(LSB + '/functions/v1/avatar-brain-fast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + LANON },
+      body: JSON.stringify({ messages: lChat, model: lModel, system: lSystem })
+    });
+    if (!resp.ok || !resp.body) throw new Error('brain ' + resp.status);
+    lSpeaking = true;                                          // mute the mic so she doesn't hear herself
+    const jobs = [];                                           // ordered voice jobs, one per sentence
+    const say = function (p) { p = p.trim(); if (p) jobs.push(lFetch('voice-speak', { text: p, voiceId: lVoiceId || undefined, format: 'pcm24' })); };
+    // The feeder walks the job queue IN ORDER and pours audio into her lips.
+    let ji = 0, streamDone = false, total = 0, fed = false;
+    const feeder = (async function () {
+      while (!streamDone || ji < jobs.length) {
+        if (ji < jobs.length) {
+          try { const a = await jobs[ji++]; const ch = (a && a.chunks) || []; ch.forEach(function (c) { lAvatar.repeatAudio(c); }); total += ch.length; if (ch.length) fed = true; }
+          catch (_) { /* one sentence failing must not silence the rest */ }
+        } else { await new Promise(function (r) { setTimeout(r, 50); }); }
+      }
+    })();
+    // Sip the SSE stream; cut at sentence ends.
+    const reader = resp.body.getReader(); const dec = new TextDecoder();
+    let buf = '', pend = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const events = buf.split('\n\n'); buf = events.pop() || '';
+      for (const ev of events) {
+        const line = ev.split('\n').find(function (l) { return l.indexOf('data: ') === 0; });
+        if (!line) continue;
+        const payload = line.slice(6);
+        if (payload === '[DONE]') continue;
+        try {
+          const t = JSON.parse(payload).t || '';
+          reply += t; pend += t;
+          let m;
+          while ((m = pend.match(/^[\s\S]*?[.!?…]["”']?(\s|$)/))) { say(m[0]); pend = pend.slice(m[0].length); }
+        } catch (_) {}
+      }
+    }
+    say(pend);                                                 // whatever trails without punctuation
+    streamDone = true;
+    if (!reply.trim()) throw new Error('empty reply');
+    lChat.push({ role: 'assistant', content: reply.trim() });
+    await feeder;
+    if (!fed) { lst('Her voice is offline — she says: “' + reply.trim() + '”'); lSpeaking = false; return; }
+    // Fallback un-mute in case the "finished speaking" event doesn't arrive.
+    setTimeout(function () { lSpeaking = false; }, (total + 2) * 1000);
+    lst('She is live — talk to her.');
+  } catch (e) {
+    lSpeaking = false;
+    if (reply.trim()) { lChat.push({ role: 'assistant', content: reply.trim() }); lst('Her voice is offline (' + e.message + ') — she says: “' + reply.trim() + '”'); }
+    else lst('Reply failed: ' + e.message);
+  }
+}
+window.toggleLiveMic = function () { lMic ? lStopMic() : lStartMic(); };
+function lStartMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { lst('This browser can’t listen — type below instead. (Chrome hears best.)'); return; }
+  lRec = new SR();
+  lRec.lang = 'en-GB';
+  lRec.continuous = true;        // keep listening across pauses instead of stopping at the first silence
+  lRec.interimResults = false;
+  lRec.onstart = function () { if (lMic) lst('🎤 She is listening — just talk.'); };
+  lRec.onresult = function (e) {
+    if (lSpeaking) return;                                   // she's talking — don't transcribe her
+    const r = e.results[e.resultIndex];                      // continuous mode accumulates results
+    if (r && r.isFinal && r[0] && r[0].transcript.trim()) lSay(r[0].transcript.trim());
+  };
+  // A silent mic is a lie — every failure must say its name.
+  lRec.onerror = function (e) {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      lMic = false; const m = document.getElementById('liveMic'); if (m) m.classList.remove('on');
+      lst('Microphone blocked. Click the mic/camera icon in the address bar → Allow → press 🎤. On Mac also check System Settings → Privacy → Microphone for this browser. (Typing below works meanwhile.)');
+    } else if (e.error === 'audio-capture') {
+      lMic = false; lst('No microphone found — check your input device. (Typing below works.)');
+    }
+    // 'no-speech' and 'aborted' are normal silences — onend restarts quietly.
+  };
+  lRec.onend = function () { if (lMic) { try { lRec.start(); } catch (_) {} } };
+  try { lRec.start(); } catch (_) {}
+  lMic = true; document.getElementById('liveMic').classList.add('on');
+}
+function lStopMic() { lMic = false; if (lRec) { try { lRec.stop(); } catch (_) {} lRec = null; } const m = document.getElementById('liveMic'); if (m) m.classList.remove('on'); }
+window.addEventListener('beforeunload', function () { if (lAvatar) { try { lAvatar.stop(); } catch (_) {} } });
+loadLiveConfig();
+// HER INVITATION: two seconds after the page settles, she offers herself — one
+// tap starts everything (browsers require that single tap before sound + mic).
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    if (lAvatar || !lAvatarId) return;                 // already live, or not configured
+    document.getElementById('liveStartBtn').style.display = 'none';   // one control, not two
+    document.getElementById('heroInvite').style.display = 'block';
+  }, 2000);
+});
+// Pre-load the live engine AFTER the page has painted, so pressing "Talk live"
+// is instant — the download happens quietly in the background, not on the click.
+if ('requestIdleCallback' in window) requestIdleCallback(function () { ensureSdk().catch(function () {}); });
+else setTimeout(function () { ensureSdk().catch(function () {}); }, 2500);
+</script>
+
+<script>
+// ---------- the blinking REVEAL button (founder's cadence, diary 14 Aug) ----------
+// bursts of 2 blinks: at open, ~every 5s at first, easing to every 20s, then 1/min.
+let revealDone = false;
+(function blinkPlan(){
+  const btn = document.getElementById('revealBtn');
+  const blink = function(){ if(revealDone) return; btn.classList.remove('blinking'); void btn.offsetWidth; btn.classList.add('blinking'); };
+  const times = [400, 5000, 10000, 15000, 30000, 50000, 70000];   // open + 5s phase + 20s phase
+  times.forEach(function(t){ setTimeout(blink, t); });
+  setInterval(function(){ if(!revealDone) blink(); }, 60000);      // then once a minute
+})();
+window.revealAll = function(){
+  revealDone = true;
+  try { if (lAvatar) stopLiveHost(); } catch(_){}
+  document.getElementById('heroStage').style.display = 'none';
+};
+</script>
+\n</body>
+</html>

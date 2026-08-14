@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Open Governance — The Factory 🏭</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0d0d0f;
+    background-image: radial-gradient(circle at 20% 10%, rgba(240,165,0,0.06), transparent 40%);
+    color: #eee; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; padding: 40px 16px;
+  }
+  .wrap { width: 100%; max-width: 720px; }
+  header { text-align: center; margin-bottom: 28px; }
+  .eyebrow { font-size: 12px; letter-spacing: 5px; color: #999; text-transform: uppercase; margin-bottom: 12px; }
+  .logo { font-size: 40px; }
+  h1 { font-size: 26px; letter-spacing: 3px; font-weight: 800; margin-top: 6px; }
+  h1 span { color: #f0a500; }
+  .tagline { color: #888; font-size: 13.5px; letter-spacing: 1.5px; margin-top: 8px; }
+  .card {
+    background: #16161a; border: 1px solid #26262c; border-radius: 16px;
+    padding: 28px; margin-bottom: 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+  .held-banner {
+    background: #2b2107; border: 1px solid #f0a500; color: #f0a500;
+    border-radius: 12px; padding: 16px 18px; margin-bottom: 22px;
+    font-size: 14.5px; text-align: center; font-weight: 800; letter-spacing: 1px; line-height: 1.7;
+  }
+  .section-title { font-size: 17px; font-weight: 800; margin-bottom: 10px; color: #f0a500; }
+  .status-msg { font-size: 15px; color: #ccc; line-height: 1.85; white-space: pre-wrap; }
+  .stamp { font-size: 12px; letter-spacing: 1.5px; color: #777; text-transform: uppercase; margin-top: 18px; }
+  .principle {
+    background: #0d0d0f; border: 1px solid #2c2c33; border-left: 3px solid #f0a500;
+    border-radius: 12px; padding: 18px 20px; margin-bottom: 12px;
+  }
+  .principle .p-name { font-weight: 800; font-size: 14px; color: #f0a500; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .principle .p-body { font-size: 14.5px; color: #bbb; line-height: 1.75; }
+  p { font-size: 14.5px; color: #bbb; line-height: 1.75; }
+  a { color: #f0a500; }
+  .hidden { display: none !important; }
+  .back-btn {
+    display: inline-block; margin-top: 8px; padding: 13px 26px;
+    background: linear-gradient(135deg, #f0a500, #d48800); color: #111;
+    border: none; border-radius: 10px; font-size: 14px; font-weight: 800;
+    letter-spacing: 1px; text-decoration: none;
+  }
+  .center { text-align: center; }
+  footer { color: #555; font-size: 12px; margin-top: 26px; text-align: center; line-height: 1.8; }
+  footer a { color: #777; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Referee Innovations</div>
+    <div class="logo">🏭</div>
+    <h1>OPEN <span>GOVERNANCE</span></h1>
+    <div class="tagline">THE FACTORY — WRITTEN IN THE OPEN</div>
+  </header>
+
+  <div id="loading" class="card"><p class="center">Loading…</p></div>
+
+  <div id="heldBanner" class="held-banner hidden">🔒 IN PREPARATION</div>
+
+  <div id="mainCard" class="card hidden">
+    <div class="section-title" id="msgTitle">A note from the founder</div>
+    <p class="status-msg" id="statusMsg"></p>
+    <div class="stamp" id="stamp"></div>
+  </div>
+
+  <div id="noteCard" class="card hidden">
+    <div class="section-title">For would-be collaborators</div>
+    <p class="status-msg" id="collabMsg"></p>
+  </div>
+
+  <div id="editorCard" class="card hidden" style="border-color:#f0a500;">
+    <div class="section-title">✏️ Founder editing</div>
+    <p style="margin-bottom:14px;">Signed in as <span id="whoami" style="color:#f0a500;"></span>. Only the founder can save; others are refused by the database.</p>
+
+    <label style="display:block;font-size:12px;letter-spacing:1.5px;color:#999;margin:16px 0 8px;text-transform:uppercase;">Where this work has reached</label>
+    <textarea id="edStatus" rows="4" style="width:100%;background:#0d0d0f;border:1.5px solid #2c2c33;border-radius:10px;color:#eee;padding:13px 15px;font-size:15px;font-family:inherit;"></textarea>
+
+    <label style="display:block;font-size:12px;letter-spacing:1.5px;color:#999;margin:16px 0 8px;text-transform:uppercase;">Message for would-be collaborators</label>
+    <textarea id="edNote" rows="4" style="width:100%;background:#0d0d0f;border:1.5px solid #2c2c33;border-radius:10px;color:#eee;padding:13px 15px;font-size:15px;font-family:inherit;"></textarea>
+
+    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <button id="edSave" onclick="edSaveMsgs()" style="padding:13px 26px;background:linear-gradient(135deg,#f0a500,#d48800);color:#111;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;">Save messages</button>
+      <button id="edToggle" onclick="edToggleRelease()" style="padding:13px 26px;background:#26262c;color:#eee;border:none;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;">Release page</button>
+      <span id="edState" style="border:1px solid #f0a500;color:#f0a500;border-radius:20px;padding:5px 14px;font-weight:700;font-size:13px;">–</span>
+      <span id="edOk" class="hidden" style="color:#7ee2a8;font-size:14px;">✓ Saved.</span>
+    </div>
+  </div>
+
+  <div id="signinCard" class="card hidden">
+    <p class="center">Founder editing — <a href="/" >sign in on the front page</a>, then return here.</p>
+  </div>
+
+  <div class="card">
+    <div class="section-title">The core principles</div>
+    <p style="margin-bottom:16px;">Everything on this page, and anything agreed through it, must align with these two. Nothing is committed to without consultation, and nothing that fails these is committed to at all.</p>
+
+    <div class="principle">
+      <div class="p-name">No harm</div>
+      <div class="p-body">Nothing we build, publish, or agree to may cause harm to people. We stand under the umbrella nearly every nation on earth has signed: our apps are held to the rights and freedoms of the UN Universal Declaration of Human Rights.</div>
+    </div>
+
+    <div class="principle">
+      <div class="p-name">The right to seek the good life</div>
+      <div class="p-body">Every person has the right to seek a good life for themselves and their family, and our work exists to widen that road rather than narrow it.</div>
+    </div>
+
+    <div class="principle">
+      <div class="p-name">The scientific method</div>
+      <div class="p-body">Our rules are anchored in UK law, with the <em>Love Between Nations</em> Manifesto as a voluntary higher standard. These decisions are debated openly and held to scientific scrutiny: users anywhere may propose a framework from their own country or tradition, with their reasons. If a scientifically proven better way to draft our terms emerges — wherever our apps are used — we will ratify it, for the welfare of all.</div>
+    </div>
+
+    <div class="principle">
+      <div class="p-name">Open to all</div>
+      <div class="p-body">The Factory welcomes all people, without prejudice — and explicitly welcomes people with disabilities; our tools are for everyone. What we refuse is apps, never people: an app we judge dangerous may be declined or removed, for reasons we may discuss or keep our own. The last word belongs to scientific evidence, scrutinised by peers across at least nine distinct intellectual and ideological traditions through our open governance process; until that consensus exists, we apply common sense and our judgement — and stand accountable for both.</div>
+    </div>
+
+    <div class="principle">
+      <div class="p-name">Transparent instruction</div>
+      <div class="p-body">Our apps are built with third-party artificial-intelligence tools. We publish, openly and permanently, the safety rules we give those tools: <em>never invent facts a visitor could act on — no phone numbers, addresses, bank details, prices, opening hours, or reviews; where a detail is missing, show a clearly marked gap for the owner to fill; a visible gap is always better than a plausible invention someone might rely on.</em> We instruct our tools as benignly as we know how, in the open, so our care is a matter of record — and where they still err, our review, approval and takedown processes stand behind them.</div>
+    </div>
+
+    <p style="margin-top:16px;">These principles follow the <em>Love Between Nations</em> Manifesto — read it at <a href="https://factory-love-between-nations.netlify.app" target="_blank">factory-love-between-nations.netlify.app</a>.</p>
+
+    <div class="center" style="margin-top:26px;">
+      <a class="back-btn" href="/">← Back to The Factory</a>
+    </div>
+  </div>
+
+  <footer>
+    Built with The Factory 🏭 · You own everything we build for you.<br>
+    <span style="color:#f0a500;font-weight:700;">v4</span> · The Factory is a <strong>Referee Innovations</strong> company · <a href="https://factory-love-between-nations.netlify.app" target="_blank">Our Manifesto</a>
+  </footer>
+</div>
+
+<script>
+  const SB_URL = 'https://canvbkibjgcnqowjtarf.supabase.co';
+  const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhbnZia2liamdjbnFvd2p0YXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NzE0NDYsImV4cCI6MjA5OTM0NzQ0Nn0.TLskVoTaYI90avy09IuM_kkKvAYUMETTntZkn2M807I';
+  const sb = supabase.createClient(SB_URL, SB_ANON);
+
+  function stampText(ts) {
+    if (!ts) return '';
+    try { return 'Last updated ' + new Date(ts).toLocaleString(); } catch (_) { return ''; }
+  }
+
+  (async function () {
+    let row = null;
+    try {
+      const { data } = await sb.from('site_settings').select('value, updated_at').eq('key', 'governance').single();
+      row = data;
+    } catch (_) { /* fall through to held view */ }
+
+    document.getElementById('loading').classList.add('hidden');
+    const val = (row && row.value) || {};
+    const released = val.released === true;
+
+    document.getElementById('statusMsg').textContent =
+      val.status || "This page is being written in the open, at the founder's pace — the business comes first.";
+    document.getElementById('stamp').textContent = stampText(row && row.updated_at);
+    document.getElementById('mainCard').classList.remove('hidden');
+
+    if (!released) {
+      document.getElementById('heldBanner').classList.remove('hidden');
+      document.getElementById('msgTitle').textContent = 'Where this work has reached';
+    }
+
+    if (val.note && val.note.trim()) {
+      document.getElementById('collabMsg').textContent = val.note;
+      document.getElementById('noteCard').classList.remove('hidden');
+    }
+    // ---- founder editing ----
+    let edReleased = released;
+
+    function paint(val2, rel) {
+      document.getElementById('edStatus').value = val2.status || '';
+      document.getElementById('edNote').value = val2.note || '';
+      document.getElementById('edState').textContent = rel ? 'RELEASED' : 'HELD';
+      document.getElementById('edToggle').textContent = rel ? 'Hold page' : 'Release page';
+    }
+
+    const { data: sess } = await sb.auth.getSession();
+    if (sess && sess.session) {
+      document.getElementById('whoami').textContent = sess.session.user.email;
+      paint(val, released);
+      document.getElementById('editorCard').classList.remove('hidden');
+    } else {
+      document.getElementById('signinCard').classList.remove('hidden');
+    }
+
+    window.edWrite = async function (rel) {
+      const payload = {
+        released: rel,
+        status: document.getElementById('edStatus').value.trim(),
+        note: document.getElementById('edNote').value.trim()
+      };
+      const { error } = await sb.from('site_settings')
+        .update({ value: payload, updated_at: new Date().toISOString() })
+        .eq('key', 'governance');
+      if (error) { alert('Could not save — ' + error.message); return false; }
+      edReleased = rel;
+      paint(payload, rel);
+      const ok = document.getElementById('edOk');
+      ok.classList.remove('hidden');
+      setTimeout(() => ok.classList.add('hidden'), 2500);
+      return true;
+    };
+
+    window.edSaveMsgs = function () { window.edWrite(edReleased); };
+    window.edToggleRelease = function () {
+      const next = !edReleased;
+      if (!confirm(next ? 'Release this page to the public?' : 'Hold this page again?')) return;
+      window.edWrite(next);
+    };
+  })();
+</script>
+</body>
+</html>
