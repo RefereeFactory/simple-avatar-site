@@ -694,6 +694,22 @@
       <button type="button" id="curBtn" onclick="curtainToggle()" style="width:100%;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">Lower the curtain</button>
     </div>
 
+    <!-- Own engine — the Factory's own GPU renderer for the live host (experimental) -->
+    <div style="margin-bottom:16px;padding:10px;border:1px solid #2c2c33;border-radius:8px;">
+      <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🚂 Own engine <span id="oeState" style="color:#777;font-weight:400;font-size:11px;">— press REFRESH</span></div>
+      <div style="font-size:11px;color:#666;line-height:1.6;margin-bottom:8px;">Rents a GPU that films her replies with our own renderer — no LiveAvatar. $0.34 per hour while running. Cold start to ready is about 20 minutes (model download). STOP is manual; the line above shows the running spend. If nothing uses it for 45 minutes it stops itself at the next status check.</div>
+      <div style="display:flex;gap:6px;">
+        <button type="button" onclick="oeStart()" style="flex:1;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">START</button>
+        <button type="button" onclick="oeStop()" style="flex:1;padding:9px;background:#0d0d0f;border:1px solid #d9534f;color:#d9534f;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">STOP</button>
+        <button type="button" onclick="oeStatus()" style="flex:1;padding:9px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">REFRESH</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+        <span style="font-size:12px;color:#999;">Live chat renders on:</span>
+        <button type="button" id="oeModeBtn" onclick="oeModeToggle()" style="flex:1;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">rented (LiveAvatar)</button>
+      </div>
+      <div style="font-size:10.5px;color:#666;margin-top:5px;line-height:1.5;">"own" only takes effect while the engine is ready; visitors fall back to the rented host automatically if the pod is down.</div>
+    </div>
+
     <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">📊 Cost per app — live</div>
     <div id="fcCosts" style="background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#aaa;line-height:1.7;">Press refresh to read the meters.</div>
     <button type="button" onclick="fcLoadCosts()" style="width:100%;margin-top:8px;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">⟳ Refresh costs</button>
@@ -1010,6 +1026,69 @@
     document.getElementById('curBtn').textContent = on ? 'Raise the curtain' : 'Lower the curtain';
     if (!on) document.getElementById('curtainGate').style.display = 'none';
   };
+
+  // ---------------- own engine (founder gear) ----------------
+  // START/STOP/STATUS go through app-admin (founder check) -> gpu-desk op:'engine'.
+  // The RunPod key and the pod control token stay server-side at all times.
+  let oeLast = null, oeTick = null;
+  async function oeCall(payload) {
+    if (!session) { alert('Sign in first.'); return null; }
+    const r = await fetch(SB_URL + '/functions/v1/app-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify(Object.assign({ action: 'own-engine' }, payload))
+    });
+    const d = await r.json().catch(function () { return {}; });
+    if (!r.ok) { alert(d.error || ('own-engine failed (' + r.status + ')')); return null; }
+    return d;
+  }
+  function oeRender() {
+    const el = document.getElementById('oeState'); if (!el) return;
+    const d = oeLast;
+    if (!d) { el.textContent = '— press REFRESH'; return; }
+    if (!d.running) {
+      el.textContent = d.autoStopped ? ('— stopped itself after ' + d.idleMin + ' min idle ($' + d.costUsd + ' spent)') : '— stopped ($0.00/hr)';
+      return;
+    }
+    const hrs = ((Date.now() - Date.parse(d.started_at)) / 3600000);
+    const cost = (hrs * d.costPerHr).toFixed(2);
+    el.textContent = '— ' + (d.ready ? 'READY' : d.phase) + ' · ' + hrs.toFixed(1) + ' h · $' + cost + ' ($' + d.costPerHr + '/hr)';
+  }
+  window.oeStatus = async function () {
+    const d = await oeCall({ op: 'status' });
+    if (d) { oeLast = d; oeRender(); }
+    // keep the cost line moving while the engine runs
+    if (oeTick) clearInterval(oeTick);
+    if (d && d.running) oeTick = setInterval(oeRender, 10000);
+  };
+  window.oeStart = async function () {
+    if (!confirm('Start the own engine? $0.34 per hour from now until you press STOP. Ready in about 20 minutes.')) return;
+    const d = await oeCall({ op: 'start' });
+    if (d) alert(d.already ? ('Already running: pod ' + d.podId) : ('Started: pod ' + d.podId + '. Provisioning takes about 20 minutes — press REFRESH to watch the phase.'));
+    oeStatus();
+  };
+  window.oeStop = async function () {
+    if (!confirm('Stop the own engine pod? Live chat falls back to the rented host.')) return;
+    const d = await oeCall({ op: 'stop' });
+    if (d) alert('Stopped. Pods remaining on the account: ' + ((d.pods || []).length) + (d.balance != null ? (' — balance $' + Number(d.balance).toFixed(2)) : ''));
+    oeStatus();
+  };
+  async function oeModeLoad() {
+    try {
+      const { data } = await sb.from('site_settings').select('value').eq('key', 'live_engine').maybeSingle();
+      const mode = (data && data.value && data.value.mode) === 'own' ? 'own' : 'rented';
+      const b = document.getElementById('oeModeBtn');
+      if (b) { b.textContent = mode === 'own' ? 'own (Factory engine)' : 'rented (LiveAvatar)'; b.dataset.mode = mode; }
+    } catch (_) {}
+  }
+  window.oeModeToggle = async function () {
+    const b = document.getElementById('oeModeBtn');
+    const next = (b && b.dataset.mode) === 'own' ? 'rented' : 'own';
+    if (next === 'own' && !confirm('Switch visitor live chat to the OWN engine? Replies take a few seconds to film. Visitors fall back to the rented host automatically if the pod is down.')) return;
+    const d = await oeCall({ op: 'mode', mode: next });
+    if (d) { b.textContent = d.mode === 'own' ? 'own (Factory engine)' : 'rented (LiveAvatar)'; b.dataset.mode = d.mode; }
+  };
+  oeModeLoad();
 
   async function loadPromotedFeatures() {
     try {
@@ -3257,10 +3336,14 @@ async function lFetch(fn, body) {
   const r = await fetch(LSB + '/functions/v1/' + fn, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + LANON }, body: JSON.stringify(body || {}) });
   const d = await r.json().catch(function () { return {}; }); if (!r.ok) throw new Error(d.error || r.status); return d;
 }
-let lVoiceId = '';
+let lVoiceId = '', lEngineMode = 'rented';
 async function loadLiveConfig() {
   try {
     const sb2 = window.supabase.createClient(LSB, LANON);
+    // Which renderer films her: 'rented' (LiveAvatar, the default) or 'own'
+    // (the Factory's MuseTalk pod). Founder-set in the gear.
+    const { data: le } = await sb2.from('site_settings').select('value').eq('key', 'live_engine').maybeSingle();
+    lEngineMode = (le && le.value && le.value.mode) === 'own' ? 'own' : 'rented';
     // The live host reads its OWN LiveAvatar config — separate from the recorded greeter.
     const { data: g } = await sb2.from('site_settings').select('value').eq('key', 'liveavatar_config').maybeSingle();
     lAvatarId = (g && g.value && g.value.avatarId) || '';
@@ -3292,6 +3375,11 @@ window.startLiveHost = async function () {
   
   // Always re-read the freshest saved config, so a just-saved host works without a page reload.
   await loadLiveConfig();
+  // OWN ENGINE first when the founder switched it on (or the ?enginepod test
+  // hook forces it). If the pod is not ready, fall through to the rented host.
+  if (lEngineMode === 'own' || OE_FORCED) {
+    if (await startOwnHost()) return;
+  }
   if (!lAvatarId) { lst('The live host isn’t set up yet. Founder: open the founder card, go to “Live host — her own face & voice”, pick her face and model, and press “Save live host”.'); return; }
   lBtnSafe(true);
   // Instant feedback: play the recorded greeting so she appears at once while
@@ -3349,12 +3437,13 @@ window.startLiveHost = async function () {
   } catch (e) { lst('Could not connect: ' + e.message); lBtnSafe(false); heroRevive(); }
 };
 window.stopLiveHost = async function () {
+  if (oOn) { stopOwnHost(); return; }
   try { if (lAvatar) await lAvatar.stop(); } catch (_) {}
   lAvatar = null; lBtnSafe(false);
   document.getElementById('liveControls').style.display = 'none'; document.getElementById('liveVideo').style.display = 'none';
   lStopMic(); heroRevive(); lst('Ended — thank you.');
 };
-window.sayToHost = async function () { const inp = document.getElementById('liveIn'); const t = inp.value.trim(); if (!t) return; inp.value = ''; await lSay(t); };
+window.sayToHost = async function () { const inp = document.getElementById('liveIn'); const t = inp.value.trim(); if (!t) return; inp.value = ''; await (oOn ? oSay(t) : lSay(t)); };
 async function lSay(text) {
   if (!lAvatar) return;
   lChat.push({ role: 'user', content: text }); lst('Thinking…');
@@ -3418,6 +3507,157 @@ async function lSay(text) {
     else lst('Reply failed: ' + e.message);
   }
 }
+// ================= OWN ENGINE live path (experimental) =================
+// Renders her replies with the Factory's own MuseTalk pod (through gpu-desk
+// op:'pod') instead of the rented LiveAvatar session. The founder switches
+// site_settings 'live_engine' to {mode:'own'} in the gear; visitors fall back
+// to the rented host automatically if the pod is not ready. Words still come
+// from avatar-brain-fast and audio from voice-speak — only the renderer
+// changes. The pod is addressed and authenticated entirely server-side.
+// Test hook: ?enginepod=<anything> forces the own path for THIS visitor only.
+// Harmless in production: with no pod running it simply falls back.
+const OE_FORCED = new URLSearchParams(location.search).get('enginepod');
+let oOn = false, oQueue = [], oPlaying = false, oSeq = 0;
+function oSleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function gpuPod(body) {
+  return fetch(LSB + '/functions/v1/gpu-desk', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + LANON }, body: JSON.stringify(body) });
+}
+async function ownEngineReady() {
+  try { const r = await gpuPod({ op: 'pod', action: 'state' }); if (!r.ok) return false; const s = await r.json(); return s.ready === true; }
+  catch (_) { return false; }
+}
+async function startOwnHost() {
+  lst('Checking the Factory engine…');
+  if (!(await ownEngineReady())) { if (OE_FORCED) { lst('Own engine not ready — using the rented host.'); } return false; }
+  oOn = true; oQueue = []; lChat = [];
+  const v = document.getElementById('liveVideo');
+  v.setAttribute('poster', 'still.png'); v.removeAttribute('src'); v.load(); v.style.display = 'inline-block';
+  document.getElementById('liveControls').style.display = 'block';
+  lStartMic();
+  lst('Experimental engine — replies take a few seconds to film.');
+  const hello = lGreeting || 'Hello, welcome to The Factory. Tell me what you would like to build, and I will help you shape it.';
+  lChat.push({ role: 'assistant', content: hello });
+  oEnqueueText(hello);
+  return true;
+}
+// Split a fixed text into sentences and queue each for voice + film.
+function oEnqueueText(text) {
+  const parts = text.match(/[^.!?…]+[.!?…]+["”']?|[^.!?…]+$/g) || [text];
+  parts.forEach(function (p) { if (p.trim()) oEnqueue(p.trim()); });
+}
+// One queue item per sentence: fetch her voice (mp3), send it to the pod to
+// film, poll for the clip. The player below consumes items strictly in order.
+function oEnqueue(sentence) {
+  const it = { id: 'j' + Date.now().toString(36) + '-' + (oSeq++), audioB64: null, clip: null, audioFailed: false, clipFailed: false };
+  oQueue.push(it);
+  (async function () {
+    try {
+      const a = await lFetch('voice-speak', { text: sentence, voiceId: lVoiceId || undefined, format: 'timed' });
+      it.audioB64 = a.audioB64 || null;
+    } catch (_) { }
+    if (!it.audioB64) { it.audioFailed = true; return; }
+    try {
+      const j = await gpuPod({ op: 'pod', action: 'job', job: it.id, b64: it.audioB64 });
+      if (!j.ok) { it.clipFailed = true; return; }
+      const t0 = Date.now();
+      while (Date.now() - t0 < 60000) {
+        await oSleep(1500);
+        const r = await gpuPod({ op: 'pod', action: 'result', job: it.id });
+        if (r.ok && (r.headers.get('Content-Type') || '').indexOf('video/mp4') === 0) {
+          it.clip = URL.createObjectURL(await r.blob()); return;
+        }
+        if (r.status === 422) { it.clipFailed = true; return; }   // render failed — her voice still plays
+      }
+      it.clipFailed = true;
+    } catch (_) { it.clipFailed = true; }
+  })();
+  oPlayer();
+}
+function oPlayAudio(b64) {
+  return new Promise(function (res) {
+    const a = new Audio('data:audio/mpeg;base64,' + b64);
+    a.onended = res; a.onerror = res;
+    a.play().catch(res);
+  });
+}
+function oPlayClip(url) {
+  const v = document.getElementById('liveVideo');
+  return new Promise(function (res) {
+    v.onended = function () { v.onended = null; URL.revokeObjectURL(url); res(); };
+    v.onerror = function () { v.onerror = null; res(); };
+    v.src = url; v.play().catch(res);
+  });
+}
+// One player walks the queue in order. The FIRST sentence plays at voice
+// speed (her voice over the still frame); later sentences wait briefly for
+// their film clip so the picture catches up with the sound.
+async function oPlayer() {
+  if (oPlaying) return;
+  oPlaying = true; lSpeaking = true;   // the mic must not transcribe her own voice
+  let first = true;
+  while (oQueue.length) {
+    const it = oQueue[0];
+    const tA = Date.now();
+    while (!it.audioB64 && !it.audioFailed && Date.now() - tA < 20000) await oSleep(100);
+    if (!it.audioB64) { oQueue.shift(); continue; }
+    const grace = first ? 0 : 8000; first = false;
+    const tC = Date.now();
+    while (!it.clip && !it.clipFailed && Date.now() - tC < grace) await oSleep(150);
+    if (it.clip) await oPlayClip(it.clip);
+    else await oPlayAudio(it.audioB64);
+    oQueue.shift();
+  }
+  oPlaying = false; lSpeaking = false;
+  if (oOn) lst('She is listening — talk or type. (Experimental engine: replies take a few seconds to film.)');
+}
+// Own-engine reply: same brain stream and sentence cutting as lSay, but each
+// sentence goes to oEnqueue (voice + film) instead of LiveAvatar's lips.
+async function oSay(text) {
+  lChat.push({ role: 'user', content: text }); lst('Thinking…');
+  let reply = '';
+  try {
+    const resp = await fetch(LSB + '/functions/v1/avatar-brain-fast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + LANON },
+      body: JSON.stringify({ messages: lChat, model: lModel, system: lSystem })
+    });
+    if (!resp.ok || !resp.body) throw new Error('brain ' + resp.status);
+    const reader = resp.body.getReader(); const dec = new TextDecoder();
+    let buf = '', pend = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const events = buf.split('\n\n'); buf = events.pop() || '';
+      for (const ev of events) {
+        const line = ev.split('\n').find(function (l) { return l.indexOf('data: ') === 0; });
+        if (!line) continue;
+        const payload = line.slice(6);
+        if (payload === '[DONE]') continue;
+        try {
+          const t = JSON.parse(payload).t || '';
+          reply += t; pend += t;
+          let m;
+          while ((m = pend.match(/^[\s\S]*?[.!?…]["”']?(\s|$)/))) { const s = m[0].trim(); if (s) oEnqueue(s); pend = pend.slice(m[0].length); }
+        } catch (_) {}
+      }
+    }
+    if (pend.trim()) oEnqueue(pend.trim());
+    if (!reply.trim()) throw new Error('empty reply');
+    lChat.push({ role: 'assistant', content: reply.trim() });
+  } catch (e) {
+    lst('Reply failed: ' + e.message);
+  }
+}
+function stopOwnHost() {
+  oOn = false; oQueue = []; lStopMic();
+  const v = document.getElementById('liveVideo');
+  try { v.pause(); } catch (_) {}
+  v.removeAttribute('src'); v.load(); v.style.display = 'none';
+  document.getElementById('liveControls').style.display = 'none';
+  heroRevive(); lst('Ended — thank you.');
+}
+// ================= end own engine =================
 window.toggleLiveMic = function () { lMic ? lStopMic() : lStartMic(); };
 function lStartMic() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -3430,7 +3670,7 @@ function lStartMic() {
   lRec.onresult = function (e) {
     if (lSpeaking) return;                                   // she's talking — don't transcribe her
     const r = e.results[e.resultIndex];                      // continuous mode accumulates results
-    if (r && r.isFinal && r[0] && r[0].transcript.trim()) lSay(r[0].transcript.trim());
+    if (r && r.isFinal && r[0] && r[0].transcript.trim()) { const t = r[0].transcript.trim(); if (oOn) oSay(t); else lSay(t); }
   };
   // A silent mic is a lie — every failure must say its name.
   lRec.onerror = function (e) {
@@ -3453,7 +3693,8 @@ loadLiveConfig();
 // tap starts everything (browsers require that single tap before sound + mic).
 window.addEventListener('load', function () {
   setTimeout(function () {
-    if (lAvatar || !lAvatarId) return;                 // already live, or not configured
+    if (lAvatar || oOn) return;                        // already live
+    if (!lAvatarId && lEngineMode !== 'own' && !OE_FORCED) return;   // nothing configured
     document.getElementById('liveStartBtn').style.display = 'none';   // one control, not two
     document.getElementById('heroInvite').style.display = 'block';
   }, 2000);
