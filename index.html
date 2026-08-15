@@ -691,7 +691,7 @@
       <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🚧 Tuning notice <span id="curState" style="color:#777;font-weight:400;font-size:11px;">— checking…</span></div>
       <input id="curMsg" placeholder="Message (e.g. We are tuning the machines.)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
       <input id="curEta" placeholder="Back around… (e.g. 8pm tonight)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
-      <button type="button" id="curBtn" onclick="curtainToggle()" style="width:100%;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">HIDE SITE (show notice)</button>
+      <button type="button" id="curBtn" onclick="curtainToggle()" style="width:100%;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">MAKE SITE NOT AVAILABLE</button>
     </div>
 
     <!-- Own engine — the Factory's own GPU renderer for the live host (experimental) -->
@@ -1007,7 +1007,7 @@
         document.getElementById('curtainGate').style.display = 'block';
       }
       const stEl = document.getElementById('curState'); if (stEl) stEl.textContent = curtainOn ? '— NOTICE SHOWN (site hidden from visitors)' : '— SITE OPEN (no notice)';
-      const btn = document.getElementById('curBtn'); if (btn) btn.textContent = curtainOn ? 'OPEN SITE (remove notice)' : 'HIDE SITE (show notice)';
+      const btn = document.getElementById('curBtn'); if (btn) btn.textContent = curtainOn ? 'MAKE SITE AVAILABLE' : 'MAKE SITE NOT AVAILABLE';
       if (c) { const m = document.getElementById('curMsg'), e = document.getElementById('curEta'); if (m && !m.value) m.value = c.message || ''; if (e && !e.value) e.value = c.eta || ''; }
     } catch (_) { /* never block the page over the curtain */ }
   }
@@ -1015,7 +1015,7 @@
     if (!session) { alert('Sign in first.'); return; }
     await curtainCheck();               // re-read the database first — never flip on a stale page
     const on = !curtainOn;
-    if (on && !confirm('Hide the site? Visitors will see the tuning notice instead of the Factory.')) return;
+    if (on && !confirm('Make the site not available? Visitors will see the tuning notice instead of the Factory.')) return;
     const r = await fetch(SB_URL + '/functions/v1/app-admin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
@@ -1025,7 +1025,7 @@
     if (!r.ok) { alert(d.error || 'Could not switch the curtain'); return; }
     curtainOn = on;
     document.getElementById('curState').textContent = on ? '— NOTICE SHOWN (site hidden from visitors)' : '— SITE OPEN (no notice)';
-    document.getElementById('curBtn').textContent = on ? 'OPEN SITE (remove notice)' : 'HIDE SITE (show notice)';
+    document.getElementById('curBtn').textContent = on ? 'MAKE SITE AVAILABLE' : 'MAKE SITE NOT AVAILABLE';
     if (!on) document.getElementById('curtainGate').style.display = 'none';
   };
 
