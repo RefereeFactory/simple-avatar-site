@@ -945,7 +945,9 @@
   sb.auth.onAuthStateChange((_e, s) => { session = s; render(); });
   sb.auth.getSession().then(({ data }) => { session = data.session; render(); });
   loadPromotedFeatures();
-  curtainCheck();
+  // curtainCheck() DORMANT until launch (founder ruling, 15 Aug) — no visitors
+  // exist pre-launch, so the Curtain only distracts. Re-arm at launch.
+  // curtainCheck();
   givesLoad();
 
   // ---------------- FACTORY GIVES (experimental) ----------------
