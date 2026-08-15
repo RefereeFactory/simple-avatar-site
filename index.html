@@ -995,6 +995,7 @@
   }
   window.curtainToggle = async function () {
     if (!session) { alert('Sign in first.'); return; }
+    await curtainCheck();               // re-read the database first — never flip on a stale page
     const on = !curtainOn;
     if (on && !confirm('Lower the curtain? Visitors will see the tuning notice instead of the Factory.')) return;
     const r = await fetch(SB_URL + '/functions/v1/app-admin', {
