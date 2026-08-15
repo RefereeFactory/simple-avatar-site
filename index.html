@@ -3695,8 +3695,8 @@ window.addEventListener('load', function () {
   setTimeout(function () {
     if (lAvatar || oOn) return;                        // already live
     if (!lAvatarId && lEngineMode !== 'own' && !OE_FORCED) return;   // nothing configured
-    document.getElementById('liveStartBtn').style.display = 'none';   // one control, not two
-    document.getElementById('heroInvite').style.display = 'block';
+    const sBtn = document.getElementById('liveStartBtn'); if (sBtn) sBtn.style.display = 'none';   // one control, not two
+    const inv = document.getElementById('heroInvite'); if (inv) inv.style.display = 'block';
   }, 2000);
 });
 // Pre-load the live engine AFTER the page has painted, so pressing "Talk live"
