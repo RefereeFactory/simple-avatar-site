@@ -32,6 +32,10 @@ def state(phase, ready, extra=None):
 state('worker-loading-models', False)
 
 from types import SimpleNamespace  # noqa: E402
+import copy  # noqa: E402
+import queue  # noqa: E402
+import cv2  # noqa: E402
+import numpy as np  # noqa: E402
 import torch  # noqa: E402
 import scripts.realtime_inference as ri  # noqa: E402
 
@@ -75,6 +79,36 @@ ri.fp = ri.FaceParsing(
     right_cheek_width=args.right_cheek_width,
 )
 
+# Same compositing as upstream Avatar.process_frames, but frames go to disk
+# as JPEG (quality 95) instead of PNG — several seconds faster per sentence
+# on the 4090; the H.264 encode at CRF 18 dominates quality anyway. Note:
+# ri.Avatar is wrapped by a class-level @torch.no_grad() decorator, so it is
+# a function wrapper, not a class — we patch the method on the instance's
+# real class after construction (see below).
+def fast_process_frames(self, res_frame_queue, video_len, skip_save_images):
+    while True:
+        if self.idx >= video_len - 1:
+            break
+        try:
+            res_frame = res_frame_queue.get(block=True, timeout=1)
+        except queue.Empty:
+            continue
+        bbox = self.coord_list_cycle[self.idx % (len(self.coord_list_cycle))]
+        ori_frame = copy.deepcopy(self.frame_list_cycle[self.idx % (len(self.frame_list_cycle))])
+        x1, y1, x2, y2 = bbox
+        try:
+            res_frame = cv2.resize(res_frame.astype(np.uint8), (x2 - x1, y2 - y1))
+        except Exception:
+            continue
+        mask = self.mask_list_cycle[self.idx % (len(self.mask_list_cycle))]
+        mask_crop_box = self.mask_coords_list_cycle[self.idx % (len(self.mask_coords_list_cycle))]
+        combine_frame = ri.get_image_blending(ori_frame, res_frame, bbox, mask, mask_crop_box)
+        if skip_save_images is False:
+            cv2.imwrite(self.avatar_path + '/tmp/' + str(self.idx).zfill(8) + '.jpg',
+                        combine_frame, [cv2.IMWRITE_JPEG_QUALITY, 95])
+        self.idx = self.idx + 1
+
+
 AVATAR_ID = 'factory_her'
 avatar_dir = './results/v15/avatars/' + AVATAR_ID
 prep = not os.path.exists(avatar_dir)
@@ -86,6 +120,7 @@ avatar = ri.Avatar(
     batch_size=args.batch_size,
     preparation=prep,
 )
+type(avatar).process_frames = fast_process_frames   # JPEG frame writes
 
 JOBS = '/workspace/jobs'
 OUT = '/workspace/out'
@@ -110,7 +145,7 @@ def render(job_id, mp3_path):
     out_tmp = OUT + '/' + job_id + '.tmp.mp4'
     subprocess.run(
         ['ffmpeg', '-y', '-v', 'error', '-r', str(args.fps),
-         '-i', tmp_dir + '/%08d.png', '-i', wav,
+         '-i', tmp_dir + '/%08d.jpg', '-i', wav,
          '-c:v', 'libx264', '-crf', '18', '-preset', 'veryfast',
          '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k', '-shortest', out_tmp],
         check=True,
