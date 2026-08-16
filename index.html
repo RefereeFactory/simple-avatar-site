@@ -379,7 +379,17 @@
         <div style="color:#f0a500;font-weight:800;font-size:15px;margin-top:2px;">Meet your guide — tap to talk</div>
         <div style="color:#888;font-size:12px;margin-top:3px;">She helps you shape your app, live, face to face.</div>
       </div>
-      <video id="liveVideo" autoplay playsinline style="display:none;width:100%;max-width:380px;border-radius:16px;background:#000;margin-top:8px;"></video>
+      <div id="guideStage" style="display:none;margin:8px auto 0;max-width:380px;">
+        <div style="overflow:hidden;border-radius:16px;background:#f4f4f6;">
+          <div id="guideBreather" style="transform-origin:50% 100%;animation:guideBreathe 4.6s ease-in-out infinite;position:relative;">
+            <div id="guideSwayer" style="transform-origin:50% 100%;position:relative;">
+              <img id="guideStill" src="still.png" style="width:100%;display:block;">
+              <canvas id="guideLips" style="position:absolute;left:0;top:0;pointer-events:none;"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin-top:8px;">
         <div style="display:flex;gap:6px;max-width:380px;margin:0 auto;">
           <input id="liveIn" placeholder="Type to her, or just talk…" style="flex:1;padding:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;" onkeydown="if(event.key==='Enter')sayToHost()">
@@ -434,6 +444,9 @@
 
   <div class="card" id="moneyCard" style="background:linear-gradient(135deg,#1a1408 0%,#241a06 55%,#3a2a08 100%);border:1px solid #f0a500;box-shadow:0 10px 40px rgba(240,165,0,0.18);position:relative;overflow:hidden;">
     <div style="position:absolute;top:12px;right:14px;font-size:11px;font-weight:800;letter-spacing:1px;color:#0a0a0c;background:#f0a500;border-radius:5px;padding:3px 10px;">BY INVITATION ONLY</div>
+  <div style="text-align:center;margin:6px 0 14px;">
+    <button type="button" onclick="backToGuide()" style="padding:10px 22px;background:#0d0d0f;border:2px solid #f0a500;color:#f0a500;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;letter-spacing:0.5px;">🗣️ BACK TO THE AVATAR GUIDE</button>
+  </div>
     <div style="font-size:26px;font-weight:900;color:#f0a500;line-height:1.2;margin-bottom:8px;">💰 Make more money with ease</div>
     <div style="font-size:14.5px;color:#e6d9bf;line-height:1.7;max-width:560px;">
       A private service for trusted members: we find a real need in the world, build the software that solves it,
@@ -3436,397 +3449,280 @@
   }
 
 </script>
+<script src="visemes/meta.js"></script>
+<script src="visemes2/meta.js"></script>
 <script>
-// The heavy LiveAvatar real-time engine is loaded ONLY when a visitor presses
-// "Talk live" — so the page itself opens instantly (under 5 seconds).
-// LITE mode: WE supply her words (our own Anthropic brain + our prompt); the
-// avatar just renders speech. Her face is baked into the token server-side.
-let LAS = null, SEV = null, AEV = null;
-async function ensureSdk() {
-  if (LAS) return;
-  const m = await import('https://esm.sh/@heygen/liveavatar-web-sdk@0.0.18');
-  LAS = m.LiveAvatarSession; SEV = m.SessionEvent; AEV = m.AgentEventsEnum;
-}
-let lSpeaking = false;   // true while she is talking — so the mic doesn't hear her own voice
-const LSB = 'https://canvbkibjgcnqowjtarf.supabase.co';
-const LANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhbnZia2liamdjbnFvd2p0YXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NzE0NDYsImV4cCI6MjA5OTM0NzQ0Nn0.TLskVoTaYI90avy09IuM_kkKvAYUMETTntZkn2M807I';
-let lAvatar = null, lChat = [], lRec = null, lMic = false, lSystem = '', lAvatarId = '', lModel = 'claude-opus-4-8';
-let lGreeting = '', lStartedAt = 0, lWarnTimer = null;
-function lBtnSafe(d){ const b=document.getElementById('liveStartBtn'); if(b) b.disabled=d; }
-function heroRevive(){ const h=document.getElementById('heroInvite'); if(h) h.style.display='block'; }
-const lst = function (t) { document.getElementById('liveStatus').textContent = t; };
+// OUR OWN GUIDE — the Factory's composite presenter. Renders on the visitor's
+// device (unlimited simultaneous visitors, no per-minute rental). Voice: our
+// ElevenLabs with letter timestamps. Mind: avatar-brain-fast. LiveAvatar: GONE.
+const GUIDE_SB='https://canvbkibjgcnqowjtarf.supabase.co';
+const GUIDE_ANON=LANON!==undefined?LANON:'';
+function gst(t){ const el=document.getElementById('liveStatus'); if(el) el.textContent=t; }
 
-async function lFetch(fn, body) {
-  const r = await fetch(LSB + '/functions/v1/' + fn, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + LANON }, body: JSON.stringify(body || {}) });
-  const d = await r.json().catch(function () { return {}; }); if (!r.ok) throw new Error(d.error || r.status); return d;
+function guideVisemeFor(ch,next){
+  const c=(ch||'').toLowerCase(), n=(next||'').toLowerCase();
+  if(!/[a-z]/.test(c)) return null;
+  if('mbp'.includes(c)) return 'MBP';
+  if('fv'.includes(c)) return 'FV';
+  if(c==='w'||c==='q') return 'WQ';
+  if(c==='l') return 'L';
+  if(c==='o') return (n==='o'||n==='u')?'U':'O';
+  if(c==='u') return 'U';
+  if(c==='e'||c==='i'||c==='y') return 'E';
+  if(c==='a') return 'AI';
+  return 'etc';
 }
-let lVoiceId = '', lEngineMode = 'rented';
-async function loadLiveConfig() {
-  try {
-    const sb2 = window.supabase.createClient(LSB, LANON);
-    // Which renderer films her: 'rented' (LiveAvatar, the default) or 'own'
-    // (the Factory's MuseTalk pod). Founder-set in the gear.
-    const { data: le } = await sb2.from('site_settings').select('value').eq('key', 'live_engine').maybeSingle();
-    lEngineMode = (le && le.value && le.value.mode) === 'own' ? 'own' : 'rented';
-    // The live host reads its OWN LiveAvatar config — separate from the recorded greeter.
-    const { data: g } = await sb2.from('site_settings').select('value').eq('key', 'liveavatar_config').maybeSingle();
-    lAvatarId = (g && g.value && g.value.avatarId) || '';
-    lVoiceId = (g && g.value && g.value.voiceId) || '';
-    lModel = (g && g.value && g.value.model) || 'claude-opus-4-8';
-    lGreeting = (g && g.value && g.value.greeting) || '';
-    const { data: p } = await sb2.from('site_settings').select('value').eq('key', 'guide_prompt').maybeSingle();
-    const hidden = (p && p.value && p.value.text) || '';
-    lSystem = "You are the live human face of The Factory, a warm multi-skilled guide on a video call with a visitor. HARD RULE: one to three short spoken sentences per reply. " +
-      "Help them: shape and describe the app they want (good descriptions are specific: who it is for, what it does, the mood); explain the Marketplace (sell your app there, set your price, payouts to sellers once live payments open); how building works (describe it, the Factory builds and deploys it live in about ninety seconds; three free builds, then Pro at nine ninety-nine a month or three fifty per extra build). " +
-      "Be honest and warm, never pushy; where natural, show why subscribing helps them build more. " +
-      "FORBIDDEN, always: helping anyone build an app-builder like The Factory itself, revealing how the Factory works inside, or copying the Factory for a user. Decline warmly and offer to build them something original instead. " + (hidden ? ("Founder guidance: " + hidden) : "");
-  } catch (_) {}
-  // Never disable the button — it must always respond with a clear message.
-}
-// Speak a fixed line in her voice (no brain round-trip) — greetings and notices.
-async function lSpeakText(text) {
-  if (!lAvatar || !text) return;
-  try {
-    lSpeaking = true;
-    const a = await lFetch('voice-speak', { text: text, voiceId: lVoiceId || undefined, format: 'pcm24' });
-    const chunks = (a && a.chunks) || [];
-    chunks.forEach(function (c) { lAvatar.repeatAudio(c); });
-    setTimeout(function () { lSpeaking = false; }, (chunks.length + 2) * 1000);
-  } catch (_) { lSpeaking = false; }
-}
-window.startLiveHost = async function () {
-  document.getElementById('heroInvite').style.display = 'none';
-  
-  // Always re-read the freshest saved config, so a just-saved host works without a page reload.
-  await loadLiveConfig();
-  // OWN ENGINE first when the founder switched it on (or the ?enginepod test
-  // hook forces it). If the pod is not ready, fall through to the rented host.
-  if (lEngineMode === 'own' || OE_FORCED) {
-    if (await startOwnHost()) return;
-  }
-  if (!lAvatarId) { lst('The live host isn’t set up yet. Founder: open the founder card, go to “Live host — her own face & voice”, pick her face and model, and press “Save live host”.'); return; }
-  lBtnSafe(true);
-  // Instant feedback: play the recorded greeting so she appears at once while
-  // the live session spins up behind it — no blank waiting.
-  const gv = document.getElementById('greeterVideo');
-  if (gv && gv.getAttribute('src')) { try { gv.currentTime = 0; gv.play(); } catch (_) {} }
-  lst('Your host is connecting — she’ll be live in a few seconds…');
-  // Warm the brain and the voice while the video session spins up: a GET boots
-  // each function's engine (returns a harmless 405) without spending a token.
-  try { fetch(LSB + '/functions/v1/avatar-brain-fast', { headers: { 'Authorization': 'Bearer ' + LANON } }).catch(function () {}); } catch (_) {}
-  try { fetch(LSB + '/functions/v1/voice-speak', { headers: { 'Authorization': 'Bearer ' + LANON } }).catch(function () {}); } catch (_) {}
-  try {
-    await ensureSdk();
-    const { token } = await lFetch('liveavatar-token', {});   // her face is baked into this token
-    lAvatar = new LAS(token);
-    const v = document.getElementById('liveVideo');
-    lAvatar.on(SEV.SESSION_STREAM_READY, function () {
-      if (gv) { try { gv.pause(); } catch (_) {} }
-      lAvatar.attach(v);                                       // SDK wires both video + audio
-      v.style.display = 'inline-block'; try { v.play(); } catch (_) {}
-      document.getElementById('liveControls').style.display = 'block';
-      lStartMic();                                             // voice-first: she listens at once — just talk
-      lst(lMic ? 'She is live — just talk to her.' : 'She is live — say hello (type below).');
-      lStartedAt = Date.now();
-      // SHE SPEAKS FIRST — the greeting opens the conversation, not the visitor.
-      const hello = lGreeting || 'Hello, welcome to The Factory. Tell me what you would like to build, and I will help you shape it.';
-      lChat.push({ role: 'assistant', content: hello });
-      lSpeakText(hello);
-      // The free sample: a warm warning near the end; the server ends it at 4:00.
-      lWarnTimer = setTimeout(function () {
-        const note = 'A small note — our free preview ends in about a minute. In future you’ll be able to top up below and keep me around longer.';
-        lChat.push({ role: 'assistant', content: note });
-        lSpeakText(note);
-      }, 185000);
-    });
-    // Mute the mic while she speaks, so she never hears her own voice back.
-    if (AEV) {
-      lAvatar.on(AEV.AVATAR_SPEAK_STARTED, function () { lSpeaking = true; });
-      lAvatar.on(AEV.AVATAR_SPEAK_ENDED, function () { lSpeaking = false; });
+const G_XFADE=0.07,G_REST_FADE=0.13,G_MIN_SEG=0.06,G_SOFT_CAP=0.09,G_SIL_REST=0.18;
+const G_SOFT={etc:1,L:1,WQ:1};
+function guideSchedule(chars,starts,ends){
+  let segs=[];
+  for(let i=0;i<chars.length;i++){
+    const v=guideVisemeFor(chars[i],chars[i+1]||''), s=starts[i], e=ends[i];
+    if(v===null){
+      if(segs.length&&(e-s)>=G_SIL_REST) segs.push([s,e,'rest']);
+      else if(segs.length) segs[segs.length-1][1]=e;
+      continue;
     }
-    lAvatar.on(SEV.SESSION_DISCONNECTED, function () {
-      if (lWarnTimer) { clearTimeout(lWarnTimer); lWarnTimer = null; }
-      lStopMic();
-      lBtnSafe(false);
-      // If the free four minutes ran their course, thank them and show the top-up.
-      if (lStartedAt && (Date.now() - lStartedAt) >= 225000) {
-        
-        heroRevive(); lst('Session complete — press the card to talk again, or reveal the Factory below.');
-      } else {
-        lst('Session ended.');
-      }
-    });
-    await lAvatar.start();
-    lChat = [];
-  } catch (e) { lst('Could not connect: ' + e.message); lBtnSafe(false); heroRevive(); }
-};
-window.stopLiveHost = async function () {
-  if (oOn) { stopOwnHost(); return; }
-  try { if (lAvatar) await lAvatar.stop(); } catch (_) {}
-  lAvatar = null; lBtnSafe(false);
-  document.getElementById('liveControls').style.display = 'none'; document.getElementById('liveVideo').style.display = 'none';
-  lStopMic(); heroRevive(); lst('Ended — thank you.');
-};
-window.sayToHost = async function () { const inp = document.getElementById('liveIn'); const t = inp.value.trim(); if (!t) return; inp.value = ''; await (oOn ? oSay(t) : lSay(t)); };
-async function lSay(text) {
-  if (!lAvatar) return;
-  lChat.push({ role: 'user', content: text }); lst('Thinking…');
-  // STREAMING pipeline: the brain's words arrive as they are written; the moment a
-  // sentence completes it goes to her voice; her lips are fed in strict order. She
-  // starts SPEAKING sentence one while the brain is still writing sentence two.
-  let reply = '';
-  try {
-    const resp = await fetch(LSB + '/functions/v1/avatar-brain-fast', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + LANON },
-      body: JSON.stringify({ messages: lChat, model: lModel, system: lSystem })
-    });
-    if (!resp.ok || !resp.body) throw new Error('brain ' + resp.status);
-    lSpeaking = true;                                          // mute the mic so she doesn't hear herself
-    const jobs = [];                                           // ordered voice jobs, one per sentence
-    const say = function (p) { p = p.trim(); if (p) jobs.push(lFetch('voice-speak', { text: p, voiceId: lVoiceId || undefined, format: 'pcm24' })); };
-    // The feeder walks the job queue IN ORDER and pours audio into her lips.
-    let ji = 0, streamDone = false, total = 0, fed = false;
-    const feeder = (async function () {
-      while (!streamDone || ji < jobs.length) {
-        if (ji < jobs.length) {
-          try { const a = await jobs[ji++]; const ch = (a && a.chunks) || []; ch.forEach(function (c) { lAvatar.repeatAudio(c); }); total += ch.length; if (ch.length) fed = true; }
-          catch (_) { /* one sentence failing must not silence the rest */ }
-        } else { await new Promise(function (r) { setTimeout(r, 50); }); }
-      }
-    })();
-    // Sip the SSE stream; cut at sentence ends.
-    const reader = resp.body.getReader(); const dec = new TextDecoder();
-    let buf = '', pend = '';
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      const events = buf.split('\n\n'); buf = events.pop() || '';
-      for (const ev of events) {
-        const line = ev.split('\n').find(function (l) { return l.indexOf('data: ') === 0; });
-        if (!line) continue;
-        const payload = line.slice(6);
-        if (payload === '[DONE]') continue;
-        try {
-          const t = JSON.parse(payload).t || '';
-          reply += t; pend += t;
-          let m;
-          while ((m = pend.match(/^[\s\S]*?[.!?…]["”']?(\s|$)/))) { say(m[0]); pend = pend.slice(m[0].length); }
-        } catch (_) {}
-      }
-    }
-    say(pend);                                                 // whatever trails without punctuation
-    streamDone = true;
-    if (!reply.trim()) throw new Error('empty reply');
-    lChat.push({ role: 'assistant', content: reply.trim() });
-    await feeder;
-    if (!fed) { lst('Her voice is offline — she says: “' + reply.trim() + '”'); lSpeaking = false; return; }
-    // Fallback un-mute in case the "finished speaking" event doesn't arrive.
-    setTimeout(function () { lSpeaking = false; }, (total + 2) * 1000);
-    lst('She is live — talk to her.');
-  } catch (e) {
-    lSpeaking = false;
-    if (reply.trim()) { lChat.push({ role: 'assistant', content: reply.trim() }); lst('Her voice is offline (' + e.message + ') — she says: “' + reply.trim() + '”'); }
-    else lst('Reply failed: ' + e.message);
+    if(segs.length&&segs[segs.length-1][2]===v) segs[segs.length-1][1]=e;
+    else segs.push([s,e,v]);
   }
+  const out=[];
+  for(const sg of segs){
+    if(out.length&&(sg[1]-sg[0])<G_MIN_SEG&&sg[2]!=='MBP'&&sg[2]!=='FV') out[out.length-1][1]=sg[1];
+    else out.push(sg);
+  }
+  segs=out;
+  for(let i=1;i<segs.length;i++){
+    const d=segs[i][1]-segs[i][0];
+    if(G_SOFT[segs[i][2]]&&d>G_SOFT_CAP){ const cut=segs[i][1]-G_SOFT_CAP; segs[i-1][1]=cut; segs[i][0]=cut; }
+  }
+  if(segs.length){
+    segs.unshift([segs[0][0]-0.20,segs[0][0],'rest']);
+    segs.push([segs[segs.length-1][1],segs[segs.length-1][1]+0.40,'rest']);
+  }
+  return segs;
 }
-// ================= OWN ENGINE live path (experimental) =================
-// Renders her replies with the Factory's own MuseTalk pod (through gpu-desk
-// op:'pod') instead of the rented LiveAvatar session. The founder switches
-// site_settings 'live_engine' to {mode:'own'} in the gear; visitors fall back
-// to the rented host automatically if the pod is not ready. Words still come
-// from avatar-brain-fast and audio from voice-speak — only the renderer
-// changes. The pod is addressed and authenticated entirely server-side.
-// Test hook: ?enginepod=<anything> forces the own path for THIS visitor only.
-// Harmless in production: with no pod running it simply falls back.
-const OE_FORCED = new URLSearchParams(location.search).get('enginepod');
-let oOn = false, oQueue = [], oPlaying = false, oSeq = 0;
-function oSleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
-function gpuPod(body) {
-  return fetch(LSB + '/functions/v1/gpu-desk', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + LANON }, body: JSON.stringify(body) });
+const gSmooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
+function guideStateAt(segs,t){
+  let idx=-1;
+  for(let i=0;i<segs.length;i++) if(t>=segs[i][0]) idx=i;
+  if(idx<0||t>=segs[segs.length-1][1]) return ['rest',0,'rest',0,1];
+  const [s,e,v]=segs[idx];
+  const prev=idx>0?segs[idx-1][2]:'rest', ps=idx>0?segs[idx-1][0]:0;
+  let fade=(v==='rest'||prev==='rest')?G_REST_FADE:G_XFADE;
+  const prevDur=idx>0?(segs[idx-1][1]-segs[idx-1][0]):fade;
+  fade=Math.min(fade,e-s,Math.max(prevDur,0.04));
+  return [prev,ps,v,s,fade>0?gSmooth((t-s)/fade):1];
 }
-async function ownEngineReady() {
-  try { const r = await gpuPod({ op: 'pod', action: 'state' }); if (!r.ok) return false; const s = await r.json(); return s.ready === true; }
-  catch (_) { return false; }
+const G_FRAME=0.04;
+function guideClipFrame(name,tIn){
+  const fr=(gMeta&&gMeta.clips&&gMeta.clips[name])||null;
+  if(!fr) return name;
+  const n=fr.length;
+  if(name==='rest'||n===1) return fr[n>>1];
+  const step=Math.floor(Math.max(0,tIn)/G_FRAME), cyc=2*n-2;
+  let i=step%cyc; if(i>=n) i=cyc-i;
+  return fr[i];
 }
-async function startOwnHost() {
-  lst('Checking the Factory engine…');
-  if (!(await ownEngineReady())) { if (OE_FORCED) { lst('Own engine not ready — using the rented host.'); } return false; }
-  oOn = true; oQueue = []; lChat = [];
-  const v = document.getElementById('liveVideo');
-  v.setAttribute('poster', 'still.png'); v.removeAttribute('src'); v.load(); v.style.display = 'inline-block';
-  document.getElementById('liveControls').style.display = 'block';
-  lStartMic();
-  lst('Experimental engine — replies take a few seconds to film.');
-  const hello = lGreeting || 'Hello, welcome to The Factory. Tell me what you would like to build, and I will help you shape it.';
-  lChat.push({ role: 'assistant', content: hello });
-  oEnqueueText(hello);
-  return true;
-}
-// Split a fixed text into sentences and queue each for voice + film.
-function oEnqueueText(text) {
-  const parts = text.match(/[^.!?…]+[.!?…]+["”']?|[^.!?…]+$/g) || [text];
-  parts.forEach(function (p) { if (p.trim()) oEnqueue(p.trim()); });
-}
-// One queue item per sentence: fetch her voice (mp3), send it to the pod to
-// film, poll for the clip. The player below consumes items strictly in order.
-function oEnqueue(sentence) {
-  const it = { id: 'j' + Date.now().toString(36) + '-' + (oSeq++), audioB64: null, clip: null, audioFailed: false, clipFailed: false };
-  oQueue.push(it);
-  (async function () {
-    try {
-      const a = await lFetch('voice-speak', { text: sentence, voiceId: lVoiceId || undefined, format: 'timed' });
-      it.audioB64 = a.audioB64 || null;
-    } catch (_) { }
-    if (!it.audioB64) { it.audioFailed = true; return; }
-    try {
-      const j = await gpuPod({ op: 'pod', action: 'job', job: it.id, b64: it.audioB64 });
-      if (!j.ok) { it.clipFailed = true; return; }
-      const t0 = Date.now();
-      while (Date.now() - t0 < 60000) {
-        await oSleep(1500);
-        const r = await gpuPod({ op: 'pod', action: 'result', job: it.id });
-        if (r.ok && (r.headers.get('Content-Type') || '').indexOf('video/mp4') === 0) {
-          it.clip = URL.createObjectURL(await r.blob()); return;
-        }
-        if (r.status === 422) { it.clipFailed = true; return; }   // render failed — her voice still plays
-      }
-      it.clipFailed = true;
-    } catch (_) { it.clipFailed = true; }
+const gStill=document.getElementById('guideStill'), gCv=document.getElementById('guideLips'), gCx=gCv.getContext('2d');
+let gMeta=null, gSprites={}, gAudio=null, gSegs=[], gPlaying=false, gBlinkStart=-1;
+(function guideAssets(){
+  let dir='visemes';
+  if(window.VISEME_META2){ gMeta=window.VISEME_META2; dir='visemes2'; }
+  else if(window.VISEME_META){ gMeta=window.VISEME_META; }
+  let names=[];
+  if(gMeta&&gMeta.clips){ for(const k in gMeta.clips) names=names.concat(gMeta.clips[k]); }
+  else names=(gMeta&&gMeta.visemes)||['rest','AI','E','O','U','MBP','FV','L','WQ','etc'];
+  const blinks=(gMeta&&gMeta.blink&&gMeta.blink.frames)||[];
+  names.concat(blinks).forEach(function(n){
+    const img=new Image(); img.onload=function(){ gSprites[n]=img; }; img.src=dir+'/'+n+'.png';
+  });
+})();
+(function guideBlinkLoop(){
+  setTimeout(function(){ if(gSprites['blink1']) gBlinkStart=performance.now(); guideBlinkLoop(); },3000+Math.random()*4000);
+})();
+(function guideSway(){
+  const el=document.getElementById('guideSwayer'), t0=performance.now();
+  (function tick(){
+    const t=(performance.now()-t0)/1000;
+    el.style.transform='translate('+(1.5*Math.sin(2*Math.PI*t/9.7)).toFixed(2)+'px,'+(0.8*Math.sin(2*Math.PI*t/12.4+1)).toFixed(2)+'px) rotate('+(0.3*Math.sin(2*Math.PI*t/11.3)).toFixed(3)+'deg)';
+    requestAnimationFrame(tick);
   })();
-  oPlayer();
+})();
+function guideFit(){
+  const w=gStill.clientWidth,h=gStill.clientHeight;
+  if(!w||!h) return;
+  gCv.width=w; gCv.height=h; gCv.style.width=w+'px'; gCv.style.height=h+'px';
 }
-function oPlayAudio(b64) {
-  return new Promise(function (res) {
-    const a = new Audio('data:audio/mpeg;base64,' + b64);
-    a.onended = res; a.onerror = res;
-    a.play().catch(res);
-  });
+window.addEventListener('resize',guideFit);
+function guideDrawSprite(name,alpha,X,Y,W,H){
+  const s=gSprites[name];
+  if(!s||!s.complete) return;
+  gCx.globalAlpha=alpha; gCx.drawImage(s,X,Y,W,H); gCx.globalAlpha=1;
 }
-function oPlayClip(url) {
-  const v = document.getElementById('liveVideo');
-  return new Promise(function (res) {
-    v.onended = function () { v.onended = null; URL.revokeObjectURL(url); res(); };
-    v.onerror = function () { v.onerror = null; res(); };
-    v.src = url; v.play().catch(res);
-  });
-}
-// One player walks the queue in order. The FIRST sentence plays at voice
-// speed (her voice over the still frame); later sentences wait briefly for
-// their film clip so the picture catches up with the sound.
-async function oPlayer() {
-  if (oPlaying) return;
-  oPlaying = true; lSpeaking = true;   // the mic must not transcribe her own voice
-  let first = true;
-  while (oQueue.length) {
-    const it = oQueue[0];
-    const tA = Date.now();
-    while (!it.audioB64 && !it.audioFailed && Date.now() - tA < 20000) await oSleep(100);
-    if (!it.audioB64) { oQueue.shift(); continue; }
-    const grace = first ? 0 : 8000; first = false;
-    const tC = Date.now();
-    while (!it.clip && !it.clipFailed && Date.now() - tC < grace) await oSleep(150);
-    if (it.clip) await oPlayClip(it.clip);
-    else await oPlayAudio(it.audioB64);
-    oQueue.shift();
+(function guideDraw(){
+  requestAnimationFrame(guideDraw);
+  if(gStill.clientWidth&&gCv.width!==gStill.clientWidth) guideFit();
+  if(!gCv.width||!gMeta) return;
+  gCx.clearRect(0,0,gCv.width,gCv.height);
+  const m={x:gMeta.x/gMeta.frameW,y:gMeta.y/gMeta.frameH,w:gMeta.w/gMeta.frameW,h:gMeta.h/gMeta.frameH};
+  const X=m.x*gCv.width,Y=m.y*gCv.height,W=m.w*gCv.width,H=m.h*gCv.height;
+  let prev='rest',ps=0,cur='rest',cs=0,f=1;
+  if(gPlaying&&gAudio){ [prev,ps,cur,cs,f]=guideStateAt(gSegs,gAudio.currentTime); }
+  const t=(gPlaying&&gAudio)?gAudio.currentTime:0;
+  const pn=gMeta.clips?guideClipFrame(prev,t-ps):prev, cn=gMeta.clips?guideClipFrame(cur,t-cs):cur;
+  guideDrawSprite(pn,1,X,Y,W,H);
+  if(cn!==pn) guideDrawSprite(cn,f,X,Y,W,H);
+  if(gBlinkStart>0&&gMeta.blink){
+    const st2=Math.floor((performance.now()-gBlinkStart)/40), SEQ=[0,1,1,2];
+    if(st2>=SEQ.length) gBlinkStart=-1;
+    else{
+      const b=gMeta.blink;
+      guideDrawSprite(b.frames[SEQ[st2]],1,b.x/gMeta.frameW*gCv.width,b.y/gMeta.frameH*gCv.height,b.w/gMeta.frameW*gCv.width,b.h/gMeta.frameH*gCv.height);
+    }
   }
-  oPlaying = false; lSpeaking = false;
-  if (oOn) lst('She is listening — talk or type. (Experimental engine: replies take a few seconds to film.)');
+})();
+
+// voice: parallel fetch, ordered playback — no gaps
+function guideFetchVoice(text){
+  return fetch(GUIDE_SB+'/functions/v1/voice-speak',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+GUIDE_ANON},
+    body:JSON.stringify({text:text,voiceId:(window.lVoiceId||undefined),format:'timed'})})
+    .then(function(r){return r.json();}).catch(function(){return null;});
 }
-// Own-engine reply: same brain stream and sentence cutting as lSay, but each
-// sentence goes to oEnqueue (voice + film) instead of LiveAvatar's lips.
-async function oSay(text) {
-  lChat.push({ role: 'user', content: text }); lst('Thinking…');
-  let reply = '';
-  try {
-    const resp = await fetch(LSB + '/functions/v1/avatar-brain-fast', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + LANON },
-      body: JSON.stringify({ messages: lChat, model: lModel, system: lSystem })
-    });
-    if (!resp.ok || !resp.body) throw new Error('brain ' + resp.status);
-    const reader = resp.body.getReader(); const dec = new TextDecoder();
-    let buf = '', pend = '';
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buf += dec.decode(value, { stream: true });
-      const events = buf.split('\n\n'); buf = events.pop() || '';
-      for (const ev of events) {
-        const line = ev.split('\n').find(function (l) { return l.indexOf('data: ') === 0; });
-        if (!line) continue;
-        const payload = line.slice(6);
-        if (payload === '[DONE]') continue;
-        try {
-          const t = JSON.parse(payload).t || '';
-          reply += t; pend += t;
+let gMicMuted=false, gQueue=Promise.resolve();
+function guidePlay(audioP,text){
+  return new Promise(async function(res){
+    const d=await audioP;
+    if(!d||!d.audioB64){ gst('Voice unavailable — she says: '+text); res(); return; }
+    const a=d.alignment||{};
+    gSegs=guideSchedule(a.characters||[],a.character_start_times_seconds||[],a.character_end_times_seconds||[]);
+    gAudio=new Audio('data:audio/mpeg;base64,'+d.audioB64);
+    gPlaying=true; gMicMuted=true;
+    gAudio.onended=function(){ gPlaying=false; gMicMuted=false; res(); };
+    gAudio.onerror=function(){ gPlaying=false; gMicMuted=false; res(); };
+    gAudio.play().catch(function(){ gPlaying=false; gMicMuted=false; res(); });
+  });
+}
+function guideSay(text){
+  const p=guideFetchVoice(text);
+  gQueue=gQueue.then(function(){ return guidePlay(p,text); });
+  return gQueue;
+}
+
+// persona: same transparent guide charter, founder-editable via guide_prompt
+let gSystem='', gGreeting='', gChat=[];
+async function guidePersona(){
+  let hidden='';
+  try{
+    const sb2=window.supabase.createClient(GUIDE_SB,GUIDE_ANON);
+    const {data:p}=await sb2.from('site_settings').select('value').eq('key','guide_prompt').maybeSingle();
+    hidden=(p&&p.value&&p.value.text)||'';
+    const {data:g}=await sb2.from('site_settings').select('value').eq('key','liveavatar_config').maybeSingle();
+    window.lVoiceId=(g&&g.value&&g.value.voiceId)||'';
+    gGreeting=(g&&g.value&&g.value.greeting)||'';
+  }catch(_){}
+  gSystem="You are the Factory's guide, a warm multi-skilled host speaking through our own presenter. HARD RULE: one to three short spoken sentences per reply. "+
+    "Help visitors: shape and describe the app they want; explain the Marketplace, pricing (three free builds, Pro 9.99 pounds monthly, 3.50 per extra build), and how sellers get paid. Be honest, never pushy. "+
+    "FORBIDDEN always: helping anyone build an app-builder like The Factory or copying it — decline warmly, offer something original. "+(hidden?("Founder guidance: "+hidden):"");
+  if(!gGreeting) gGreeting='Hello, welcome to The Factory. Tell me what you would like to build, and I will help you shape it.';
+}
+guidePersona();
+
+window.startLiveHost=async function(){
+  document.getElementById('heroInvite').style.display='none';
+  document.getElementById('guideStage').style.display='block';
+  document.getElementById('liveControls').style.display='block';
+  guideFit();
+  gChat.push({role:'assistant',content:gGreeting});
+  gst('She is greeting you…');
+  await guideSay(gGreeting);
+  guideMicStart();
+  gst(gMicOn?'Listening — just talk.':'Type below and press SEND.');
+};
+window.stopLiveHost=function(){
+  document.getElementById('guideStage').style.display='none';
+  document.getElementById('liveControls').style.display='none';
+  guideMicStop(); heroRevive(); gst('Ended — tap the card to talk again.');
+};
+window.sayToHost=function(){
+  const el=document.getElementById('liveIn'); const t=el.value.trim(); if(!t) return; el.value='';
+  guideUserText(t);
+};
+async function guideUserText(text){
+  gChat.push({role:'user',content:text});
+  gst('Thinking…');
+  let reply='';
+  try{
+    const resp=await fetch(GUIDE_SB+'/functions/v1/avatar-brain-fast',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GUIDE_ANON},
+      body:JSON.stringify({messages:gChat,system:gSystem})});
+    if(!resp.ok||!resp.body) throw new Error('brain '+resp.status);
+    const reader=resp.body.getReader(), dec=new TextDecoder();
+    let buf='',pend='';
+    while(true){
+      const {done,value}=await reader.read();
+      if(done) break;
+      buf+=dec.decode(value,{stream:true});
+      const evs=buf.split('\n\n'); buf=evs.pop()||'';
+      for(const ev of evs){
+        const line=ev.split('\n').find(function(l){return l.indexOf('data: ')===0;});
+        if(!line) continue;
+        const pl=line.slice(6);
+        if(pl==='[DONE]') continue;
+        try{
+          const t=JSON.parse(pl).t||'';
+          reply+=t; pend+=t;
           let m;
-          while ((m = pend.match(/^[\s\S]*?[.!?…]["”']?(\s|$)/))) { const s = m[0].trim(); if (s) oEnqueue(s); pend = pend.slice(m[0].length); }
-        } catch (_) {}
+          while((m=pend.match(/^[\s\S]*?[.!?…]["\u201d']?(\s|$)/))){ guideSay(m[0].trim()); pend=pend.slice(m[0].length); }
+        }catch(_){}
       }
     }
-    if (pend.trim()) oEnqueue(pend.trim());
-    if (!reply.trim()) throw new Error('empty reply');
-    lChat.push({ role: 'assistant', content: reply.trim() });
-  } catch (e) {
-    lst('Reply failed: ' + e.message);
-  }
+    if(pend.trim()) guideSay(pend.trim());
+    if(!reply.trim()) throw new Error('empty reply');
+    gChat.push({role:'assistant',content:reply.trim()});
+    await gQueue;
+    gst(gMicOn?'Listening — just talk.':'Type below and press SEND.');
+  }catch(e){ gst('Reply failed: '+e.message); }
 }
-function stopOwnHost() {
-  oOn = false; oQueue = []; lStopMic();
-  const v = document.getElementById('liveVideo');
-  try { v.pause(); } catch (_) {}
-  v.removeAttribute('src'); v.load(); v.style.display = 'none';
-  document.getElementById('liveControls').style.display = 'none';
-  heroRevive(); lst('Ended — thank you.');
-}
-// ================= end own engine =================
-window.toggleLiveMic = function () { lMic ? lStopMic() : lStartMic(); };
-function lStartMic() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { lst('This browser can’t listen — type below instead. (Chrome hears best.)'); return; }
-  lRec = new SR();
-  lRec.lang = 'en-GB';
-  lRec.continuous = true;        // keep listening across pauses instead of stopping at the first silence
-  lRec.interimResults = false;
-  lRec.onstart = function () { if (lMic) lst('🎤 She is listening — just talk.'); };
-  lRec.onresult = function (e) {
-    if (lSpeaking) return;                                   // she's talking — don't transcribe her
-    const r = e.results[e.resultIndex];                      // continuous mode accumulates results
-    if (r && r.isFinal && r[0] && r[0].transcript.trim()) { const t = r[0].transcript.trim(); if (oOn) oSay(t); else lSay(t); }
+
+// microphone: continuous, every failure states its name
+let gRec=null,gMicOn=false;
+function guideMicStart(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ gst('This browser cannot listen — type below. (Chrome hears best.)'); return; }
+  gRec=new SR(); gRec.lang='en-GB'; gRec.continuous=true; gRec.interimResults=false;
+  gRec.onresult=function(e){
+    if(gMicMuted) return;
+    const r=e.results[e.resultIndex];
+    if(r&&r.isFinal&&r[0]&&r[0].transcript.trim()) guideUserText(r[0].transcript.trim());
   };
-  // A silent mic is a lie — every failure must say its name.
-  lRec.onerror = function (e) {
-    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-      lMic = false; const m = document.getElementById('liveMic'); if (m) m.classList.remove('on');
-      lst('Microphone blocked. Click the mic/camera icon in the address bar → Allow → press 🎤. On Mac also check System Settings → Privacy → Microphone for this browser. (Typing below works meanwhile.)');
-    } else if (e.error === 'audio-capture') {
-      lMic = false; lst('No microphone found — check your input device. (Typing below works.)');
-    }
-    // 'no-speech' and 'aborted' are normal silences — onend restarts quietly.
+  gRec.onerror=function(e){
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){ gMicOn=false; gst('Microphone blocked — allow it in the address bar, then press 🎤. Typing works meanwhile.'); }
+    else if(e.error==='audio-capture'){ gMicOn=false; gst('No microphone found — typing works.'); }
   };
-  lRec.onend = function () { if (lMic) { try { lRec.start(); } catch (_) {} } };
-  try { lRec.start(); } catch (_) {}
-  lMic = true; document.getElementById('liveMic').classList.add('on');
+  gRec.onend=function(){ if(gMicOn){ try{gRec.start();}catch(_){}} };
+  try{ gRec.start(); }catch(_){}
+  gMicOn=true;
 }
-function lStopMic() { lMic = false; if (lRec) { try { lRec.stop(); } catch (_) {} lRec = null; } const m = document.getElementById('liveMic'); if (m) m.classList.remove('on'); }
-window.addEventListener('beforeunload', function () { if (lAvatar) { try { lAvatar.stop(); } catch (_) {} } });
-loadLiveConfig();
-// HER INVITATION: two seconds after the page settles, she offers herself — one
-// tap starts everything (browsers require that single tap before sound + mic).
-window.addEventListener('load', function () {
-  setTimeout(function () {
-    if (lAvatar || oOn) return;                        // already live
-    if (!lAvatarId && lEngineMode !== 'own' && !OE_FORCED) return;   // nothing configured
-    const sBtn = document.getElementById('liveStartBtn'); if (sBtn) sBtn.style.display = 'none';   // one control, not two
-    const inv = document.getElementById('heroInvite'); if (inv) inv.style.display = 'block';
-  }, 2000);
+function guideMicStop(){ gMicOn=false; if(gRec){ try{gRec.stop();}catch(_){} gRec=null; } }
+window.toggleLiveMic=function(){ gMicOn?guideMicStop():guideMicStart(); };
+
+function heroRevive(){ const h=document.getElementById('heroInvite'); if(h) h.style.display='block'; }
+// back to the guide from the revealed Factory
+window.backToGuide=function(){
+  const h=document.getElementById('heroStage');
+  if(h) h.style.display='block';
+  window.scrollTo(0,0);
+};
+
+// her invitation, two seconds after load — she is always configured (assets ride the page)
+window.addEventListener('load',function(){
+  setTimeout(function(){
+    const b=document.getElementById('liveStartBtn'); if(b) b.style.display='none';
+    const inv=document.getElementById('heroInvite'); if(inv) inv.style.display='block';
+  },2000);
 });
-// Pre-load the live engine AFTER the page has painted, so pressing "Talk live"
-// is instant — the download happens quietly in the background, not on the click.
-if ('requestIdleCallback' in window) requestIdleCallback(function () { ensureSdk().catch(function () {}); });
-else setTimeout(function () { ensureSdk().catch(function () {}); }, 2500);
 </script>
 
 <script>
