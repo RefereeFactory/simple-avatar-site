@@ -442,11 +442,11 @@
   <div class="banner hidden" id="payBanner">🎉 Payment received — your builds are being credited. Thank you!</div>
   <div class="inbox-banner hidden" id="inboxBanner"></div>
 
-  <div class="card" id="moneyCard" style="background:linear-gradient(135deg,#1a1408 0%,#241a06 55%,#3a2a08 100%);border:1px solid #f0a500;box-shadow:0 10px 40px rgba(240,165,0,0.18);position:relative;overflow:hidden;">
-    <div style="position:absolute;top:12px;right:14px;font-size:11px;font-weight:800;letter-spacing:1px;color:#0a0a0c;background:#f0a500;border-radius:5px;padding:3px 10px;">BY INVITATION ONLY</div>
   <div style="text-align:center;margin:6px 0 14px;">
     <button type="button" onclick="backToGuide()" style="padding:10px 22px;background:#0d0d0f;border:2px solid #f0a500;color:#f0a500;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;letter-spacing:0.5px;">🗣️ BACK TO THE AVATAR GUIDE</button>
   </div>
+  <div class="card" id="moneyCard" style="background:linear-gradient(135deg,#1a1408 0%,#241a06 55%,#3a2a08 100%);border:1px solid #f0a500;box-shadow:0 10px 40px rgba(240,165,0,0.18);position:relative;overflow:hidden;">
+    <div style="position:absolute;top:12px;right:14px;font-size:11px;font-weight:800;letter-spacing:1px;color:#0a0a0c;background:#f0a500;border-radius:5px;padding:3px 10px;">BY INVITATION ONLY</div>
     <div style="font-size:26px;font-weight:900;color:#f0a500;line-height:1.2;margin-bottom:8px;">💰 Make more money with ease</div>
     <div style="font-size:14.5px;color:#e6d9bf;line-height:1.7;max-width:560px;">
       A private service for trusted members: we find a real need in the world, build the software that solves it,
@@ -3456,7 +3456,7 @@
 // device (unlimited simultaneous visitors, no per-minute rental). Voice: our
 // ElevenLabs with letter timestamps. Mind: avatar-brain-fast. LiveAvatar: GONE.
 const GUIDE_SB='https://canvbkibjgcnqowjtarf.supabase.co';
-const GUIDE_ANON=LANON!==undefined?LANON:'';
+const GUIDE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhbnZia2liamdjbnFvd2p0YXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NzE0NDYsImV4cCI6MjA5OTM0NzQ0Nn0.TLskVoTaYI90avy09IuM_kkKvAYUMETTntZkn2M807I';
 function gst(t){ const el=document.getElementById('liveStatus'); if(el) el.textContent=t; }
 
 function guideVisemeFor(ch,next){
