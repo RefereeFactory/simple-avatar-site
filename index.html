@@ -3529,6 +3529,7 @@ function guideClipFrame(name,tIn){
 }
 const gStill=document.getElementById('guideStill'), gCv=document.getElementById('guideLips'), gCx=gCv.getContext('2d');
 let gMeta=null, gSprites={}, gAudio=null, gSegs=[], gPlaying=false, gBlinkStart=-1;
+let gMicMuted=false, gQueue=Promise.resolve(), gQueueDepth=0;
 (function guideAssets(){
   let dir='visemes';
   if(window.VISEME_META2){ gMeta=window.VISEME_META2; dir='visemes2'; }
@@ -3555,7 +3556,9 @@ let gMeta=null, gSprites={}, gAudio=null, gSegs=[], gPlaying=false, gBlinkStart=
 function guideFit(){
   const w=gStill.clientWidth,h=gStill.clientHeight;
   if(!w||!h) return;
-  gCv.width=w; gCv.height=h; gCv.style.width=w+'px'; gCv.style.height=h+'px';
+  const r=window.devicePixelRatio||1;
+  gCv.width=Math.round(w*r); gCv.height=Math.round(h*r);
+  gCv.style.width=w+'px'; gCv.style.height=h+'px';
 }
 window.addEventListener('resize',guideFit);
 function guideDrawSprite(name,alpha,X,Y,W,H){
@@ -3563,19 +3566,30 @@ function guideDrawSprite(name,alpha,X,Y,W,H){
   if(!s||!s.complete) return;
   gCx.globalAlpha=alpha; gCx.drawImage(s,X,Y,W,H); gCx.globalAlpha=1;
 }
+let gHoldFrame='rest';
 (function guideDraw(){
   requestAnimationFrame(guideDraw);
-  if(gStill.clientWidth&&gCv.width!==gStill.clientWidth) guideFit();
+  const wantW=Math.round(gStill.clientWidth*(window.devicePixelRatio||1));
+  if(gStill.clientWidth&&gCv.width!==wantW) guideFit();
   if(!gCv.width||!gMeta) return;
   gCx.clearRect(0,0,gCv.width,gCv.height);
   const m={x:gMeta.x/gMeta.frameW,y:gMeta.y/gMeta.frameH,w:gMeta.w/gMeta.frameW,h:gMeta.h/gMeta.frameH};
   const X=m.x*gCv.width,Y=m.y*gCv.height,W=m.w*gCv.width,H=m.h*gCv.height;
-  let prev='rest',ps=0,cur='rest',cs=0,f=1;
-  if(gPlaying&&gAudio){ [prev,ps,cur,cs,f]=guideStateAt(gSegs,gAudio.currentTime); }
-  const t=(gPlaying&&gAudio)?gAudio.currentTime:0;
-  const pn=gMeta.clips?guideClipFrame(prev,t-ps):prev, cn=gMeta.clips?guideClipFrame(cur,t-cs):cur;
-  guideDrawSprite(pn,1,X,Y,W,H);
-  if(cn!==pn) guideDrawSprite(cn,f,X,Y,W,H);
+  // one frame per paint at full alpha — no overlapped draws, so no double exposure.
+  // f<0.5 keeps the previous segment's frame, f>=0.5 switches to the current one.
+  let name;
+  if(gPlaying&&gAudio){
+    const [prev,ps,cur,cs,f]=guideStateAt(gSegs,gAudio.currentTime);
+    const t=gAudio.currentTime;
+    name=(f<0.5)?guideClipFrame(prev,t-ps):guideClipFrame(cur,t-cs);
+    gHoldFrame=name;
+  } else if(gQueueDepth>0){
+    name=gHoldFrame;   // next sentence is queued: keep the last frame, no rest snap
+  } else {
+    name=guideClipFrame('rest',0);
+    gHoldFrame=name;
+  }
+  guideDrawSprite(name,1,X,Y,W,H);
   if(gBlinkStart>0&&gMeta.blink){
     const st2=Math.floor((performance.now()-gBlinkStart)/40), SEQ=[0,1,1,2];
     if(st2>=SEQ.length) gBlinkStart=-1;
@@ -3593,7 +3607,6 @@ function guideFetchVoice(text){
     body:JSON.stringify({text:text,voiceId:(window.lVoiceId||undefined),format:'timed'})})
     .then(function(r){return r.json();}).catch(function(){return null;});
 }
-let gMicMuted=false, gQueue=Promise.resolve(), gQueueDepth=0;
 function guideSilenceOthers(){
   try{ window.speechSynthesis&&window.speechSynthesis.cancel(); }catch(_){}
   document.querySelectorAll('audio,video').forEach(function(el){
