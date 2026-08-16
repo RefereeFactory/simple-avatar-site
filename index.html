@@ -686,10 +686,10 @@
     <div style="margin-bottom:16px;padding:10px;border:1px solid #2c2c33;border-radius:8px;">
       <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🌐 Domain desk (Porkbun)</div>
       <div id="purseLine" style="font-size:12px;color:#8f8;margin-bottom:6px;">Porkbun credit: checking…</div>
-      <button type="button" onclick="purseTopUp()" style="width:100%;padding:7px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:11.5px;cursor:pointer;margin-bottom:6px;">RECORD TOP-UP / CORRECT BALANCE</button>
+      <button type="button" onclick="purseTopUp()" style="width:100%;padding:7px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:11.5px;cursor:pointer;margin-bottom:6px;">ENTER REMAINING PORKBUN BALANCE MANUALLY</button>
       <div style="display:flex;gap:6px;margin-bottom:6px;">
-        <input id="purseFloor" placeholder="alarm floor USD (200)" style="flex:1;padding:7px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:11.5px;">
-        <button type="button" onclick="purseFloorSave()" style="padding:7px 10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-size:11.5px;cursor:pointer;">SET FLOOR</button>
+        <input id="purseFloor" placeholder="alarm level in USD — alerts sound below this" style="flex:1;padding:7px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:11.5px;">
+        <button type="button" onclick="purseFloorSave()" style="padding:7px 10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-size:11.5px;cursor:pointer;">SET CREDIT ALARM FOR PORKBUN</button>
       </div>
       <input id="domainDeskName" placeholder="yourdomain.com" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
       <input id="domainDeskRepo" placeholder="attach to app (repo name, default: the-factory-ui)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
@@ -996,10 +996,29 @@
   };
   // ---------------- Domain desk (founder): quote, then explicit purchase ----------------
   let domQuoteCents = 0;
-  let purseFloorCents = 20000;
+  let purseFloorCents = 20000, lastBeep = 0;
+  function purseBeep() {
+    const now = Date.now();
+    if (now - lastBeep < 60000) return;          // at most once a minute
+    lastBeep = now;
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [0, 350, 700].forEach(function (delay) {
+        setTimeout(function () {
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
+          g.gain.setValueAtTime(0.25, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+          o.start(); o.stop(ctx.currentTime + 0.26);
+        }, delay);
+      });
+    } catch (_) { /* browser blocked audio before first user gesture — visual warning still shows */ }
+  }
   async function purseShow(cents, floorCents) {
     if (typeof floorCents === 'number') purseFloorCents = floorCents;
-    document.getElementById('purseLine').textContent = 'Porkbun credit: $' + (cents / 100).toFixed(2) + (cents < purseFloorCents ? ('  ⚠ BELOW $' + (purseFloorCents / 100).toFixed(0) + ' — TOP UP') : '');
+    const low = cents < purseFloorCents;
+    document.getElementById('purseLine').textContent = 'Porkbun credit: $' + (cents / 100).toFixed(2) + (low ? ('  ⚠ BELOW $' + (purseFloorCents / 100).toFixed(0) + ' — TOP UP') : '');
+    if (low) purseBeep();
   }
   async function purseLoad() {
     if (!session) return;
@@ -1032,7 +1051,7 @@
   };
   window.purseTopUp = async function () {
     if (!session) { alert('Sign in first.'); return; }
-    const amt = prompt('Amount to ADD in USD (what you just paid Porkbun), or type =NUMBER to SET the exact balance (e.g. =39):');
+    const amt = prompt('Type the CURRENT balance shown on the Porkbun dashboard, with = in front (example =38.92). Or type a plain number to ADD a top-up you just made:');
     if (!amt) return;
     const setMode = amt.trim().startsWith('=');
     const v = Math.round(parseFloat(amt.replace('=', '').trim()) * 100);
