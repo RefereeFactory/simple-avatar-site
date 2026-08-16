@@ -3745,7 +3745,12 @@ window.startLiveHost=async function(){
   document.getElementById('guideStage').style.display='block';
   document.getElementById('liveControls').style.display='block';
   guideFit();
-  await guideEngineCheck();   // per-visit: GPU film mode only if the founder's engine is on and ready
+  // Engine check runs in the background with a 5-second ceiling; the greeting
+  // never waits for it. Film mode switches on mid-conversation if available.
+  Promise.race([
+    guideEngineCheck(),
+    new Promise(function(r){ setTimeout(r, 5000); })
+  ]).catch(function(){});
   gChat.push({role:'assistant',content:gGreeting});
   gst('She is greeting you…');
   await guideSay(gGreeting);
