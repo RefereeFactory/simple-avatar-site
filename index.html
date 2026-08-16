@@ -685,6 +685,8 @@
     <!-- The Curtain — graceful "tuning" mode; visitors see the foyer message, founder keeps working -->
     <div style="margin-bottom:16px;padding:10px;border:1px solid #2c2c33;border-radius:8px;">
       <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🌐 Domain desk (Porkbun)</div>
+      <div id="purseLine" style="font-size:12px;color:#8f8;margin-bottom:6px;">Porkbun credit: checking…</div>
+      <button type="button" onclick="purseTopUp()" style="width:100%;padding:7px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:11.5px;cursor:pointer;margin-bottom:6px;">RECORD TOP-UP / CORRECT BALANCE</button>
       <input id="domainDeskName" placeholder="yourdomain.com" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
       <input id="domainDeskRepo" placeholder="attach to app (repo name, default: the-factory-ui)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
       <button type="button" onclick="domainPrice()" style="width:100%;padding:8px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:6px;">CHECK PRICE</button>
@@ -968,6 +970,7 @@
       if (cl && !cl.value) cl.value = list.map(function (c) { return c.name + (c.website ? ' | ' + c.website : ''); }).join('\n');
     } catch (_) {}
   }
+  setTimeout(purseLoad, 2500);
   window.giveVote = async function (pct) {
     if (!session) { document.getElementById('giveStatus').textContent = 'Sign in to vote.'; return; }
     const charity = document.getElementById('giveCharity').value;
@@ -989,6 +992,36 @@
   };
   // ---------------- Domain desk (founder): quote, then explicit purchase ----------------
   let domQuoteCents = 0;
+  async function purseShow(cents) {
+    document.getElementById('purseLine').textContent = 'Porkbun credit: $' + (cents / 100).toFixed(2) + (cents < 20000 ? '  ⚠ BELOW $200 — TOP UP' : '');
+  }
+  async function purseLoad() {
+    if (!session) return;
+    try {
+      const r = await fetch(SB_URL + '/functions/v1/domain-desk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        body: JSON.stringify({ action: 'ledger' })
+      });
+      const d = await r.json();
+      if (r.ok) purseShow(d.balance_cents || 0);
+    } catch (_) {}
+  }
+  window.purseTopUp = async function () {
+    if (!session) { alert('Sign in first.'); return; }
+    const amt = prompt('Amount to ADD in USD (what you just paid Porkbun), or type =NUMBER to SET the exact balance (e.g. =39):');
+    if (!amt) return;
+    const setMode = amt.trim().startsWith('=');
+    const v = Math.round(parseFloat(amt.replace('=', '').trim()) * 100);
+    if (!(v >= 0)) { alert('Not a number.'); return; }
+    const r = await fetch(SB_URL + '/functions/v1/domain-desk', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify(setMode ? { action: 'ledger', set_cents: v } : { action: 'ledger', add_cents: v })
+    });
+    const d = await r.json();
+    if (r.ok) purseShow(d.balance_cents); else alert(d.error || 'Failed');
+  };
   window.domainPrice = async function () {
     if (!session) { alert('Sign in first.'); return; }
     const domain = document.getElementById('domainDeskName').value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/[\/\s].*$/,'');
@@ -1004,7 +1037,8 @@
     if (!d.available) { q.textContent = domain + ' is TAKEN.'; return; }
     if (d.premium) { q.textContent = domain + ' is a PREMIUM domain — refused by policy.'; return; }
     domQuoteCents = d.priceCents;
-    q.textContent = domain + ' is AVAILABLE — $' + (d.priceCents / 100).toFixed(2) + ' first year' + (d.promo ? (' (promo; renews at $' + (d.regularCents / 100).toFixed(2) + ')') : '') + '.';
+    q.textContent = domain + ' AVAILABLE — cost $' + (d.priceCents / 100).toFixed(2) + ', customer price $' + (d.retailCents / 100).toFixed(2) + ' (+' + d.marginPct + '%)' + (d.promo ? ('; renews at $' + (d.regularCents / 100).toFixed(2)) : '') + '.';
+    if (typeof d.purseCents === 'number') purseShow(d.purseCents);
     btn.style.display = 'block';
   };
   window.domainRegister = async function () {
@@ -1023,6 +1057,7 @@
     const d = await r.json();
     if (!r.ok) { q.textContent = 'Refused: ' + (d.error || r.status); return; }
     q.textContent = '✓ ' + domain + ' registered ($' + (d.paidCents / 100).toFixed(2) + '). DNS: ' + d.dns + '. Netlify: ' + d.netlify + '. ' + d.note;
+    if (typeof d.purseCents === 'number') purseShow(d.purseCents);
   };
 
   window.charitySave = async function () {
