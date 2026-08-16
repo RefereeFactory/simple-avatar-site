@@ -991,7 +991,7 @@
   let domQuoteCents = 0;
   window.domainPrice = async function () {
     if (!session) { alert('Sign in first.'); return; }
-    const domain = document.getElementById('domName').value.trim().toLowerCase();
+    const domain = document.getElementById('domName').value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/[\/\s].*$/,'');
     const q = document.getElementById('domQuote'), btn = document.getElementById('domRegBtn');
     btn.style.display = 'none'; q.textContent = 'Asking the registry…';
     const r = await fetch(SB_URL + '/functions/v1/domain-desk', {
@@ -1009,7 +1009,7 @@
   };
   window.domainRegister = async function () {
     if (!session) { alert('Sign in first.'); return; }
-    const domain = document.getElementById('domName').value.trim().toLowerCase();
+    const domain = document.getElementById('domName').value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/[\/\s].*$/,'');
     const repo = document.getElementById('domRepo').value.trim() || 'the-factory-ui';
     const q = document.getElementById('domQuote');
     if (!confirm('Register ' + domain + ' for $' + (domQuoteCents / 100).toFixed(2) + '?\n\nPressing OK is your agreement to Porkbun\'s Domain Registration Agreement, and charges your Porkbun account. DNS will point the domain at ' + repo + '.')) return;
