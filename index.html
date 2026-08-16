@@ -3455,6 +3455,9 @@
 // OUR OWN GUIDE — the Factory's composite presenter. Renders on the visitor's
 // device (unlimited simultaneous visitors, no per-minute rental). Voice: our
 // ElevenLabs with letter timestamps. Mind: avatar-brain-fast. LiveAvatar: GONE.
+(function(){ const OA=window.Audio; window.__audioRegistry=[];
+  window.Audio=function(){ const el=new OA(...arguments); window.__audioRegistry.push(el); return el; };
+  window.Audio.prototype=OA.prototype; })();
 const GUIDE_SB='https://canvbkibjgcnqowjtarf.supabase.co';
 const GUIDE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhbnZia2liamdjbnFvd2p0YXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NzE0NDYsImV4cCI6MjA5OTM0NzQ0Nn0.TLskVoTaYI90avy09IuM_kkKvAYUMETTntZkn2M807I';
 function gst(t){ const el=document.getElementById('liveStatus'); if(el) el.textContent=t; }
@@ -3590,11 +3593,21 @@ function guideFetchVoice(text){
     body:JSON.stringify({text:text,voiceId:(window.lVoiceId||undefined),format:'timed'})})
     .then(function(r){return r.json();}).catch(function(){return null;});
 }
-let gMicMuted=false, gQueue=Promise.resolve();
+let gMicMuted=false, gQueue=Promise.resolve(), gQueueDepth=0;
+function guideSilenceOthers(){
+  try{ window.speechSynthesis&&window.speechSynthesis.cancel(); }catch(_){}
+  document.querySelectorAll('audio,video').forEach(function(el){
+    try{ if(el!==gAudio&&!el.paused) el.pause(); }catch(_){}
+  });
+  (window.__audioRegistry||[]).forEach(function(el){
+    try{ if(el!==gAudio&&!el.paused) el.pause(); }catch(_){}
+  });
+}
 function guidePlay(audioP,text){
   return new Promise(async function(res){
     const d=await audioP;
     if(!d||!d.audioB64){ gst('Voice unavailable — she says: '+text); res(); return; }
+    guideSilenceOthers();
     const a=d.alignment||{};
     gSegs=guideSchedule(a.characters||[],a.character_start_times_seconds||[],a.character_end_times_seconds||[]);
     gAudio=new Audio('data:audio/mpeg;base64,'+d.audioB64);
@@ -3606,7 +3619,10 @@ function guidePlay(audioP,text){
 }
 function guideSay(text){
   const p=guideFetchVoice(text);
-  gQueue=gQueue.then(function(){ return guidePlay(p,text); });
+  gQueueDepth++;
+  gQueue=gQueue.then(function(){ return guidePlay(p,text); })
+               .catch(function(){})
+               .then(function(){ gQueueDepth=Math.max(0,gQueueDepth-1); });
   return gQueue;
 }
 
@@ -3709,6 +3725,9 @@ function guideMicStop(){ gMicOn=false; if(gRec){ try{gRec.stop();}catch(_){} gRe
 window.toggleLiveMic=function(){ gMicOn?guideMicStop():guideMicStart(); };
 
 function heroRevive(){ const h=document.getElementById('heroInvite'); if(h) h.style.display='block'; }
+window.__guideDebug=function(){ return { sprites:Object.keys(gSprites).length, meta:!!gMeta,
+  queueDepth:gQueueDepth, playing:gPlaying, registrySize:(window.__audioRegistry||[]).length,
+  concurrent:(window.__audioRegistry||[]).filter(function(a){return !a.paused;}).length }; };
 // back to the guide from the revealed Factory
 window.backToGuide=function(){
   const h=document.getElementById('heroStage');
