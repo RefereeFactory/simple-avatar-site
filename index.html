@@ -560,7 +560,7 @@
       </div>
     </details>
     <input id="domName" placeholder="e.g. mybarbershop.com" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;margin-bottom:8px;">
-    <select id="domRepo" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;margin-bottom:8px;">
+    <select id="domainDeskRepo" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;margin-bottom:8px;">
       <option value="">— choose which of your apps —</option>
     </select>
     <div style="display:flex;gap:8px;">
@@ -685,11 +685,11 @@
     <!-- The Curtain — graceful "tuning" mode; visitors see the foyer message, founder keeps working -->
     <div style="margin-bottom:16px;padding:10px;border:1px solid #2c2c33;border-radius:8px;">
       <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🌐 Domain desk (Porkbun)</div>
-      <input id="domName" placeholder="yourdomain.com" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
-      <input id="domRepo" placeholder="attach to app (repo name, default: the-factory-ui)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
+      <input id="domainDeskName" placeholder="yourdomain.com" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
+      <input id="domainDeskRepo" placeholder="attach to app (repo name, default: the-factory-ui)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
       <button type="button" onclick="domainPrice()" style="width:100%;padding:8px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:6px;">CHECK PRICE</button>
-      <div id="domQuote" style="font-size:12px;color:#8f8;min-height:16px;margin-bottom:6px;"></div>
-      <button type="button" id="domRegBtn" onclick="domainRegister()" style="display:none;width:100%;padding:8px;background:#1a1408;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:12px;">REGISTER — charges your Porkbun account</button>
+      <div id="domainDeskQuote" style="font-size:12px;color:#8f8;min-height:16px;margin-bottom:6px;"></div>
+      <button type="button" id="domainDeskRegisterBtn" onclick="domainRegister()" style="display:none;width:100%;padding:8px;background:#1a1408;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:12px;">REGISTER — charges your Porkbun account</button>
 
       <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🎗 Charities (one per line: Name | website)</div>
       <textarea id="charList" rows="3" placeholder="Water Aid | wateraid.org&#10;Shelter | shelter.org.uk" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;"></textarea>
@@ -991,8 +991,8 @@
   let domQuoteCents = 0;
   window.domainPrice = async function () {
     if (!session) { alert('Sign in first.'); return; }
-    const domain = document.getElementById('domName').value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/[\/\s].*$/,'');
-    const q = document.getElementById('domQuote'), btn = document.getElementById('domRegBtn');
+    const domain = document.getElementById('domainDeskName').value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/[\/\s].*$/,'');
+    const q = document.getElementById('domainDeskQuote'), btn = document.getElementById('domainDeskRegisterBtn');
     btn.style.display = 'none'; q.textContent = 'Asking the registry…';
     const r = await fetch(SB_URL + '/functions/v1/domain-desk', {
       method: 'POST',
@@ -1009,12 +1009,12 @@
   };
   window.domainRegister = async function () {
     if (!session) { alert('Sign in first.'); return; }
-    const domain = document.getElementById('domName').value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/[\/\s].*$/,'');
-    const repo = document.getElementById('domRepo').value.trim() || 'the-factory-ui';
-    const q = document.getElementById('domQuote');
+    const domain = document.getElementById('domainDeskName').value.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/[\/\s].*$/,'');
+    const repo = document.getElementById('domainDeskRepo').value.trim() || 'the-factory-ui';
+    const q = document.getElementById('domainDeskQuote');
     if (!confirm('Register ' + domain + ' for $' + (domQuoteCents / 100).toFixed(2) + '?\n\nPressing OK is your agreement to Porkbun\'s Domain Registration Agreement, and charges your Porkbun account. DNS will point the domain at ' + repo + '.')) return;
     q.textContent = 'Registering — this takes a few seconds…';
-    document.getElementById('domRegBtn').style.display = 'none';
+    document.getElementById('domainDeskRegisterBtn').style.display = 'none';
     const r = await fetch(SB_URL + '/functions/v1/domain-desk', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
@@ -1647,7 +1647,7 @@
   async function domainClaim() {
     if (!session) { signIn(); return; }
     const el = document.getElementById('domResult');
-    if (!document.getElementById('domRepo').value) {
+    if (!document.getElementById('domainDeskRepo').value) {
       el.textContent = 'Choose which of your apps this domain is for — the list is just above.';
       return;
     }
@@ -1655,7 +1655,7 @@
     const d = await domainDesk({
       action: 'claim',
       domain: document.getElementById('domName').value,
-      repoName: document.getElementById('domRepo').value.trim().toLowerCase()
+      repoName: document.getElementById('domainDeskRepo').value.trim().toLowerCase()
     });
     if (d.error) { el.textContent = '⚠️ ' + d.error; return; }
     el.textContent = '✅ Claimed and reserved to your account. ' + (d.note || '');
