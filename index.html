@@ -380,13 +380,15 @@
         <div style="color:#888;font-size:12px;margin-top:3px;">She helps you shape your app, live, face to face.</div>
       </div>
       <div id="guideStage" style="display:none;margin:8px auto 0;max-width:380px;">
-        <div style="overflow:hidden;border-radius:16px;background:#f4f4f6;">
+        <div style="overflow:hidden;border-radius:16px;background:#f4f4f6;position:relative;">
           <div id="guideBreather" style="transform-origin:50% 100%;animation:guideBreathe 4.6s ease-in-out infinite;position:relative;">
             <div id="guideSwayer" style="transform-origin:50% 100%;position:relative;">
               <img id="guideStill" src="still.png" style="width:100%;display:block;">
               <canvas id="guideLips" style="position:absolute;left:0;top:0;pointer-events:none;"></canvas>
             </div>
           </div>
+          <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
+          <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
@@ -3607,19 +3609,96 @@ function guideFetchVoice(text){
     body:JSON.stringify({text:text,voiceId:(window.lVoiceId||undefined),format:'timed'})})
     .then(function(r){return r.json();}).catch(function(){return null;});
 }
+// OWN ENGINE film mode — GPU-rendered replies (MuseTalk pod through gpu-desk).
+// Engaged automatically per visit when the founder set live_engine mode 'own'
+// AND the pod reports ready; otherwise the composite path below runs unchanged.
+// AUDIO-FIRST: every sentence's sound plays the moment it is due — a film clip
+// replaces the live view only when its render already arrived by then.
+// Test hook: ?enginepod=<anything> skips the mode read for THIS visitor only;
+// the pod readiness check still gates, so with no pod it just falls back.
+const GUIDE_OE_FORCED=new URLSearchParams(location.search).get('enginepod');
+const gFilmEl=document.getElementById('guideFilm');
+let gFilmMode=false, gFilmSeq=0, gOutFilm=null, gFilmBlobs=[];
+function guidePod(body){
+  return fetch(GUIDE_SB+'/functions/v1/gpu-desk',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+GUIDE_ANON},
+    body:JSON.stringify(body)});
+}
+async function guideEngineCheck(){
+  gFilmMode=false;
+  try{
+    const sb2=window.supabase.createClient(GUIDE_SB,GUIDE_ANON);
+    if(!GUIDE_OE_FORCED){
+      const {data:le}=await sb2.from('site_settings').select('value').eq('key','live_engine').maybeSingle();
+      if(((le&&le.value&&le.value.mode)||'rented')!=='own') return;
+    }
+    const {data:oe}=await sb2.from('site_settings').select('value').eq('key','own_engine').maybeSingle();
+    if(!oe||!oe.value||!oe.value.podId) return;
+    if(oe.value.state==='ready'){ gFilmMode=true; return; }
+    // settings row not (yet) marked ready — ask the pod itself through the proxy
+    const r=await guidePod({op:'pod',action:'state'});
+    if(r.ok){ const s=await r.json().catch(function(){return {};}); if(s.ready===true) gFilmMode=true; }
+  }catch(_){}
+}
+// Submit one sentence's mp3 to the pod and poll for the clip in the background.
+// Returns an item the player checks at play time; it NEVER blocks playback.
+function guideFilmJob(audioB64){
+  const it={clip:null,failed:false};
+  const id='g'+Date.now().toString(36)+'-'+(gFilmSeq++);   // fits pod job id ^[a-z0-9-]{1,48}$
+  (async function(){
+    try{
+      const j=await guidePod({op:'pod',action:'job',job:id,b64:audioB64});
+      if(!j.ok){ it.failed=true; return; }
+      const t0=Date.now();
+      while(Date.now()-t0<60000&&gFilmMode){
+        await new Promise(function(r){setTimeout(r,1500);});
+        const r=await guidePod({op:'pod',action:'result',job:id});
+        if(r.ok&&(r.headers.get('Content-Type')||'').indexOf('video/mp4')===0){
+          it.clip=URL.createObjectURL(await r.blob()); gFilmBlobs.push(it.clip); return;
+        }
+        if(r.status===422){ it.failed=true; return; }   // render failed — the voice already played or will
+      }
+      it.failed=true;
+    }catch(_){ it.failed=true; }
+  })();
+  return it;
+}
+// Play one arrived clip in the film layer. The film IS the current output:
+// it carries the sentence's own audio track, so the composite audio is skipped.
+function guidePlayFilm(url){
+  return new Promise(function(res){
+    if(!gFilmEl){ res(); return; }
+    gOutFilm=gFilmEl;
+    guideSilenceOthers();
+    gMicMuted=true;
+    const done=function(){ gFilmEl.onended=gFilmEl.onerror=null; gFilmEl.style.display='none'; gOutFilm=null; gMicMuted=false; res(); };
+    gFilmEl.onended=done; gFilmEl.onerror=done;
+    gFilmEl.src=url; gFilmEl.style.display='block';
+    gFilmEl.play().catch(done);
+  });
+}
+function guideIdleLine(){
+  if(gFilmMode) return 'premium renderer active — some replies arrive as film a few seconds behind the voice';
+  return gMicOn?'Listening — just talk.':'Type below and press SEND.';
+}
 function guideSilenceOthers(){
   try{ window.speechSynthesis&&window.speechSynthesis.cancel(); }catch(_){}
   document.querySelectorAll('audio,video').forEach(function(el){
-    try{ if(el!==gAudio&&!el.paused) el.pause(); }catch(_){}
+    try{ if(el!==gAudio&&el!==gOutFilm&&!el.paused) el.pause(); }catch(_){}
   });
   (window.__audioRegistry||[]).forEach(function(el){
-    try{ if(el!==gAudio&&!el.paused) el.pause(); }catch(_){}
+    try{ if(el!==gAudio&&el!==gOutFilm&&!el.paused) el.pause(); }catch(_){}
   });
 }
 function guidePlay(audioP,text){
   return new Promise(async function(res){
     const d=await audioP;
     if(!d||!d.audioB64){ gst('Voice unavailable — she says: '+text); res(); return; }
+    // Film-mode: if this sentence's render already arrived, play the clip instead.
+    // No waiting — a clip that is not here yet loses to the composite voice.
+    if(d.__film&&d.__film.clip){ guidePlayFilm(d.__film.clip).then(res); return; }
+    gOutFilm=null;
+    if(gFilmEl&&gFilmEl.style.display!=='none'){ try{gFilmEl.pause();}catch(_){} gFilmEl.style.display='none'; }
     guideSilenceOthers();
     const a=d.alignment||{};
     gSegs=guideSchedule(a.characters||[],a.character_start_times_seconds||[],a.character_end_times_seconds||[]);
@@ -3631,7 +3710,10 @@ function guidePlay(audioP,text){
   });
 }
 function guideSay(text){
-  const p=guideFetchVoice(text);
+  const p=guideFetchVoice(text).then(function(d){
+    if(d&&d.audioB64&&gFilmMode) d.__film=guideFilmJob(d.audioB64);   // render starts now; playback never waits for it
+    return d;
+  });
   gQueueDepth++;
   gQueue=gQueue.then(function(){ return guidePlay(p,text); })
                .catch(function(){})
@@ -3663,15 +3745,19 @@ window.startLiveHost=async function(){
   document.getElementById('guideStage').style.display='block';
   document.getElementById('liveControls').style.display='block';
   guideFit();
+  await guideEngineCheck();   // per-visit: GPU film mode only if the founder's engine is on and ready
   gChat.push({role:'assistant',content:gGreeting});
   gst('She is greeting you…');
   await guideSay(gGreeting);
   guideMicStart();
-  gst(gMicOn?'Listening — just talk.':'Type below and press SEND.');
+  gst(guideIdleLine());
 };
 window.stopLiveHost=function(){
   document.getElementById('guideStage').style.display='none';
   document.getElementById('liveControls').style.display='none';
+  gFilmMode=false; gOutFilm=null;   // stops the result pollers on their next loop check
+  if(gFilmEl){ try{gFilmEl.pause();}catch(_){} gFilmEl.removeAttribute('src'); gFilmEl.style.display='none'; }
+  gFilmBlobs.forEach(function(u){ try{URL.revokeObjectURL(u);}catch(_){} }); gFilmBlobs=[];
   guideMicStop(); heroRevive(); gst('Ended — tap the card to talk again.');
 };
 window.sayToHost=function(){
@@ -3711,7 +3797,7 @@ async function guideUserText(text){
     if(!reply.trim()) throw new Error('empty reply');
     gChat.push({role:'assistant',content:reply.trim()});
     await gQueue;
-    gst(gMicOn?'Listening — just talk.':'Type below and press SEND.');
+    gst(guideIdleLine());
   }catch(e){ gst('Reply failed: '+e.message); }
 }
 
@@ -3740,7 +3826,9 @@ window.toggleLiveMic=function(){ gMicOn?guideMicStop():guideMicStart(); };
 function heroRevive(){ const h=document.getElementById('heroInvite'); if(h) h.style.display='block'; }
 window.__guideDebug=function(){ return { sprites:Object.keys(gSprites).length, meta:!!gMeta,
   queueDepth:gQueueDepth, playing:gPlaying, registrySize:(window.__audioRegistry||[]).length,
-  concurrent:(window.__audioRegistry||[]).filter(function(a){return !a.paused;}).length }; };
+  concurrent:(window.__audioRegistry||[]).filter(function(a){return !a.paused;}).length,
+  filmMode:gFilmMode, filmShowing:!!(gFilmEl&&gFilmEl.style.display!=='none'),
+  filmClipsHeld:gFilmBlobs.length }; };
 // back to the guide from the revealed Factory
 window.backToGuide=function(){
   const h=document.getElementById('heroStage');
