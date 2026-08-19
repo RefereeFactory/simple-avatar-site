@@ -3794,7 +3794,13 @@ async function guideEnsureStarted(){
   // She steps out the moment the conversation starts — SEND or mic alike.
   document.getElementById('guideStage').style.display='block';
   document.getElementById('liveControls').style.display='block';
-  if(typeof guideFit==='function') try{ guideFit(); }catch(_){}
+  // size the mouth canvas only AFTER layout settles — sizing while hidden warps the face
+  if(typeof guideFit==='function'){
+    requestAnimationFrame(function(){ try{ guideFit(); }catch(_){} });
+    setTimeout(function(){ try{ guideFit(); }catch(_){} }, 350);
+    var gsImg=document.getElementById('guideStill');
+    if(gsImg && !gsImg.complete) gsImg.onload=function(){ try{ guideFit(); }catch(_){} };
+  }
   // No greeting monologue — she answers what the user asked.
   // Background engine check (5s ceiling) may enable film mode later.
   Promise.race([guideEngineCheck(), new Promise(function(r){setTimeout(r,5000);})]).catch(function(){});
