@@ -694,7 +694,28 @@
     <button onclick="certStamp()" style="width:100%;padding:12px;background:linear-gradient(135deg,#f0a500,#d48800);border:none;color:#111;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;">STAMP</button>
     <div id="certMsg" style="font-size:12.5px;color:#8f8;min-height:18px;margin-top:8px;"></div>
     <div id="certMine" style="margin-top:10px;"></div>
+    <div style="margin-top:16px;border-top:1px solid #26262c;padding-top:12px;">
+      <div style="font-weight:800;color:#f0a500;font-size:14px;margin-bottom:4px;">🔎 Verify — the evidence bench</div>
+      <div style="font-size:12px;color:#999;line-height:1.6;margin-bottom:8px;">For buyers, officers and courts: deterministic verdicts, no opinion. Check a file's stamp, or prove a key's bearer.</div>
+      <div style="border:1px solid #2c2c33;border-radius:10px;padding:10px;margin-bottom:8px;">
+        <div style="font-weight:700;color:#e6e6e6;font-size:12px;margin-bottom:6px;">1 · Is this file stamped, and since when?</div>
+        <input type="file" id="vrfFile" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
+        <button onclick="vrfFileCheck()" style="width:100%;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">CHECK FILE</button>
+        <div id="vrfFileOut" style="font-size:12px;min-height:16px;margin-top:6px;color:#8f8;"></div>
+      </div>
+      <div style="border:1px solid #2c2c33;border-radius:10px;padding:10px;">
+        <div style="font-weight:700;color:#e6e6e6;font-size:12px;margin-bottom:6px;">2 · Does this key own this certificate?</div>
+        <input type="file" id="vrfCert" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;" title="certificate json">
+        <div style="font-size:10px;color:#666;margin:-2px 0 6px;">↑ the certificate file (factory-certificate-….json)</div>
+        <input type="file" id="vrfKey" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;" title="ownership key json">
+        <div style="font-size:10px;color:#666;margin:-2px 0 6px;">↑ the ownership key file (OWNERSHIP-KEY-….json)</div>
+        <input type="password" id="vrfPass" placeholder="The key's passphrase (typed by the claimed owner)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
+        <button onclick="vrfKeyCheck()" style="width:100%;padding:9px;background:#0d0d0f;border:1px solid #8f8;color:#8f8;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">RULE ON OWNERSHIP</button>
+        <div id="vrfKeyOut" style="font-size:12px;min-height:16px;margin-top:6px;color:#8f8;"></div>
+      </div>
+    </div>
   </div>
+
 
   <div class="card hidden" id="videosCard">
     <div class="section-title" data-t="videosTitle">🎬 Reference videos</div>
@@ -5227,6 +5248,60 @@ setInterval(async function(){
     }
   }catch(_){}
 }, 30000);
+</script>
+
+
+<script>
+// ---------- THE EVIDENCE BENCH: deterministic verdicts for officers, courts, buyers ----------
+window.vrfFileCheck = async function(){
+  const out=document.getElementById('vrfFileOut');
+  const f=document.getElementById('vrfFile').files[0];
+  if(!f){ out.textContent='Choose the file first.'; return; }
+  if(!session){ out.textContent='Sign in first (any account) — the bench needs a door pass.'; return; }
+  out.style.color='#8f8'; out.textContent='Fingerprinting on this device…';
+  try{
+    const sha=await factoryHashFile(f);
+    const r=await fetch(SB_URL+'/functions/v1/timestamp-desk',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({op:'verify',sha256:sha})});
+    const j=await r.json();
+    if(!j.ok){ out.style.color='#d9534f'; out.textContent=j.error||'check failed'; return; }
+    if(j.found){ out.style.color='#8f8'; out.textContent='VERDICT: stamped. First certified '+new Date(j.first_stamped).toLocaleString()+' under label "'+j.label+'". Any later claim on this exact content loses on date.'; }
+    else { out.style.color='#d9a500'; out.textContent='VERDICT: no stamp found for this exact file at The Factory. One changed byte changes the fingerprint — verify you hold the exact stamped copy.'; }
+  }catch(e){ out.style.color='#d9534f'; out.textContent='Error — '+e.message; }
+};
+window.vrfKeyCheck = async function(){
+  const out=document.getElementById('vrfKeyOut');
+  const cf=document.getElementById('vrfCert').files[0], kf=document.getElementById('vrfKey').files[0];
+  const pass=document.getElementById('vrfPass').value;
+  if(!cf||!kf){ out.textContent='Provide both files: the certificate and the ownership key.'; return; }
+  out.style.color='#8f8'; out.textContent='Ruling…';
+  try{
+    const cert=JSON.parse(await cf.text());
+    const keyFile=JSON.parse(await kf.text());
+    const certPub=(cert.ownership&&cert.ownership.public_key_jwk)||null;
+    if(!certPub){ out.style.color='#d9a500'; out.textContent='This certificate is account-held (no bearer key). Ownership follows the named account, not a key.'; return; }
+    let privJwk=null;
+    if(keyFile.format==='factory-locked-key-v1'){
+      if(!pass){ out.style.color='#d9534f'; out.textContent='The key is passphrase-locked — the claimed owner must type the passphrase.'; return; }
+      function ub64(b){ const bin=atob(b); const a=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i); return a; }
+      const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);
+      const aes=await crypto.subtle.deriveKey({name:'PBKDF2',salt:ub64(keyFile.kdf.salt_b64),iterations:keyFile.kdf.iterations,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
+      try{
+        privJwk=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:ub64(keyFile.cipher.iv_b64)},aes,ub64(keyFile.private_key_encrypted_b64))));
+      }catch(_){ out.style.color='#d9534f'; out.textContent='VERDICT: passphrase wrong — this person cannot open this key.'; return; }
+    } else if(keyFile.private_key_jwk){ privJwk=keyFile.private_key_jwk; }
+    else { out.style.color='#d9534f'; out.textContent='Unrecognised key file.'; return; }
+    // the challenge: sign fresh random data with the presented key; verify with the certificate's public key
+    const priv=await crypto.subtle.importKey('jwk',privJwk,{name:'ECDSA',namedCurve:'P-256'},false,['sign']);
+    const pub=await crypto.subtle.importKey('jwk',certPub,{name:'ECDSA',namedCurve:'P-256'},false,['verify']);
+    const challenge=crypto.getRandomValues(new Uint8Array(32));
+    const sig=await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},priv,challenge);
+    const okv=await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},pub,sig,challenge);
+    if(okv){ out.style.color='#8f8'; out.textContent='VERDICT: BEARER PROVEN — this key signs for the certificate "'+(cert.label||'')+'" stamped '+new Date(cert.stamped_at_utc).toLocaleString()+'. The holder of this key and passphrase is the owner.'; }
+    else { out.style.color='#d9534f'; out.textContent='VERDICT: key does NOT match this certificate. This person is not the owner.'; }
+  }catch(e){ out.style.color='#d9534f'; out.textContent='Error — '+e.message; }
+};
 </script>
 
 </body>
