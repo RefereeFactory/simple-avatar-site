@@ -718,6 +718,12 @@
     <div style="margin-top:18px;border-top:1px solid #26262c;padding-top:14px;">
       <div class="section-title" style="font-size:15px;" data-t="invTitle">🧪 Sell your other inventions here</div>
       <div class="section-sub" data-t="invSub">Not everything great is an app. A tool, a method, an idea you created — list it here, certified with our timestamp service, and sell it to the world. We take a stated fee on each sale.</div>
+      <!-- THE EXPLAINER FILM: animated scenes + her voice; no external video service -->
+      <div id="invFilm" style="position:relative;border:1px solid #2c2c33;border-radius:12px;background:#0a0a0c;overflow:hidden;margin:6px 0 12px;">
+        <div id="invFilmStage" style="position:relative;width:100%;aspect-ratio:16/7;display:flex;align-items:center;justify-content:center;"></div>
+        <div id="invFilmCaption" style="padding:10px 14px;font-size:12.5px;color:#ccc;line-height:1.6;min-height:40px;text-align:center;"></div>
+        <button id="invFilmBtn" onclick="invFilmToggle()" style="position:absolute;top:10px;right:10px;padding:8px 16px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer;">▶ PLAY</button>
+      </div>
       <div id="marketMsgInventions" style="display:none;margin:6px 0 10px;padding:10px;border:1px solid #f0a500;border-radius:10px;background:#17130a;font-size:12.5px;color:#eee;line-height:1.6;"></div>
       <div id="inventionList" style="margin-bottom:10px;"></div>
       <div id="invFormWrap" style="border:1px dashed #2c2c33;border-radius:10px;padding:10px;">
@@ -3884,7 +3890,7 @@ function routerReturnCards(){
 }
 window.showPage = function(name){
   if(name==='certify') setTimeout(function(){ if(typeof certList==='function') certList(); if(typeof certPrice==='function') certPrice(); }, 400);
-  if(name==='marketplace') setTimeout(function(){ if(typeof invLoad==='function') invLoad(); if(typeof mmShow==='function') mmShow(); }, 400);
+  if(name==='marketplace') setTimeout(function(){ if(typeof invLoad==='function') invLoad(); if(typeof mmShow==='function') mmShow(); if(typeof invFilmShow==='function'&&!invFilmOn) invFilmShow(0); }, 400);
   try{ if(typeof stopLiveHost==='function' && window.gStarted) stopLiveHost(); }catch(_){}
   routerReturnCards();
   document.getElementById('homePanel').style.display='none';
@@ -4945,6 +4951,64 @@ window.mmShow = async function(){
   }catch(_){}
 };
 </script>
+
+
+<script>
+// ---------- INVENTIONS EXPLAINER FILM: animated SVG scenes narrated by our own voice ----------
+const INV_SCENES=[
+ {cap:"Meet Amina. She has invented a folding bicycle helmet — brilliant. But how does she prove it is hers?",
+  svg:'<svg viewBox="0 0 320 140"><circle cx="110" cy="70" r="34" fill="none" stroke="#f0a500" stroke-width="2.5"/><path d="M96 60 q14 -18 28 0" fill="none" stroke="#f0a500" stroke-width="2.5"/><circle cx="103" cy="72" r="3" fill="#f0a500"/><circle cx="117" cy="72" r="3" fill="#f0a500"/><path d="M100 84 q10 8 20 0" fill="none" stroke="#f0a500" stroke-width="2"/><g style="animation:invPulse 1.6s ease-in-out infinite;transform-origin:210px 52px;"><circle cx="210" cy="52" r="16" fill="none" stroke="#ffd766" stroke-width="2.5"/><path d="M204 68 h12 M206 74 h8" stroke="#ffd766" stroke-width="2.5"/><path d="M210 20 v10 M232 30 l-7 7 M188 30 l7 7 M238 52 h-10 M182 52 h10" stroke="#ffd766" stroke-width="2"/></g></svg>'},
+ {cap:"She saves everything as one file and stamps it. Her own computer takes the file\u2019s fingerprint — the file never leaves her machine — and the fingerprint is anchored into the Bitcoin blockchain. The date is carved in stone.",
+  svg:'<svg viewBox="0 0 320 140"><rect x="40" y="30" width="60" height="80" rx="6" fill="none" stroke="#f0a500" stroke-width="2.5"/><path d="M50 46 h40 M50 58 h40 M50 70 h28" stroke="#5a5a66" stroke-width="2"/><g style="animation:invSlide 2.2s ease-in-out infinite;"><text x="128" y="78" fill="#ffd766" font-size="15" font-family="monospace">a3f9\u20261b</text></g><g style="animation:invPulse 2s ease-in-out infinite;transform-origin:250px 70px;"><rect x="222" y="42" width="56" height="56" rx="8" fill="none" stroke="#f0a500" stroke-width="2.5"/><circle cx="250" cy="70" r="16" fill="none" stroke="#ffd766" stroke-width="2"/><path d="M250 60 v10 l7 5" stroke="#ffd766" stroke-width="2.5" fill="none"/></g></svg>'},
+ {cap:"She ticks the crypto key. No name on the certificate — whoever holds the key owns the invention. The key lives only on her device.",
+  svg:'<svg viewBox="0 0 320 140"><g style="animation:invPulse 1.8s ease-in-out infinite;transform-origin:160px 70px;"><circle cx="130" cy="70" r="22" fill="none" stroke="#f0a500" stroke-width="3"/><circle cx="130" cy="70" r="8" fill="none" stroke="#f0a500" stroke-width="3"/><path d="M152 70 h64 M196 70 v14 M212 70 v18" stroke="#f0a500" stroke-width="3" fill="none" stroke-linecap="round"/></g></svg>'},
+ {cap:"She lists an advert in the Factory Marketplace: what it does and why it matters — never how. The secret stays home.",
+  svg:'<svg viewBox="0 0 320 140"><rect x="90" y="26" width="140" height="88" rx="8" fill="none" stroke="#f0a500" stroke-width="2.5"/><path d="M90 46 h140" stroke="#f0a500" stroke-width="2"/><path d="M104 62 h80 M104 76 h112 M104 90 h64" stroke="#5a5a66" stroke-width="2.5"/><g style="animation:invPulse 1.6s ease-in-out infinite;transform-origin:214px 96px;"><rect x="188" y="88" width="52" height="16" rx="4" fill="#f0a500"/><text x="196" y="100" fill="#111" font-size="10" font-weight="bold">\u00a3 PRICE</text></g></svg>'},
+ {cap:"A buyer enquires. They agree a price. The buyer\u2019s money waits safely in the middle while Amina signs the invention over to the buyer\u2019s new key.",
+  svg:'<svg viewBox="0 0 320 140"><circle cx="60" cy="70" r="20" fill="none" stroke="#f0a500" stroke-width="2.5"/><circle cx="260" cy="70" r="20" fill="none" stroke="#ffd766" stroke-width="2.5"/><g style="animation:invPulse 1.5s ease-in-out infinite;transform-origin:160px 70px;"><rect x="132" y="48" width="56" height="44" rx="8" fill="none" stroke="#8f8" stroke-width="2.5"/><text x="148" y="76" fill="#8f8" font-size="17" font-weight="bold">\u00a3</text><path d="M132 60 h-40 M188 60 h40" stroke="#5a5a66" stroke-width="2" stroke-dasharray="4 4"/></g><g style="animation:invSlide 2.4s ease-in-out infinite;"><path d="M96 96 h120" stroke="#f0a500" stroke-width="2" stroke-dasharray="5 5"/><text x="140" y="112" fill="#f0a500" font-size="10">key signs over \u2192</text></g></svg>'},
+ {cap:"The moment the signature checks out: money to Amina minus the stated fee \u2014 key and dated certificate to the buyer. Both protected. That is the Factory way.",
+  svg:'<svg viewBox="0 0 320 140"><g style="animation:invPulse 1.8s ease-in-out infinite;transform-origin:160px 66px;"><circle cx="160" cy="66" r="30" fill="none" stroke="#8f8" stroke-width="3"/><path d="M144 66 l12 12 l22 -24" fill="none" stroke="#8f8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M74 108 h172" stroke="#f0a500" stroke-width="2"/><text x="96" y="126" fill="#f0a500" font-size="11">certified \u00b7 escrowed \u00b7 exchanged \u00b7 done</text></svg>'}
+];
+let invFilmOn=false, invFilmIdx=0, invFilmAudio=null, invFilmTimer=null;
+function invFilmShow(i){
+  const st=document.getElementById('invFilmStage'), cp=document.getElementById('invFilmCaption');
+  st.innerHTML='<div style="width:92%;max-width:460px;opacity:0;animation:invFade .8s ease forwards;">'+INV_SCENES[i].svg+'</div>';
+  cp.textContent=INV_SCENES[i].cap;
+}
+async function invFilmVoice(text){
+  try{
+    const r=await fetch(SB_URL+'/functions/v1/voice-speak',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+(session?session.access_token:SB_ANON)},
+      body:JSON.stringify({text:text})});
+    if(!r.ok) throw new Error('tts '+r.status);
+    const blob=await r.blob(); if(blob.size<200) throw new Error('empty');
+    return new Promise(function(res){
+      invFilmAudio=new Audio(URL.createObjectURL(blob));
+      invFilmAudio.onended=res; invFilmAudio.onerror=res;
+      invFilmAudio.play().catch(res);
+    });
+  }catch(_){ return new Promise(function(res){ invFilmTimer=setTimeout(res, 6000); }); } // silent fallback: timed captions
+}
+window.invFilmToggle = async function(){
+  const btn=document.getElementById('invFilmBtn');
+  if(invFilmOn){ invFilmOn=false; btn.textContent='\u25b6 PLAY';
+    if(invFilmAudio){ try{invFilmAudio.pause();}catch(_){} } if(invFilmTimer) clearTimeout(invFilmTimer); return; }
+  invFilmOn=true; btn.textContent='\u25a0 STOP';
+  for(invFilmIdx=0; invFilmIdx<INV_SCENES.length && invFilmOn; invFilmIdx++){
+    invFilmShow(invFilmIdx);
+    await invFilmVoice(INV_SCENES[invFilmIdx].cap);
+  }
+  invFilmOn=false; btn.textContent='\u25b6 REPLAY';
+};
+// idle poster frame so the stage is never empty
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ if(document.getElementById('invFilmStage')) invFilmShow(0); });
+else if(document.getElementById('invFilmStage')) invFilmShow(0);
+</script>
+<style>
+@keyframes invPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+@keyframes invSlide{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
+@keyframes invFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
 
 </body>
 </html>
