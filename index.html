@@ -682,7 +682,12 @@
     <div class="section-sub" data-t="certSub">Prove your creation existed today, in your hands. We take a cryptographic fingerprint of your file — the file itself never leaves your device — and anchor that fingerprint into the Bitcoin blockchain through independent public witnesses. You receive a certificate: this exact content existed at this exact time, presented by your account.</div>
     <div style="margin:8px 0;padding:10px;border:1px dashed #f0a500;border-radius:10px;font-size:12px;color:#f0a500;"><span id="certPriceLine" data-t="certOffer">Launch offer: free for signed-in makers. Becomes a paid certificate service at launch.</span></div>
     <div style="margin:8px 0;padding:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:10px;font-size:12px;color:#ccc;line-height:1.7;" data-t="certPath">The traced path: you have an idea that helps the UK and the world → say it to The Factory → The Factory builds it → The Factory certifies your ownership → you sell it in our Marketplace (ownership transfers there; we take a small stated cut) → we can even advertise it for you. Your business, born certified.</div>
-    <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#bbb;margin:8px 0;"><input id="certAnon" type="checkbox" style="accent-color:#f0a500;"> <span data-t="certAnonLbl">Hold anonymously with a crypto key — no name on the certificate; whoever holds the key owns the work. The key downloads to your device only; if you lose it, the proof of ownership is lost with it.</span></label>
+    <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#bbb;margin:8px 0;"><input id="certAnon" type="checkbox" style="accent-color:#f0a500;" onchange="certPassShow(this.checked)"> <span data-t="certAnonLbl">Hold anonymously with a crypto key — no name on the certificate; whoever holds the key owns the work. The key downloads to your device only; if you lose it, the proof of ownership is lost with it.</span></label>
+    <div id="certPassWrap" style="display:none;margin:0 0 8px;">
+      <input id="certPass1" type="password" placeholder="Passphrase to lock the key — you will need it to ever use the key" style="width:100%;box-sizing:border-box;margin-bottom:6px;padding:8px;background:#0d0d0f;border:1px solid #f0a500;border-radius:8px;color:#eee;font-size:12px;">
+      <input id="certPass2" type="password" placeholder="Same passphrase again" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #f0a500;border-radius:8px;color:#eee;font-size:12px;">
+      <div style="font-size:10.5px;color:#666;margin-top:4px;">The key file downloads locked with this passphrase (AES-256). A thief who steals the file gets nothing without the passphrase. Keep the passphrase in your head and on paper — never in the same place as the file.</div>
+    </div>
     <input type="file" id="certFile" style="width:100%;box-sizing:border-box;margin:6px 0;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
     <textarea id="certText" rows="3" placeholder="…or paste text to certify (an idea, a design, a contract draft)" style="width:100%;box-sizing:border-box;margin:0 0 6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;"></textarea>
     <input id="certLabel" placeholder="Name this certificate — e.g. My app design v1" style="width:100%;box-sizing:border-box;margin:0 0 8px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
@@ -4855,6 +4860,7 @@ async function factoryHashFile(file){
   const d=await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
   return Array.from(new Uint8Array(d)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
 }
+window.certPassShow = function(on){ var w=document.getElementById('certPassWrap'); if(w) w.style.display=on?'block':'none'; };
 window.certStamp = async function(){
   const msg=document.getElementById('certMsg');
   if(!session){ msg.textContent='Sign in first — press Login, top right.'; showPage('account'); return; }
@@ -4868,12 +4874,29 @@ window.certStamp = async function(){
     let anonymous=false, ownerPubJwk=null;
     if(document.getElementById('certAnon').checked){
       anonymous=true;
-      msg.textContent='Forging your ownership key on your device…';
+      const p1=document.getElementById('certPass1').value, p2=document.getElementById('certPass2').value;
+      if(p1.length<8){ msg.textContent='Choose a passphrase of at least 8 characters to lock the key.'; return; }
+      if(p1!==p2){ msg.textContent='The two passphrases differ — type the same one twice.'; return; }
+      msg.textContent='Forging and locking your ownership key on your device…';
       const kp=await crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']);
       ownerPubJwk=await crypto.subtle.exportKey('jwk',kp.publicKey);
       const priv=await crypto.subtle.exportKey('jwk',kp.privateKey);
+      // lock: PBKDF2(310k, SHA-256) -> AES-256-GCM; the unlocked key never touches the file
+      const salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
+      const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(p1),'PBKDF2',false,['deriveKey']);
+      const aes=await crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:310000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt']);
+      const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},aes,new TextEncoder().encode(JSON.stringify(priv)));
+      function b64u(a){ return btoa(String.fromCharCode.apply(null,new Uint8Array(a))); }
       const kd=document.createElement('a');
-      kd.href=URL.createObjectURL(new Blob([JSON.stringify({warning:'THIS IS YOUR OWNERSHIP KEY. Keep it safe and private. Whoever holds it owns the certified work. Lost key = lost proof.',label:label,private_key_jwk:priv,public_key_jwk:ownerPubJwk},null,2)],{type:'application/json'}));
+      kd.href=URL.createObjectURL(new Blob([JSON.stringify({
+        warning:'THIS IS YOUR OWNERSHIP KEY, LOCKED WITH YOUR PASSPHRASE. Whoever holds this file AND the passphrase owns the certified work. Without the passphrase the file is useless. Lost file or forgotten passphrase = lost proof.',
+        label:label,
+        format:'factory-locked-key-v1',
+        kdf:{name:'PBKDF2',hash:'SHA-256',iterations:310000,salt_b64:b64u(salt)},
+        cipher:{name:'AES-256-GCM',iv_b64:b64u(iv)},
+        private_key_encrypted_b64:b64u(ct),
+        public_key_jwk:ownerPubJwk
+      },null,2)],{type:'application/json'}));
       kd.download='OWNERSHIP-KEY-'+label.replace(/[^a-z0-9-]/gi,'_')+'.json'; kd.click();
     }
     msg.textContent='Anchoring with independent witnesses…';
