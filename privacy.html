@@ -144,5 +144,46 @@
     The Factory is a <strong>Referee Innovations</strong> company · <a href="/terms">Terms</a> · <a href="/fees">Fees</a> · <a href="https://factory-love-between-nations.netlify.app" target="_blank">Our Manifesto</a>
   </footer>
 </div>
+<a href="index.html" style="position:fixed;top:14px;right:14px;z-index:1000;padding:10px 18px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.5);">✕ Exit</a>
+
+<script>
+// auto-translate this page into the visitor's chosen language (set on the main page)
+(function(){
+  const ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhbnZia2liamdjbnFvd2p0YXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NzE0NDYsImV4cCI6MjA5OTM0NzQ0Nn0.TLskVoTaYI90avy09IuM_kkKvAYUMETTntZkn2M807I';
+  const lang = localStorage.getItem('factory_lang') || 'en';
+  if (lang === 'en') return;
+  if (lang === 'ar') document.documentElement.dir = 'rtl';
+  function nodes(){
+    const out=[]; const w=document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode:function(n){
+        const p=n.parentElement; if(!p) return NodeFilter.FILTER_REJECT;
+        const t=p.tagName; if(t==='SCRIPT'||t==='STYLE'||t==='NOSCRIPT') return NodeFilter.FILTER_REJECT;
+        if(!n.nodeValue||!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        if(!/[A-Za-z]{2}/.test(n.nodeValue)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }});
+    let n; while((n=w.nextNode())) out.push(n); return out;
+  }
+  async function go(){
+    const ns=nodes(); if(!ns.length) return;
+    const uniq=[]; ns.forEach(function(n){ const s=n.nodeValue.trim(); if(uniq.indexOf(s)<0) uniq.push(s); });
+    const batches=[]; let cur=[], len=0;
+    uniq.forEach(function(s){ if(cur.length&&(len+s.length>6000||cur.length>=60)){batches.push(cur);cur=[];len=0;} cur.push(s); len+=s.length; });
+    if(cur.length) batches.push(cur);
+    const map=new Map();
+    for(const b of batches){
+      try{
+        const r=await fetch('https://canvbkibjgcnqowjtarf.supabase.co/functions/v1/translate-desk',{
+          method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+ANON,'apikey':ANON},
+          body:JSON.stringify({lang:lang,texts:b})});
+        const j=await r.json(); if(!r.ok||!j.ok) return;
+        b.forEach(function(s,k){ map.set(s,j.out[k]); });
+        ns.forEach(function(n){ const s=n.nodeValue.trim(); const t=map.get(s); if(t) n.nodeValue=n.nodeValue.replace(s,t); });
+      }catch(_){ return; }
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go); else go();
+})();
+</script>
 </body>
 </html>

@@ -240,7 +240,7 @@
     font-size: 12.5px; font-weight: 700; font-family: inherit; white-space: nowrap;
   }
   .agree-overlay {
-    position: fixed; inset: 0; background: rgba(5,5,7,0.92); z-index: 1000;
+    position: fixed; inset: 0; background: rgba(5,5,7,0.92); z-index: 9500;
     display: flex; align-items: center; justify-content: center; padding: 20px;
   }
   .agree-box {
@@ -364,22 +364,79 @@
   .earn-block h3 { font-size: 14.5px; color: #f0a500; margin-bottom: 6px; }
 </style>
 </head>
-\1
+<body>
 
   <!-- ===== EXPERIMENTAL: AVATAR-FIRST LANDING (simple-avatar fork, 14 Aug 2026) =====
        Only the AI host appears; the Factory hides behind her until "Reveal all features". -->
-  <div id="heroStage" style="position:fixed;inset:0;z-index:9000;background:#0a0a0c;color:#eee;text-align:center;overflow-y:auto;">
-    <div style="max-width:460px;margin:0 auto;padding:26px 16px;">
-      <div style="letter-spacing:6px;color:#888;font-size:11px;">REFEREE INNOVATIONS</div>
-      <div style="font-size:28px;font-weight:800;margin:6px 0 2px;">THE <span style="color:#f0a500;">FACTORY</span></div>
-      <div style="color:#999;font-size:12.5px;margin-bottom:14px;">Describe it. Own it. Live in minutes.</div>
+  <div id="heroStage" style="position:fixed;inset:0;z-index:9000;background:#0a0a0c;color:#eee;overflow-y:auto;">
+    <div style="display:flex;min-height:100%;align-items:stretch;">
 
-      <div id="heroInvite" onclick="startLiveHost()" style="cursor:pointer;margin:6px auto;max-width:380px;padding:16px;border:2px solid #f0a500;border-radius:16px;background:linear-gradient(180deg,#1a1408,#0d0d0f);animation:heroPulse 2s ease-in-out infinite;">
-        <div style="font-size:32px;">🗣️</div>
-        <div style="color:#f0a500;font-weight:800;font-size:15px;margin-top:2px;">Meet your guide — tap to talk</div>
-        <div style="color:#888;font-size:12px;margin-top:3px;">She helps you shape your app, live, face to face.</div>
+      <!-- LEFT SIDE MENU: the features, quiet, secondary -->
+      <div id="sideMenu" style="width:150px;flex-shrink:0;background:#0d0d0f;border-right:1px solid #26262c;padding:18px 10px;">
+        <div style="letter-spacing:2px;color:#666;font-size:9px;font-weight:700;margin-bottom:14px;" data-t="featuresLabel">FEATURES</div>
+        <a onclick="showPage('build')" data-t="mBuild" style="display:block;cursor:pointer;color:#cfcfcf;font-size:12.5px;padding:8px 6px;border-radius:6px;text-decoration:none;">⚙ Build</a>
+        <a onclick="showPage('apps')" data-t="mApps" style="display:block;cursor:pointer;color:#cfcfcf;font-size:12.5px;padding:8px 6px;border-radius:6px;text-decoration:none;">🔧 Your apps</a>
+        <a onclick="showPage('marketplace')" data-t="mMarket" style="display:block;cursor:pointer;color:#cfcfcf;font-size:12.5px;padding:8px 6px;border-radius:6px;text-decoration:none;">🛒 Marketplace</a>
+        <a onclick="showPage('earn')" data-t="mEarn" style="display:block;cursor:pointer;color:#cfcfcf;font-size:12.5px;padding:8px 6px;border-radius:6px;text-decoration:none;">🤝 Earn with us</a>
+        <a onclick="showPage('domain')" data-t="mDomain" style="display:block;cursor:pointer;color:#cfcfcf;font-size:12.5px;padding:8px 6px;border-radius:6px;text-decoration:none;">🌐 Domain</a>
+        <a onclick="showPage('academy')" data-t="mAcademy" style="display:block;cursor:pointer;color:#cfcfcf;font-size:12.5px;padding:8px 6px;border-radius:6px;text-decoration:none;">📺 Academy</a>
+        <a onclick="showPage('certify')" data-t="mCertify" style="display:block;cursor:pointer;color:#cfcfcf;font-size:12.5px;padding:8px 6px;border-radius:6px;text-decoration:none;">🔏 Own your work</a>
+        <a onclick="showPage('videos')" data-t="mVideos" style="display:block;cursor:pointer;color:#cfcfcf;font-size:12.5px;padding:8px 6px;border-radius:6px;text-decoration:none;">🎬 Reference videos</a>
+        <div style="margin-top:16px;border-top:1px solid #26262c;padding-top:12px;">
+          <div style="letter-spacing:1px;color:#666;font-size:9px;font-weight:700;margin-bottom:6px;">LANGUAGE</div>
+          <select id="heroLang" style="width:100%;padding:6px;background:#141418;border:1px solid #2c2c33;border-radius:6px;color:#eee;font-size:11.5px;">
+            <option value="en">English</option><option value="zh">中文</option><option value="hi">हिन्दी</option>
+            <option value="es">Español</option><option value="ar">العربية</option><option value="fr">Français</option>
+            <option value="pt">Português</option><option value="ru">Русский</option><option value="ja">日本語</option><option value="de">Deutsch</option>
+          </select>
+        </div>
       </div>
-      <div id="guideStage" style="display:none;margin:8px auto 0;max-width:380px;">
+
+      <!-- MAIN COLUMN: the reason people came, first and prominent -->
+      <div style="flex:1;text-align:center;padding:34px 18px;position:relative;">
+
+        <!-- TOP-RIGHT: account + rules -->
+        <div style="position:absolute;top:12px;right:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;font-size:11.5px;">
+          <a id="topAuth" onclick="topAuthClick()" data-t="tLogin" style="cursor:pointer;color:#f0a500;text-decoration:none;font-weight:700;">Login</a>
+          <a onclick="showPage('marketplace')" data-t="tMarket" style="cursor:pointer;color:#999;text-decoration:none;">Marketplace</a>
+          <a onclick="showPage('revenue')" data-t="tRevenue" style="cursor:pointer;color:#999;text-decoration:none;">Revenue share</a>
+          <a onclick="showPage('earn')" data-t="tAffiliate" style="cursor:pointer;color:#999;text-decoration:none;">Affiliate</a>
+          <a href="terms.html" data-t="tTerms" style="color:#999;text-decoration:none;">Terms</a>
+          <a href="privacy.html" data-t="tPrivacy" style="color:#999;text-decoration:none;">Privacy</a>
+          <a onclick="showPage('governance')" data-t="tRules" style="cursor:pointer;color:#999;text-decoration:none;">Rules</a>
+        </div>
+
+        <div id="homePanel">
+        <div style="letter-spacing:6px;color:#888;font-size:11px;">REFEREE INNOVATIONS</div>
+        <div style="font-size:30px;font-weight:800;margin:6px 0 2px;">THE <span style="color:#f0a500;">FACTORY</span></div>
+        <div data-t="tagline" style="color:#999;font-size:12.5px;margin-bottom:22px;">Describe it. Own it. Live in minutes.</div>
+
+        <!-- THE OUTSTANDING BOX: decorative border, the one thing they came for -->
+        <div style="max-width:520px;margin:0 auto;padding:26px 22px;border:2px solid #f0a500;border-radius:20px;background:linear-gradient(180deg,#1a1408,#0d0d0f);box-shadow:0 0 30px 4px rgba(240,165,0,.15);">
+          <div data-t="question" style="color:#f0a500;font-weight:800;font-size:20px;line-height:1.3;margin-bottom:14px;">What app would you like to make?</div>
+          <div style="display:flex;gap:8px;max-width:440px;margin:0 auto;">
+            <input id="liveIn" data-t-ph="placeholder" placeholder="Type it — or press the mic and say it…" style="flex:1;padding:13px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:10px;color:#eee;font-size:14px;" onkeydown="if(event.key==='Enter')sayToHost()">
+            <button onclick="sayToHost()" data-t="send" style="padding:13px 18px;background:#f0a500;border:none;color:#0a0a0c;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;">SEND</button>
+            <button id="liveMic" onclick="toggleLiveMic()" style="padding:13px 15px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:10px;font-size:15px;cursor:pointer;">🎤</button>
+          </div>
+          <button onclick="heroBuild()" data-t="buildBtn" style="margin-top:10px;width:100%;max-width:440px;padding:12px;background:linear-gradient(135deg,#f0a500,#d48800);border:none;color:#111;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;">⚙ BUILD</button>
+          <div id="liveStatus" style="color:#8f8;font-size:12.5px;min-height:18px;margin-top:12px;"></div>
+          <div id="heroBuildBar" style="display:none;margin-top:14px;">
+            <div style="display:flex;gap:6px;">
+              <div class="hstep" id="hs1" data-t="stQueued" style="flex:1;padding:8px 4px;border:1px solid #2c2c33;border-radius:8px;font-size:11.5px;color:#777;background:#0d0d0f;">Queued</div>
+              <div class="hstep" id="hs2" data-t="stBuilding" style="flex:1;padding:8px 4px;border:1px solid #2c2c33;border-radius:8px;font-size:11.5px;color:#777;background:#0d0d0f;">Building</div>
+              <div class="hstep" id="hs3" data-t="stDeploying" style="flex:1;padding:8px 4px;border:1px solid #2c2c33;border-radius:8px;font-size:11.5px;color:#777;background:#0d0d0f;">Deploying</div>
+              <div class="hstep" id="hs4" data-t="stLive" style="flex:1;padding:8px 4px;border:1px solid #2c2c33;border-radius:8px;font-size:11.5px;color:#777;background:#0d0d0f;">Live</div>
+            </div>
+            <div id="heroBuildMsg" style="color:#8f8;font-size:12.5px;min-height:18px;margin-top:8px;"></div>
+            <a id="heroBuildLink" target="_blank" style="display:none;color:#f0a500;font-weight:800;font-size:14px;margin-top:4px;"></a>
+          </div>
+          <div id="heroReply" style="display:none;text-align:left;color:#eee;font-size:14px;line-height:1.5;margin-top:10px;padding:12px;background:#0d0d0f;border-radius:10px;border:1px solid #2c2c33;"></div>
+        </div>
+
+        <!-- hidden until a conversation begins: the guide's face + end control -->
+        <div id="heroInvite" onclick="startLiveHost()" style="display:none;"></div>
+        <div id="guideStage" style="display:none;margin:14px auto 0;max-width:380px;">
         <div style="overflow:hidden;border-radius:16px;background:#f4f4f6;position:relative;">
           <div id="guideBreather" style="transform-origin:50% 100%;animation:guideBreathe 4.6s ease-in-out infinite;position:relative;">
             <div id="guideSwayer" style="transform-origin:50% 100%;position:relative;">
@@ -392,18 +449,17 @@
         </div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
-      <div id="liveControls" style="display:none;margin-top:8px;">
-        <div style="display:flex;gap:6px;max-width:380px;margin:0 auto;">
-          <input id="liveIn" placeholder="Type to her, or just talk…" style="flex:1;padding:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;" onkeydown="if(event.key==='Enter')sayToHost()">
-          <button class="terms-btn" onclick="sayToHost()" style="cursor:pointer;">SUBMIT</button>
-          <button class="terms-btn" id="liveMic" onclick="toggleLiveMic()" style="cursor:pointer;">🎤</button>
-        </div>
-        <button class="terms-btn" onclick="stopLiveHost()" style="cursor:pointer;margin-top:6px;">END</button>
+      <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;">
+        <button class="terms-btn" onclick="stopLiveHost()" style="cursor:pointer;">END</button>
       </div>
-      <div id="liveStatus" style="color:#8f8;font-size:12.5px;min-height:18px;margin-top:8px;"></div>
 
-      <button id="revealBtn" onclick="revealAll()" style="margin-top:22px;padding:14px 30px;background:#0d0d0f;border:2px solid #f0a500;color:#f0a500;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;letter-spacing:1px;">✨ REVEAL ALL FEATURES</button>
-      <div style="color:#666;font-size:11px;margin-top:8px;">The full Factory — builder, marketplace, everything — waits behind this button.</div>
+      <button id="revealBtn" onclick="showPage('plans')" style="margin-top:26px;padding:12px 26px;background:transparent;border:1px solid #444;color:#999;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;">See available purchase plans →</button>
+      </div><!-- /homePanel -->
+
+      <!-- sub-pages render here; the side menu and top bar above stay visible -->
+      <div id="routerSlot" style="display:none;text-align:left;max-width:640px;margin:0 auto;"></div>
+      </div>
+
     </div>
   </div>
   <style>
@@ -412,7 +468,7 @@
     .blinking{animation:revealBlink .35s ease-in-out 2;}
   </style>
 
-<div class="wrap">
+<div class="wrap" id="legacyWrap" style="display:none;">
   <header>
     <div class="eyebrow">Referee Innovations</div>
     <div class="logo">🏭</div>
@@ -444,9 +500,6 @@
   <div class="banner hidden" id="payBanner">🎉 Payment received — your builds are being credited. Thank you!</div>
   <div class="inbox-banner hidden" id="inboxBanner"></div>
 
-  <div style="text-align:center;margin:6px 0 14px;">
-    <button type="button" onclick="backToGuide()" style="padding:10px 22px;background:#0d0d0f;border:2px solid #f0a500;color:#f0a500;border-radius:10px;font-weight:800;font-size:13px;cursor:pointer;letter-spacing:0.5px;">🗣️ BACK TO THE AVATAR GUIDE</button>
-  </div>
   <div class="card" id="moneyCard" style="background:linear-gradient(135deg,#1a1408 0%,#241a06 55%,#3a2a08 100%);border:1px solid #f0a500;box-shadow:0 10px 40px rgba(240,165,0,0.18);position:relative;overflow:hidden;">
     <div style="position:absolute;top:12px;right:14px;font-size:11px;font-weight:800;letter-spacing:1px;color:#0a0a0c;background:#f0a500;border-radius:5px;padding:3px 10px;">BY INVITATION ONLY</div>
     <div style="font-size:26px;font-weight:900;color:#f0a500;line-height:1.2;margin-bottom:8px;">💰 Make more money with ease</div>
@@ -493,7 +546,7 @@
   </div>
 
   <!-- The Curtain: shown to visitors when the founder lowers it. Founder door bottom-right. -->
-  <div id="curtainGate" style="display:none;position:fixed;inset:0;z-index:9999;background:#0a0a0c;color:#eee;text-align:center;">
+  <div id="curtainGate" style="display:none;position:fixed;inset:0;z-index:9000;background:#0a0a0c;color:#eee;text-align:center;">
     <div style="max-width:520px;margin:14vh auto 0;padding:0 18px;">
       <div style="letter-spacing:6px;color:#888;font-size:12px;">REFEREE INNOVATIONS</div>
       <div style="font-size:30px;font-weight:800;margin:8px 0;">THE <span style="color:#f0a500;">FACTORY</span></div>
@@ -507,20 +560,7 @@
     <div onclick="document.getElementById('curtainGate').style.display='none'" style="position:fixed;right:10px;bottom:8px;color:#333;font-size:10px;cursor:pointer;">founder</div>
   </div>
 
-  <div class="agree-overlay hidden" id="agreeGate">
-    <div class="agree-box">
-      <div class="agree-lead">Apps should be made in good faith — to help people, never to harm others.</div>
-      <div class="agree-sub">If you agree, press Agree and proceed. If not, please don't use our tools.<br><br>
-        This sentence is our spirit in one line — it is not the agreement itself. Pressing Agree accepts the full
-        <a href="/terms" target="_blank">Terms of Service</a>, which alone govern your use of The Factory.
-        Our <a href="/privacy" target="_blank">Privacy Policy</a> explains how your data is handled, and our
-        <a href="/governance" target="_blank">guiding principles</a> are also open to read.<br><br>
-        By pressing Agree you also confirm you are <strong>18 or over</strong> — or a parent or guardian
-        registering in your own name and accepting full responsibility for a young maker's use.</div>
-      <button class="agree-yes" onclick="acceptTerms()">✓ I agree — proceed</button><br>
-      <button class="agree-no" onclick="declineTerms()">I do not agree</button>
-    </div>
-  </div>
+
 
   <div class="mode-overlay hidden" id="modeGate">
     <div class="mode-box">
@@ -555,15 +595,15 @@
   </div>
 
   <div class="card hidden" id="payoutCard">
-    <div class="section-title">💸 Get paid</div>
-    <div class="section-sub">Connect your bank through Stripe to receive your app earnings. Your details go to Stripe directly — The Factory never sees them. Test mode until launch.</div>
+    <div class="section-title" data-t="payTitle">💸 Get paid</div>
+    <div class="section-sub" data-t="paySub">Connect your bank through Stripe to receive your app earnings. Your details go to Stripe directly — The Factory never sees them. Test mode until launch.</div>
     <div id="payoutStatus" style="font-size:13.5px;color:#bbb;margin-bottom:10px;">—</div>
     <button class="signout" type="button" id="payoutBtn" onclick="payoutSetup()">Set up payouts</button>
   </div>
 
   <div class="card hidden" id="domainCard">
-    <div class="section-title">🌐 Your domain</div>
-    <div class="section-sub">Give your app a real address of its own — included with your subscription. Search, claim, and it's reserved to your account; registration switches on at launch.</div>
+    <div class="section-title" data-t="domainTitle">🌐 Your domain</div>
+    <div class="section-sub" data-t="domainSub">Give your app a real address of its own — included with your subscription. Search, claim, and it's reserved to your account; registration switches on at launch.</div>
     <details style="margin-bottom:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;">
       <summary style="cursor:pointer;color:#f0a500;font-size:13px;font-weight:700;">ℹ️ How to name your domain</summary>
       <div style="font-size:12.5px;color:#999;line-height:1.7;margin-top:8px;">
@@ -587,8 +627,8 @@
   </div>
 
   <div class="card" id="academyCard">
-    <div class="section-title">📺 Factory Academy</div>
-    <div class="section-sub">Short videos from the founder — how to build, sell and grow with The Factory. Hosted by us.</div>
+    <div class="section-title" data-t="academyTitle">📺 Factory Academy</div>
+    <div class="section-sub" data-t="academySub">Short videos from the founder — how to build, sell and grow with The Factory. Hosted by us.</div>
     <select id="academySelect" onchange="academyPick()" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;margin-bottom:10px;display:none;">
     </select>
     <div id="academyList"><div class="empty-state">Videos coming soon.</div></div>
@@ -637,11 +677,62 @@
     </details>
   </div>
 
+  <div class="card hidden" id="certifyCard">
+    <div class="section-title" data-t="certTitle">🔏 Own your work — timestamp certification</div>
+    <div class="section-sub" data-t="certSub">Prove your creation existed today, in your hands. We take a cryptographic fingerprint of your file — the file itself never leaves your device — and anchor that fingerprint into the Bitcoin blockchain through independent public witnesses. You receive a certificate: this exact content existed at this exact time, presented by your account.</div>
+    <div style="margin:8px 0;padding:10px;border:1px dashed #f0a500;border-radius:10px;font-size:12px;color:#f0a500;"><span id="certPriceLine" data-t="certOffer">Launch offer: free for signed-in makers. Becomes a paid certificate service at launch.</span></div>
+    <div style="margin:8px 0;padding:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:10px;font-size:12px;color:#ccc;line-height:1.7;" data-t="certPath">The traced path: you have an idea that helps the UK and the world → say it to The Factory → The Factory builds it → The Factory certifies your ownership → you sell it in our Marketplace (ownership transfers there; we take a small stated cut) → we can even advertise it for you. Your business, born certified.</div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#bbb;margin:8px 0;"><input id="certAnon" type="checkbox" style="accent-color:#f0a500;"> <span data-t="certAnonLbl">Hold anonymously with a crypto key — no name on the certificate; whoever holds the key owns the work. The key downloads to your device only; if you lose it, the proof of ownership is lost with it.</span></label>
+    <input type="file" id="certFile" style="width:100%;box-sizing:border-box;margin:6px 0;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+    <textarea id="certText" rows="3" placeholder="…or paste text to certify (an idea, a design, a contract draft)" style="width:100%;box-sizing:border-box;margin:0 0 6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;"></textarea>
+    <input id="certLabel" placeholder="Name this certificate — e.g. My app design v1" style="width:100%;box-sizing:border-box;margin:0 0 8px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+    <button onclick="certStamp()" style="width:100%;padding:12px;background:linear-gradient(135deg,#f0a500,#d48800);border:none;color:#111;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;">STAMP</button>
+    <div id="certMsg" style="font-size:12.5px;color:#8f8;min-height:18px;margin-top:8px;"></div>
+    <div id="certMine" style="margin-top:10px;"></div>
+  </div>
+
+  <div class="card hidden" id="videosCard">
+    <div class="section-title" data-t="videosTitle">🎬 Reference videos</div>
+    <div class="section-sub" data-t="videosSub">Short videos about who we are, our aims and values, and how to get the most from The Factory.</div>
+    <div style="margin-top:12px;padding:30px 16px;border:1px dashed #f0a500;border-radius:12px;text-align:center;color:#f0a500;font-weight:700;">
+      Coming up
+      <div style="color:#999;font-weight:400;font-size:12.5px;margin-top:6px;">Our introduction video — who we are, our aims and values — will play here.</div>
+    </div>
+  </div>
+
   <div class="card" id="marketCard">
-    <div class="section-title">🛒 Marketplace</div>
-    <div class="section-sub">Apps built by our makers, ready to use today. Every app comes with a 4-day free trial — pay only if you love it.</div>
+    <div class="section-title" data-t="marketTitle">🛒 Marketplace</div>
+    <div class="section-sub" data-t="marketSub">Apps built by our makers, ready to use today. Every app comes with a 4-day free trial — pay only if you love it.</div>
+    <!-- Sell with us: two ways to sell on The Factory -->
+    <div style="display:flex;gap:10px;margin:8px 0 16px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:150px;border:1px solid #2c2c33;border-radius:10px;padding:12px;background:#0d0d0f;">
+        <div style="color:#f0a500;font-weight:700;font-size:13px;" data-t="sellApps">Marketplace apps</div>
+        <div style="color:#999;font-size:12px;margin-top:4px;" data-t="sellAppsSub">Build an app and sell it here to the world.</div>
+      </div>
+      <div style="flex:1;min-width:150px;border:1px dashed #2c2c33;border-radius:10px;padding:12px;background:#0d0d0f;">
+        <div style="color:#f0a500;font-weight:700;font-size:13px;"><span data-t="sellGoods">Sell goods with us</span> <span style="color:#777;font-weight:400;font-size:11px;" data-t="sellComing">(coming)</span></div>
+        <div style="color:#999;font-size:12px;margin-top:4px;" data-t="sellGoodsSub">Sell physical or digital goods through The Factory.</div>
+      </div>
+    </div>
+    <div id="marketMsgApps" style="display:none;margin:0 0 10px;padding:10px;border:1px solid #f0a500;border-radius:10px;background:#17130a;font-size:12.5px;color:#eee;line-height:1.6;"></div>
     <div id="marketList"></div>
     <div class="empty-state" id="marketEmpty">🛒 The shelves are opening. Makers are preparing their first apps — yours could be the very first: build it, then press 💰 Sell.</div>
+    <!-- INVENTIONS: sell non-Factory creations — a tool or idea you made -->
+    <div style="margin-top:18px;border-top:1px solid #26262c;padding-top:14px;">
+      <div class="section-title" style="font-size:15px;" data-t="invTitle">🧪 Sell your other inventions here</div>
+      <div class="section-sub" data-t="invSub">Not everything great is an app. A tool, a method, an idea you created — list it here, certified with our timestamp service, and sell it to the world. We take a stated fee on each sale.</div>
+      <div id="marketMsgInventions" style="display:none;margin:6px 0 10px;padding:10px;border:1px solid #f0a500;border-radius:10px;background:#17130a;font-size:12.5px;color:#eee;line-height:1.6;"></div>
+      <div id="inventionList" style="margin-bottom:10px;"></div>
+      <div id="invFormWrap" style="border:1px dashed #2c2c33;border-radius:10px;padding:10px;">
+        <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;" data-t="invFormT">List an invention</div>
+        <input id="invTitleIn" placeholder="Title — e.g. Folding workshop clamp" style="width:100%;box-sizing:border-box;margin-bottom:6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+        <textarea id="invSummaryIn" rows="3" placeholder="What it is, what it does, why it matters — without revealing the secret itself" style="width:100%;box-sizing:border-box;margin-bottom:6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;"></textarea>
+        <input id="invPriceIn" placeholder="Asking price — e.g. £5,000 or 'negotiable'" style="width:100%;box-sizing:border-box;margin-bottom:6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+        <button onclick="invSubmit()" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">SUBMIT</button>
+        <div id="invMsg" style="font-size:12px;color:#8f8;min-height:16px;margin-top:6px;"></div>
+        <div style="font-size:10.5px;color:#666;margin-top:4px;" data-t="invCertHint">Tip: certify it first in 🔏 Own your work — certified listings carry the proof badge.</div>
+      </div>
+    </div>
   </div>
 
   <div class="card" id="signinCard">
@@ -657,170 +748,7 @@
     <span style="display:block;font-size:9px;letter-spacing:1px;color:#777;font-weight:700;">GLOBAL HEALTH METER OF FACTORY</span>
     <span id="healthPlateLights" style="display:block;font-size:13px;font-weight:800;color:#eee;margin-top:2px;">awaiting first heartbeat…</span>
   </a>
-  <button type="button" id="fcGear" class="hidden" onclick="fcToggle()" title="Founder Controls" style="position:fixed;right:18px;bottom:18px;z-index:60;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,0.6);">⚙</button>
-  <div id="fcPanel" class="hidden" style="position:fixed;top:0;right:0;bottom:0;width:330px;max-width:92vw;z-index:59;background:#141418;border-left:1px solid #2c2c33;padding:22px 18px 40px;overflow-y:auto;box-shadow:-20px 0 60px rgba(0,0,0,0.6);">
-    <div style="font-weight:800;color:#f0a500;font-size:16px;">⚙ Founder Controls</div>
-    <div style="font-size:11.5px;color:#777;margin:6px 0 16px;line-height:1.6;">Central values for the whole Factory. Each system adopts them at its next update; payment values arm at launch.</div>
 
-    <!-- TASKS — top of the gear, the founder's own to-do board -->
-    <div style="border:1px solid #f0a500;border-radius:10px;padding:12px;margin-bottom:18px;background:#17130a;">
-      <div style="font-weight:800;color:#f0a500;font-size:14px;margin-bottom:8px;">📋 My Tasks &amp; Features</div>
-      <input id="tkName" placeholder="Task or feature name" style="width:100%;margin-bottom:6px;padding:9px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:13px;">
-      <input id="tkDesc" placeholder="Short description (optional)" style="width:100%;margin-bottom:6px;padding:9px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:13px;">
-      <div style="display:flex;gap:6px;">
-        <input id="tkDue" type="datetime-local" style="flex:1;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
-        <select id="tkImp" style="padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
-          <option value="normal">Normal</option>
-          <option value="high">🔴 High</option>
-          <option value="low">Low</option>
-        </select>
-      </div>
-      <button type="button" onclick="tkAdd()" style="width:100%;margin-top:8px;padding:9px;background:#f0a500;border:none;color:#0a0a0c;border-radius:8px;font-weight:800;font-size:13px;cursor:pointer;">＋ Add task</button>
-
-      <div onclick="tkToggle('tkActiveList','tkActiveArrow')" style="cursor:pointer;margin-top:12px;padding:8px 10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;font-size:12.5px;font-weight:700;color:#e6e6e6;user-select:none;">
-        <span id="tkActiveArrow">▸</span> Active tasks (<span id="tkActiveCount">0</span>)</div>
-      <div id="tkActiveList" style="display:none;max-height:280px;overflow-y:auto;margin-top:4px;padding-left:2px;"></div>
-
-      <div onclick="tkToggle('tkCompletedList','tkCompletedArrow')" style="cursor:pointer;margin-top:8px;padding:8px 10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;font-size:12.5px;font-weight:700;color:#8a8a8a;user-select:none;">
-        <span id="tkCompletedArrow">▸</span> Completed tasks (<span id="tkCompletedCount">0</span>)</div>
-      <div id="tkCompletedList" style="display:none;max-height:220px;overflow-y:auto;margin-top:4px;padding-left:2px;"></div>
-
-      <button type="button" onclick="tkReport()" style="width:100%;margin-top:10px;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">📄 Tasks report</button>
-      <button type="button" id="tkAlarmBtn" onclick="tkEnableAlarm()" style="width:100%;margin-top:6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:12px;cursor:pointer;">🔔 Enable alarms</button>
-      <div style="font-size:10px;color:#666;margin-top:5px;line-height:1.5;">Alarms sound and pop up while this page is open — even if the screen dims, keep the tab open. A true alarm when the phone is fully closed needs the phone app (later).</div>
-    </div>
-
-    <!-- Additional utilities — the scattered tools, gathered; may become services -->
-    <div style="margin-bottom:16px;">
-      <div onclick="utilToggle()" style="cursor:pointer;padding:9px 11px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;font-size:12.5px;font-weight:700;color:#e6e6e6;user-select:none;">
-        <span id="utilArrow">▸</span> 🧰 Additional utilities <span style="color:#777;font-weight:400;font-size:11px;">— may graduate to a service for users</span></div>
-      <div id="utilList" style="display:none;margin-top:8px;"></div>
-    </div>
-
-    <!-- The Curtain — graceful "tuning" mode; visitors see the foyer message, founder keeps working -->
-    <div style="margin-bottom:16px;padding:10px;border:1px solid #2c2c33;border-radius:8px;">
-      <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🌐 Domain desk (Porkbun)</div>
-      <div id="purseLine" style="font-size:12px;color:#8f8;margin-bottom:6px;">Porkbun credit: checking…</div>
-      <button type="button" onclick="purseTopUp()" style="width:100%;padding:7px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:11.5px;cursor:pointer;margin-bottom:6px;">ENTER REMAINING PORKBUN BALANCE MANUALLY</button>
-      <div style="display:flex;gap:6px;margin-bottom:6px;">
-        <input id="purseFloor" placeholder="alarm level in USD — alerts sound below this" style="flex:1;padding:7px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:11.5px;">
-        <button type="button" onclick="purseFloorSave()" style="padding:7px 10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-size:11.5px;cursor:pointer;">SET CREDIT ALARM FOR PORKBUN</button>
-      </div>
-      <input id="domainDeskName" placeholder="yourdomain.com" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
-      <input id="domainDeskRepo" placeholder="attach to app (repo name, default: the-factory-ui)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
-      <button type="button" onclick="domainPrice()" style="width:100%;padding:8px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:6px;">CHECK PRICE</button>
-      <div id="domainDeskQuote" style="font-size:12px;color:#8f8;min-height:16px;margin-bottom:6px;"></div>
-      <button type="button" id="domainDeskRegisterBtn" onclick="domainRegister()" style="display:none;width:100%;padding:8px;background:#1a1408;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:6px;">REGISTER — charges your Porkbun account</button>
-      <button type="button" onclick="domainReattach()" style="width:100%;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:11.5px;cursor:pointer;margin-bottom:12px;">LINK DOMAIN TO A DIFFERENT APP</button>
-
-      <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🎗 Charities (one per line: Name | website)</div>
-      <textarea id="charList" rows="3" placeholder="Water Aid | wateraid.org&#10;Shelter | shelter.org.uk" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;"></textarea>
-      <button type="button" onclick="charitySave()" style="width:100%;padding:8px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:12px;">Save charities</button>
-
-      <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🚧 Tuning notice <span id="curState" style="color:#777;font-weight:400;font-size:11px;">— checking…</span></div>
-      <input id="curMsg" placeholder="Message (e.g. We are tuning the machines.)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
-      <input id="curEta" placeholder="Back around… (e.g. 8pm tonight)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
-      <button type="button" id="curBtn" onclick="curtainToggle()" style="width:100%;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">MAKE SITE NOT AVAILABLE</button>
-    </div>
-
-    <!-- Own engine — the Factory's own GPU renderer for the live host (experimental) -->
-    <div style="margin-bottom:16px;padding:10px;border:1px solid #2c2c33;border-radius:8px;">
-      <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🚂 Own engine <span id="oeState" style="color:#777;font-weight:400;font-size:11px;">— press REFRESH</span></div>
-      <div style="font-size:11px;color:#666;line-height:1.6;margin-bottom:8px;">Rents a GPU that films her replies with our own renderer — no LiveAvatar. $0.34 per hour while running. Cold start to ready is about 20-30 minutes (model download + avatar preparation). STOP is manual; the line above shows the running spend. If nothing uses it for 45 minutes it stops itself at the next status check.</div>
-      <div style="display:flex;gap:6px;">
-        <button type="button" onclick="oeStart()" style="flex:1;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">START</button>
-        <button type="button" onclick="oeStop()" style="flex:1;padding:9px;background:#0d0d0f;border:1px solid #d9534f;color:#d9534f;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">STOP</button>
-        <button type="button" onclick="oeStatus()" style="flex:1;padding:9px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">REFRESH</button>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
-        <span style="font-size:12px;color:#999;">Live chat renders on:</span>
-        <button type="button" id="oeModeBtn" onclick="oeModeToggle()" style="flex:1;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">rented (LiveAvatar)</button>
-      </div>
-      <div style="font-size:10.5px;color:#666;margin-top:5px;line-height:1.5;">"own" only takes effect while the engine is ready; visitors fall back to the rented host automatically if the pod is down.</div>
-    </div>
-
-    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">📊 Cost per app — live</div>
-    <div id="fcCosts" style="background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#aaa;line-height:1.7;">Press refresh to read the meters.</div>
-    <button type="button" onclick="fcLoadCosts()" style="width:100%;margin-top:8px;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">⟳ Refresh costs</button>
-    <button type="button" id="fcCurBtn" onclick="fcToggleCur()" style="width:100%;margin-top:6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">Showing £ — switch to $</button>
-    <div style="font-size:11px;color:#666;margin-top:6px;line-height:1.5;">Anthropic is exact per build; Netlify and voice come live from their meters. Rates below feed the maths.</div>
-    <label style="font-size:12px;color:#999;display:block;margin-top:10px;">Netlify plan $/month</label>
-    <input id="fcNetlifyUsd" type="number" step="0.01" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-    <label style="font-size:12px;color:#999;">Anthropic $ per million tokens — in / out</label>
-    <div style="display:flex;gap:8px;">
-      <input id="fcAiIn" type="number" step="0.01" min="0" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-      <input id="fcAiOut" type="number" step="0.01" min="0" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-    </div>
-    <label style="font-size:12px;color:#999;">US dollars per £1 — fallback only; the live ECB rate is fetched on every refresh</label>
-    <input id="fcFx" type="number" step="0.01" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-    <label style="font-size:12px;color:#999;">Anthropic credit loaded — $ (update when you top up)</label>
-    <input id="fcAiCredit" type="number" step="0.01" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-
-    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🧾 Suppliers &amp; bills</div>
-    <div id="fcBills" style="background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#aaa;line-height:1.7;">Press refresh above.</div>
-    <button type="button" onclick="fcVerifyRates()" style="width:100%;margin-top:8px;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">✓ I verified supplier prices today</button>
-    <div style="font-size:11px;color:#666;margin-top:6px;line-height:1.6;">Check them here: <a href="https://www.anthropic.com/pricing" target="_blank" style="color:#f0a500;">Anthropic</a> · <a href="https://www.netlify.com/pricing/" target="_blank" style="color:#f0a500;">Netlify</a> · <a href="https://elevenlabs.io/pricing" target="_blank" style="color:#f0a500;">ElevenLabs</a>. Netlify's price is also checked live on every refresh; the others cannot be read by machine, so the button keeps you honest.</div>
-
-    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🎟 Admissions — sustainable growth</div>
-    <div id="fcAdmission" style="background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#aaa;line-height:1.7;">Press refresh above.</div>
-    <label style="font-size:12px;color:#999;display:block;margin-top:10px;">Planning figure — live apps per average customer</label>
-    <input id="fcAdmApps" type="number" min="1" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-    <label style="font-size:12px;color:#999;">Your cap — customers admitted per period (0 = measured caps only)</label>
-    <input id="fcAdmMax" type="number" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-    <label style="font-size:12px;color:#999;">Database allocation per sub (MB) / bandwidth per sub (GB/mo)</label>
-    <div style="display:flex;gap:8px;">
-      <input id="fcAdmDb" type="number" min="1" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-      <input id="fcAdmBw" type="number" min="1" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-    </div>
-    <label style="font-size:12px;color:#999;">War chest — ready deployable cash for capacity only (£)</label>
-    <input id="fcAdmChest" type="number" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-    <a href="/ops.html" style="display:block;text-align:center;width:100%;margin-top:2px;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none;">⚙→ Open Ops Console</a>
-
-    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">💰 Money</div>
-    <label style="font-size:12px;color:#999;">Marketplace commission %</label>
-    <input id="fcCommission" type="number" step="0.1" min="0" max="100" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-    <label style="font-size:12px;color:#999;">Platform fee % on app transactions (arms at launch)</label>
-    <input id="fcPlatFee" type="number" step="0.1" min="0" max="100" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-
-    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">📦 Plans</div>
-    <label style="font-size:12px;color:#999;">Subscription price label</label>
-    <input id="fcSubPrice" type="text" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-    <label style="font-size:12px;color:#999;">Build credits per subscription payment</label>
-    <input id="fcCreditsSub" type="number" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-    <label style="font-size:12px;color:#999;">Free builds for new customers</label>
-    <input id="fcFreeBuilds" type="number" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-
-    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🗄 App storage</div>
-    <label style="font-size:12px;color:#999;">Max record size (KB)</label>
-    <input id="fcRecKb" type="number" min="1" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-    <label style="font-size:12px;color:#999;">Max records per app</label>
-    <input id="fcRecMax" type="number" min="1" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-
-    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🔔 Alerts to me</div>
-    <label style="font-size:13px;color:#bbb;display:block;margin-bottom:8px;"><input id="fcNotifySales" type="checkbox" style="accent-color:#f0a500;margin-right:8px;">Marketplace sales</label>
-    <label style="font-size:13px;color:#bbb;display:block;margin-bottom:8px;"><input id="fcNotifySubs" type="checkbox" style="accent-color:#f0a500;margin-right:8px;">New subscriptions</label>
-
-    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:18px 0 8px;">🎬 Academy videos</div>
-    <input id="fcVideoTitle" type="text" placeholder="Video title — e.g. How to build your first app" style="width:100%;margin:4px 0 8px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12.5px;">
-    <input id="fcVideoFile" type="file" accept="video/*" style="width:100%;margin:4px 0 8px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
-    <button type="button" onclick="fcUploadVideo()" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">⬆ Upload to Academy</button>
-    <div id="fcVideoMsg" style="font-size:12px;color:#888;margin-top:6px;"></div>
-    <div id="fcVideoList" style="margin-top:8px;"></div>
-
-    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:18px 0 8px;">🏪 Market moderation</div>
-    <div id="fcMarketList" style="font-size:12px;color:#888;">Loading…</div>
-
-    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:18px 0 8px;">🛟 Backup</div>
-    <div id="fcBackupStatus" style="font-size:12px;color:#888;margin-bottom:8px;">Checking…</div>
-    <button type="button" onclick="fcBackupSchema()" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">⬇ Download schema backup (.sql)</button>
-    <div style="font-size:11px;color:#666;margin-top:6px;line-height:1.5;">Save the file into factory-code-vault on GitHub. Edge functions are vaulted separately, one file per change.</div>
-
-    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:18px 0 8px;">📜 Change board</div>
-    <div id="fcLog" style="max-height:180px;overflow-y:auto;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#888;">Loading…</div>
-
-    <button type="button" onclick="fcSave()" style="width:100%;margin-top:16px;padding:12px;background:linear-gradient(135deg,#f0a500,#d48800);color:#111;border:none;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;">Save all</button>
-    <div id="fcOk" class="hidden" style="text-align:center;color:#7fdc7f;font-size:13px;margin-top:10px;">Saved ✓</div>
-  </div>
 
   <div class="card hidden" id="founderCard">
     <div class="section-title">📬 Founder Inbox</div>
@@ -849,27 +777,33 @@
   </div>
 
   <div class="card hidden" id="upgradeCard">
-    <div class="section-title">Keep building</div>
-    <div class="section-sub">You own everything The Factory makes for you. Choose how you want to keep creating:</div>
+    <div class="section-title" data-t="plansTitle">Plans</div>
+    <div id="trialLine" onclick="showPage('build')" style="cursor:pointer;margin:4px 0 14px;padding:14px;border:2px solid #f0a500;border-radius:12px;background:linear-gradient(180deg,#1a1408,#0d0d0f);text-align:center;">
+      <div style="color:#f0a500;font-weight:800;font-size:16px;"><span data-t="trialPre">Start free — </span><span id="trialCount">3</span><span data-t="trialPost"> builds on us</span></div>
+      <div style="color:#999;font-size:12.5px;margin-top:4px;"><span data-t="trialSub">Try The Factory free. No card needed. Keep what you build.</span></div>
+      <div style="color:#777;font-size:11.5px;margin-top:4px;" data-t="trialAvail">Free credit offers are subject to availability and may be reduced, or the offer removed.</div>
+      <div style="color:#f0a500;font-size:12.5px;margin-top:8px;font-weight:700;" data-t="trialGo">Press here to start →</div>
+    </div>
+    <div class="section-sub" data-t="plansSub">Then, to keep building — you own everything The Factory makes for you:</div>
     <div class="plan-row">
       <div class="plan best">
         <div class="p-name">Factory Pro</div>
         <div class="p-price">£9.99<span style="font-size:13px;color:#888;">/mo</span></div>
-        <div class="p-desc">10 builds every month — about £1 per app. Cancel anytime.</div>
-        <button onclick="checkout('pro')">Go Pro</button>
+        <div class="p-desc" data-t="proDesc">10 builds every month — about £1 per app. Cancel anytime.</div>
+        <button onclick="checkout('pro')" data-t="proBtn">Go Pro</button>
       </div>
       <div class="plan">
-        <div class="p-name">Extra Build</div>
+        <div class="p-name" data-t="extraName">Extra Build</div>
         <div class="p-price">£3.50</div>
-        <div class="p-desc">One extra build, no subscription. 10 builds this way = £35 — Pro gives you 10 for £9.99.</div>
-        <button onclick="checkout('extra')">Buy 1 Build</button>
+        <div class="p-desc" data-t="extraDesc">One extra build, no subscription. 10 builds this way = £35 — Pro gives you 10 for £9.99.</div>
+        <button onclick="checkout('extra')" data-t="extraBtn">Buy 1 Build</button>
       </div>
     </div>
   </div>
 
   <div class="card hidden" id="appsCard">
-    <div class="section-title">🔧 Your apps</div>
-    <div class="section-sub">Everything The Factory has built for you. Changed your prices, hours or wording? Tell us what to change — the live page updates in about ninety seconds.</div>
+    <div class="section-title" data-t="appsTitle">🔧 Your apps</div>
+    <div class="section-sub" data-t="appsSub">Everything The Factory has built for you. Changed your prices, hours or wording? Tell us what to change — the live page updates in about ninety seconds.</div>
     <div id="appsList"></div>
     <div class="empty-state hidden" id="appsEmpty">Nothing built yet. Your apps will appear here.</div>
   </div>
@@ -893,7 +827,7 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="contactCard">
     <div class="section-title">About The Factory</div>
     <div class="section-sub">The Factory is one innovation from <strong>Referee Innovations</strong> — a solutions consultancy for the creative industries, built on mathematics and science. We create AI-generated websites and web apps for businesses large and small. Larger projects can be directed to our founders for manual analysis and a quotation, to find the solution that optimises your business.</div>
     <div class="section-title" style="font-size:15px;margin-top:20px;">Reach us here</div>
@@ -908,8 +842,8 @@
   </div>
 
   <div class="card" id="earnCard">
-    <div class="section-title">🤝 Earn with us</div>
-    <div class="section-sub">Two ways to grow with Referee Innovations: refer others and earn, or join the people who build The Factory itself.</div>
+    <div class="section-title" data-t="earnTitle">🤝 Earn with us</div>
+    <div class="section-sub" data-t="earnSub">Two ways to grow with Referee Innovations: refer others and earn, or join the people who build The Factory itself.</div>
     <div class="earn-grid">
       <div class="earn-block">
         <h3>💰 Affiliate programme <span class="draft-tag" style="background:#2b2107;border:1px dashed #f0a500;color:#f0a500;border-radius:6px;padding:1px 8px;font-size:11px;font-weight:700;">Coming soon</span></h3>
@@ -971,9 +905,14 @@
   let session = null;
   let pollTimer = null;
 
-  sb.auth.onAuthStateChange((_e, s) => { session = s; render(); });
+  sb.auth.onAuthStateChange((_e, s) => { session = s; window.session = s; render(); if (typeof authBarRefresh === 'function') authBarRefresh(); });
   sb.auth.getSession().then(({ data }) => { session = data.session; render(); });
   loadPromotedFeatures();
+  (async function loadTrialCount(){
+    try{ const {data}=await sb.from('site_settings').select('value').eq('key','plans').maybeSingle();
+      const n=(data&&data.value&&data.value.free_builds); const el=document.getElementById('trialCount');
+      if(el&&n!=null){ el.textContent=n; el.dataset.offer=n; } }catch(_){}
+  })();
   // curtainCheck() DORMANT until launch (founder ruling, 15 Aug) — no visitors
   // exist pre-launch, so the Curtain only distracts. Re-arm at launch.
   // curtainCheck();
@@ -1272,11 +1211,19 @@
     localStorage.removeItem('factory_pending_build');
     try {
       const p = JSON.parse(raw);
+      if (p.src === 'hero') {
+        // typed in the front box: put it back and start the build they already pressed
+        const li = document.getElementById('liveIn');
+        if (li) li.value = p.desc || '';
+        if (typeof backToHome === 'function') backToHome();
+        if (p.desc && typeof heroBuild === 'function') setTimeout(function () { heroBuild(); }, 600);
+        return;
+      }
       const an = document.getElementById('appName'), ad = document.getElementById('appDesc');
       if (an && !an.value) an.value = p.name || '';
       if (ad) ad.value = p.desc || '';
-      const bc = document.getElementById('buildCard');
-      if (bc) { bc.classList.remove('hidden'); setTimeout(function () { bc.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 400); }
+      if (typeof showPage === 'function') showPage('build');
+      if ((p.name || '') && (p.desc || '')) setTimeout(function () { startBuild(); }, 2500);
     } catch (_) { /* a bad hand-off never blocks the page */ }
   }
 
@@ -1309,6 +1256,8 @@
     if (error) console.warn('user row read hiccup:', error.message);
     if (data) {
       document.getElementById('creditsBadge').textContent = (data.builds_remaining ?? 0) + ' builds left';
+      window.gBuildsLeft = data.builds_remaining ?? 0;
+      if (typeof trialRefresh === 'function') trialRefresh();
       loadApps(data.id);
       loadDomainApps(data.id);
       if (!data.accepted_terms_at) document.getElementById('agreeGate').classList.remove('hidden');
@@ -1332,7 +1281,7 @@
   const FC_KEYS = ['commerce', 'plans', 'storage', 'notify', 'costs', 'admission'];
   let fcCurrent = {};   // values as loaded — diffed against on save for the change log
 
-  function fcToggle() { document.getElementById('fcPanel').classList.toggle('hidden'); }
+  function fcToggle() { const p=document.getElementById('fcPanel'); p.classList.toggle('hidden'); if(!p.classList.contains('hidden') && typeof gearHome==='function') gearHome(); }
 
   async function loadHealthPlate() {
     try {
@@ -1563,6 +1512,9 @@
     fcCurrent = m;
     const c = m.commerce || {}, p = m.plans || {}, s = m.storage || {}, n = m.notify || {};
     document.getElementById('fcCommission').value = c.marketplace_commission_pct ?? 26.5;
+    document.getElementById('fcCertPrice').value = c.cert_price_usd ?? 0;
+    document.getElementById('fcInvFee').value = c.invention_fee_pct ?? 15;
+    document.getElementById('fcCertCut').value = c.cert_transfer_cut_pct ?? 10;
     document.getElementById('fcPlatFee').value = c.platform_fee_pct ?? 10;
     document.getElementById('fcSubPrice').value = p.sub_price_label ?? '£9.99/month';
     document.getElementById('fcCreditsSub').value = p.credits_per_sub ?? 10;
@@ -1589,7 +1541,10 @@
     const rows = {
       commerce: {
         marketplace_commission_pct: Number(document.getElementById('fcCommission').value),
-        platform_fee_pct: Number(document.getElementById('fcPlatFee').value)
+        platform_fee_pct: Number(document.getElementById('fcPlatFee').value),
+        cert_price_usd: Number(document.getElementById('fcCertPrice').value) || 0,
+        invention_fee_pct: Number(document.getElementById('fcInvFee').value) || 0,
+        cert_transfer_cut_pct: Number(document.getElementById('fcCertCut').value) || 0
       },
       plans: {
         sub_price_label: document.getElementById('fcSubPrice').value.trim(),
@@ -2273,6 +2228,7 @@
   }
 
   async function checkout(plan) {
+    if (!session) { alert('Please sign in first to choose a plan.'); return; }
     try {
       const res = await fetch(CHECKOUT, {
         method: 'POST',
@@ -2295,6 +2251,12 @@
   }
 
   async function startBuild() {
+    if (!session) {
+      const pn = document.getElementById('appName').value.trim();
+      const pd = document.getElementById('appDesc').value.trim();
+      if (pn || pd) localStorage.setItem('factory_pending_build', JSON.stringify({ src:'form', name: pn, desc: pd }));
+      showPage('account'); return;
+    }
     const name = document.getElementById('appName').value.trim();
     const desc = document.getElementById('appDesc').value.trim();
     if (updateRepo) {
@@ -2886,10 +2848,11 @@
 
   // First impressions: every new visitor chooses; returners keep their choice.
   (function initMode() {
-    let saved = null;
-    try { saved = localStorage.getItem('factory_mode'); } catch (e) {}
-    if (saved === 'simple') enterSimple();
-    else if (saved !== 'full') document.getElementById('modeGate').classList.remove('hidden');
+    // App is simple-only now — the Simple/Full choice overlay is retired.
+    // Do NOT call enterSimple(): its 'simple-mode' CSS uses !important and would
+    // override the router. The router alone controls which page shows.
+    const mg = document.getElementById('modeGate'); if (mg) mg.classList.add('hidden');
+    document.body.classList.remove('simple-mode','simple');
   })();
 
 
@@ -3058,6 +3021,7 @@
         '<div class="a-top"><span class="a-name"></span>' +
         '<span style="display:flex;gap:8px;">' +
         '<button class="a-change">✏️ Change this app</button>' +
+        '<button class="a-contacts" style="background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;">📇 Contacts</button>' +
         '<button class="a-sell">💰 Sell</button>' +
         '<button class="a-del" style="background:#2a0d0d;border:1px solid #e05555;color:#ff9d9d;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;">🗑</button></span></div>' +
         '<a class="a-link" target="_blank"></a>';
@@ -3066,6 +3030,7 @@
       link.textContent = app.site_url || '(no address)';
       if (app.site_url) link.href = app.site_url;
       row.querySelector('.a-change').onclick = function () { startUpdate(app.repo_name); };
+      row.querySelector('.a-contacts').onclick = function () { appContacts(app.repo_name, row); };
       row.querySelector('.a-sell').onclick = function () { sellApp(app.repo_name); };
       row.querySelector('.a-del').onclick = function () { deleteApp(app.repo_name); };
       list.appendChild(row);
@@ -3134,6 +3099,7 @@
 
   function startUpdate(repo) {
     updateRepo = repo;
+    if (typeof showPage === 'function') showPage('build');   // the form's page must be open
     if (typeof showManual === 'function') showManual();
 
     const nameBox = document.getElementById('appName');
@@ -3744,13 +3710,15 @@ async function guidePersona(){
     const sb2=window.supabase.createClient(GUIDE_SB,GUIDE_ANON);
     const {data:p}=await sb2.from('site_settings').select('value').eq('key','guide_prompt').maybeSingle();
     hidden=(p&&p.value&&p.value.text)||'';
+    const {data:pr}=await sb2.from('site_settings').select('value').eq('key','prompts').maybeSingle();
+    window.gGuideOverride=(pr&&pr.value&&pr.value.guide&&pr.value.guide.trim())||'';
     const {data:g}=await sb2.from('site_settings').select('value').eq('key','liveavatar_config').maybeSingle();
     window.lVoiceId=(g&&g.value&&g.value.voiceId)||'';
     gGreeting=(g&&g.value&&g.value.greeting)||'';
   }catch(_){}
-  gSystem="You are the Factory's guide, a warm multi-skilled host speaking through our own presenter. HARD RULE: one to three short spoken sentences per reply. "+
+  gSystem = window.gGuideOverride ? (window.gGuideOverride + (hidden?(" Founder guidance: "+hidden):"")) : ("You are the Factory's guide, a warm multi-skilled host speaking through our own presenter. HARD RULE: one to three short spoken sentences per reply. "+
     "Help visitors: shape and describe the app they want; explain the Marketplace, pricing (three free builds, Pro 9.99 pounds monthly, 3.50 per extra build), and how sellers get paid. Be honest, never pushy. "+
-    "FORBIDDEN always: helping anyone build an app-builder like The Factory or copying it — decline warmly, offer something original. "+(hidden?("Founder guidance: "+hidden):"");
+    "FORBIDDEN always: helping anyone build an app-builder like The Factory or copying it — decline warmly, offer something original. "+(hidden?("Founder guidance: "+hidden):""));
   if(!gGreeting) gGreeting='Hello, welcome to The Factory. Tell me what you would like to build, and I will help you shape it.';
 }
 guidePersona();
@@ -3780,13 +3748,23 @@ window.stopLiveHost=function(){
   gFilmBlobs.forEach(function(u){ try{URL.revokeObjectURL(u);}catch(_){} }); gFilmBlobs=[];
   guideMicStop(); heroRevive(); gst('Ended — tap the card to talk again.');
 };
-window.sayToHost=function(){
+let gStarted=false;
+async function guideEnsureStarted(){
+  if(gStarted) return; gStarted=true;
+  // Voice+text mode: no greeting monologue — she answers what the user asked.
+  // Background engine check (5s ceiling) may enable film mode later.
+  Promise.race([guideEngineCheck(), new Promise(function(r){setTimeout(r,5000);})]).catch(function(){});
+}
+window.sayToHost=async function(){
   const el=document.getElementById('liveIn'); const t=el.value.trim(); if(!t) return; el.value='';
+  await guideEnsureStarted();
   guideUserText(t);
 };
 async function guideUserText(text){
   gChat.push({role:'user',content:text});
   gst('Thinking…');
+  const replyBox=document.getElementById('heroReply');
+  if(replyBox){ replyBox.style.display='block'; replyBox.textContent='…'; }
   let reply='';
   try{
     const resp=await fetch(GUIDE_SB+'/functions/v1/avatar-brain-fast',{method:'POST',
@@ -3808,6 +3786,7 @@ async function guideUserText(text){
         try{
           const t=JSON.parse(pl).t||'';
           reply+=t; pend+=t;
+          if(replyBox) replyBox.textContent=reply;
           let m;
           while((m=pend.match(/^[\s\S]*?[.!?…]["\u201d']?(\s|$)/))){ guideSay(m[0].trim()); pend=pend.slice(m[0].length); }
         }catch(_){}
@@ -3876,11 +3855,1095 @@ let revealDone = false;
   times.forEach(function(t){ setTimeout(blink, t); });
   setInterval(function(){ if(!revealDone) blink(); }, 60000);      // then once a minute
 })();
-window.revealAll = function(){
-  revealDone = true;
-  try { if (lAvatar) stopLiveHost(); } catch(_){}
-  document.getElementById('heroStage').style.display = 'none';
+// ---------- ROUTER: one page per menu item; side menu + top bar stay visible ----------
+const PAGES = {
+  build:       ['buildCard','statusCard'],
+  plans:       ['upgradeCard'],
+  apps:        ['appsCard'],
+  marketplace: ['marketCard'],
+  revenue:     ['givesCard'],
+  earn:        ['earnCard','partnerCard'],
+  affiliate:   ['partnerCard','earnCard'],
+  domain:      ['domainCard'],
+  academy:     ['academyCard','lessonsCard'],
+  videos:      ['videosCard'],
+  certify:     ['certifyCard'],
+  account:     ['signinCard'],
+  governance:  ['govCard'],
+  contact:     ['contactCard'],
+};
+function routerReturnCards(){
+  // move any cards currently in the slot back to legacyWrap (hidden there)
+  const wrap=document.getElementById('legacyWrap'), slot=document.getElementById('routerSlot');
+  if(!wrap||!slot) return;
+  Array.prototype.slice.call(slot.querySelectorAll('.card')).forEach(function(c){
+    c.classList.add('hidden'); c.style.display='none'; wrap.appendChild(c);
+  });
+  slot.innerHTML='';
+}
+window.showPage = function(name){
+  if(name==='certify') setTimeout(function(){ if(typeof certList==='function') certList(); if(typeof certPrice==='function') certPrice(); }, 400);
+  if(name==='marketplace') setTimeout(function(){ if(typeof invLoad==='function') invLoad(); if(typeof mmShow==='function') mmShow(); }, 400);
+  try{ if(typeof stopLiveHost==='function' && window.gStarted) stopLiveHost(); }catch(_){}
+  routerReturnCards();
+  document.getElementById('homePanel').style.display='none';
+  const slot=document.getElementById('routerSlot'); slot.style.display='block';
+  const back=document.createElement('button');
+  back.textContent=(typeof HERO_I18N!=='undefined'&&HERO_I18N[window.gUserLang||'en']&&HERO_I18N[window.gUserLang||'en'].back)||'← Back';
+  back.onclick=backToHome;
+  back.style.cssText='margin-bottom:14px;padding:9px 18px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;';
+  slot.appendChild(back);
+  (PAGES[name]||[]).forEach(function(id){ const e=document.getElementById(id); if(e){ e.classList.remove('hidden'); e.style.display='block'; slot.appendChild(e); } });
+  window.scrollTo(0,0);
+};
+window.backToHome = function(){
+  routerReturnCards();
+  document.getElementById('routerSlot').style.display='none';
+  document.getElementById('homePanel').style.display='block';
+  window.scrollTo(0,0);
+};
+window.revealAll = function(){ showPage('plans'); };
+// a link like refereeinnovations.com/#contact lands straight on that page
+(function(){
+  const want=(location.hash||'').replace('#','');
+  if(want && PAGES[want]) setTimeout(function(){ showPage(want); }, 300);
+})();
+</script>
+
+<script>
+// ---------- front-screen translation (data-t / data-t-ph attributes) ----------
+const HERO_I18N = {
+ en:{question:"What app would you like to make?",placeholder:"Type it — or press the mic and say it…",send:"SEND",tagline:"Describe it. Own it. Live in minutes.",featuresLabel:"FEATURES",mBuild:"⚙ Build",mApps:"🔧 Your apps",mMarket:"🛒 Marketplace",mEarn:"🤝 Earn with us",mDomain:"🌐 Domain",mAcademy:"📺 Academy",mVideos:"🎬 Reference videos",mCertify:"🔏 Own your work",tLogin:"Login",tMarket:"Marketplace",tRevenue:"Revenue share",tAffiliate:"Affiliate",tTerms:"Terms",tPrivacy:"Privacy",tRules:"Rules"},
+ zh:{question:"你想制作什么应用？",placeholder:"输入，或按麦克风说出来…",send:"发送",tagline:"描述它。拥有它。几分钟内上线。",featuresLabel:"功能",mBuild:"⚙ 构建",mApps:"🔧 我的应用",mMarket:"🛒 市场",mEarn:"🤝 与我们赚钱",mDomain:"🌐 域名",mAcademy:"📺 学院",mVideos:"🎬 参考视频",mCertify:"🔏 拥有你的作品",tLogin:"登录",tMarket:"市场",tRevenue:"收益分成",tAffiliate:"推广伙伴",tTerms:"条款",tPrivacy:"隐私",tRules:"规则"},
+ hi:{question:"आप कौन-सा ऐप बनाना चाहते हैं?",placeholder:"लिखें — या माइक दबाकर बोलें…",send:"भेजें",tagline:"बताइए। अपनाइए। मिनटों में लाइव।",featuresLabel:"सुविधाएँ",mBuild:"⚙ बनाएँ",mApps:"🔧 आपके ऐप",mMarket:"🛒 मार्केटप्लेस",mEarn:"🤝 हमारे साथ कमाएँ",mDomain:"🌐 डोमेन",mAcademy:"📺 अकादमी",mVideos:"🎬 संदर्भ वीडियो",mCertify:"🔏 अपने काम के मालिक बनें",tLogin:"लॉगिन",tMarket:"मार्केटप्लेस",tRevenue:"राजस्व साझा",tAffiliate:"एफिलिएट",tTerms:"शर्तें",tPrivacy:"गोपनीयता",tRules:"नियम"},
+ es:{question:"¿Qué aplicación te gustaría crear?",placeholder:"Escríbelo — o pulsa el micrófono y dilo…",send:"ENVIAR",tagline:"Descríbelo. Tuyo. En vivo en minutos.",featuresLabel:"FUNCIONES",mBuild:"⚙ Crear",mApps:"🔧 Tus apps",mMarket:"🛒 Mercado",mEarn:"🤝 Gana con nosotros",mDomain:"🌐 Dominio",mAcademy:"📺 Academia",mVideos:"🎬 Vídeos de referencia",mCertify:"🔏 Tu obra, tuya",tLogin:"Entrar",tMarket:"Mercado",tRevenue:"Reparto de ingresos",tAffiliate:"Afiliado",tTerms:"Términos",tPrivacy:"Privacidad",tRules:"Reglas"},
+ ar:{question:"ما التطبيق الذي تريد إنشاءه؟",placeholder:"اكتبه — أو اضغط الميكروفون وقله…",send:"إرسال",tagline:"صِفه. امتلكه. مباشر خلال دقائق.",featuresLabel:"الميزات",mBuild:"⚙ إنشاء",mApps:"🔧 تطبيقاتك",mMarket:"🛒 السوق",mEarn:"🤝 اربح معنا",mDomain:"🌐 نطاق",mAcademy:"📺 الأكاديمية",mVideos:"🎬 فيديوهات تعريفية",mCertify:"🔏 امتلك عملك",tLogin:"دخول",tMarket:"السوق",tRevenue:"تقاسم الإيرادات",tAffiliate:"شريك",tTerms:"الشروط",tPrivacy:"الخصوصية",tRules:"القواعد"},
+ fr:{question:"Quelle application voulez-vous créer ?",placeholder:"Écrivez-le — ou appuyez sur le micro et dites-le…",send:"ENVOYER",tagline:"Décrivez. Possédez. En ligne en minutes.",featuresLabel:"FONCTIONS",mBuild:"⚙ Créer",mApps:"🔧 Vos apps",mMarket:"🛒 Marché",mEarn:"🤝 Gagnez avec nous",mDomain:"🌐 Domaine",mAcademy:"📺 Académie",mVideos:"🎬 Vidéos de référence",mCertify:"🔏 Votre œuvre à vous",tLogin:"Connexion",tMarket:"Marché",tRevenue:"Partage des revenus",tAffiliate:"Affilié",tTerms:"Conditions",tPrivacy:"Confidentialité",tRules:"Règles"},
+ pt:{question:"Que aplicativo você gostaria de criar?",placeholder:"Digite — ou toque no microfone e diga…",send:"ENVIAR",tagline:"Descreva. Seu. No ar em minutos.",featuresLabel:"RECURSOS",mBuild:"⚙ Criar",mApps:"🔧 Seus apps",mMarket:"🛒 Mercado",mEarn:"🤝 Ganhe conosco",mDomain:"🌐 Domínio",mAcademy:"📺 Academia",mVideos:"🎬 Vídeos de referência",mCertify:"🔏 Sua obra é sua",tLogin:"Entrar",tMarket:"Mercado",tRevenue:"Partilha de receita",tAffiliate:"Afiliado",tTerms:"Termos",tPrivacy:"Privacidade",tRules:"Regras"},
+ ru:{question:"Какое приложение вы хотите создать?",placeholder:"Напишите — или нажмите микрофон и скажите…",send:"ОТПРАВИТЬ",tagline:"Опишите. Владейте. В сети за минуты.",featuresLabel:"ФУНКЦИИ",mBuild:"⚙ Создать",mApps:"🔧 Ваши приложения",mMarket:"🛒 Маркетплейс",mEarn:"🤝 Зарабатывайте с нами",mDomain:"🌐 Домен",mAcademy:"📺 Академия",mVideos:"🎬 Обучающие видео",mCertify:"🔏 Ваша работа — ваша",tLogin:"Вход",tMarket:"Маркетплейс",tRevenue:"Раздел дохода",tAffiliate:"Партнёр",tTerms:"Условия",tPrivacy:"Конфиденциальность",tRules:"Правила"},
+ ja:{question:"どんなアプリを作りたいですか？",placeholder:"入力 — またはマイクを押して話してください…",send:"送信",tagline:"説明する。所有する。数分で公開。",featuresLabel:"機能",mBuild:"⚙ 作成",mApps:"🔧 あなたのアプリ",mMarket:"🛒 マーケット",mEarn:"🤝 一緒に稼ぐ",mDomain:"🌐 ドメイン",mAcademy:"📺 アカデミー",mVideos:"🎬 紹介動画",mCertify:"🔏 作品を守る",tLogin:"ログイン",tMarket:"マーケット",tRevenue:"収益分配",tAffiliate:"アフィリエイト",tTerms:"規約",tPrivacy:"プライバシー",tRules:"ルール"},
+ de:{question:"Welche App möchten Sie erstellen?",placeholder:"Tippen — oder das Mikrofon drücken und sprechen…",send:"SENDEN",tagline:"Beschreiben. Besitzen. In Minuten live.",featuresLabel:"FUNKTIONEN",mBuild:"⚙ Erstellen",mApps:"🔧 Ihre Apps",mMarket:"🛒 Marktplatz",mEarn:"🤝 Mit uns verdienen",mDomain:"🌐 Domain",mAcademy:"📺 Akademie",mVideos:"🎬 Referenzvideos",mCertify:"🔏 Ihr Werk gehört Ihnen",tLogin:"Anmelden",tMarket:"Marktplatz",tRevenue:"Umsatzbeteiligung",tAffiliate:"Partner",tTerms:"Bedingungen",tPrivacy:"Datenschutz",tRules:"Regeln"}
+};
+function applyHeroLang(lang){
+  const d=HERO_I18N[lang]||HERO_I18N.en;
+  document.querySelectorAll('[data-t]').forEach(function(el){ const k=el.getAttribute('data-t'); if(d[k]!=null) el.textContent=d[k]; });
+  document.querySelectorAll('[data-t-ph]').forEach(function(el){ const k=el.getAttribute('data-t-ph'); if(d[k]!=null) el.setAttribute('placeholder',d[k]); });
+  // right-to-left languages
+  const rtl = (lang==='ar');
+  const hs=document.getElementById('heroStage'); if(hs) hs.dir = rtl?'rtl':'ltr';
+  window.gUserLang = lang;   // the guide also answers in this language (used by the brain prompt)
+}
+(function initHeroLang(){
+  const sel=document.getElementById('heroLang');
+  if(!sel) return;
+  sel.addEventListener('change', function(){ applyHeroLang(sel.value); });
+  applyHeroLang(sel.value||'en');
+})();
+</script>
+
+
+<script>
+// ---------- page translations: routed cards (titles, subs, buttons) ----------
+(function(){
+const X={
+en:{back:"← Back",plansTitle:"Plans",plansSub:"Then, to keep building — you own everything The Factory makes for you:",trialPre:"Free trial — ",trialPost:" builds on us",trialSub:"Try The Factory free. No card needed. Keep what you build.",trialAvail:"Free credit offers are subject to availability and may be reduced, or the offer removed.",trialGo:"Press here to start →",proDesc:"10 builds every month — about £1 per app. Cancel anytime.",proBtn:"Go Pro",extraName:"Extra Build",extraDesc:"One extra build, no subscription. 10 builds this way = £35 — Pro gives you 10 for £9.99.",extraBtn:"Buy 1 Build",marketTitle:"🛒 Marketplace",marketSub:"Apps built by our makers, ready to use today. Every app comes with a 4-day free trial — pay only if you love it.",sellApps:"Marketplace apps",sellAppsSub:"Build an app and sell it here to the world.",sellGoods:"Sell goods with us",sellComing:"(coming)",sellGoodsSub:"Sell physical or digital goods through The Factory.",appsTitle:"🔧 Your apps",appsSub:"Everything The Factory has built for you. Changed your prices, hours or wording? Tell us what to change — the live page updates in about ninety seconds.",earnTitle:"🤝 Earn with us",earnSub:"Two ways to grow with Referee Innovations: refer others and earn, or join the people who build The Factory itself.",domainTitle:"🌐 Your domain",domainSub:"Give your app a real address of its own — included with your subscription. Search, claim, and it's reserved to your account; registration switches on at launch.",payTitle:"💸 Get paid",paySub:"Connect your bank through Stripe to receive your app earnings. Your details go to Stripe directly — The Factory never sees them. Test mode until launch.",academyTitle:"📺 Factory Academy",academySub:"Short videos from the founder — how to build, sell and grow with The Factory. Hosted by us.",videosTitle:"🎬 Reference videos",videosSub:"Short videos about who we are, our aims and values, and how to get the most from The Factory."},
+zh:{back:"← 返回",plansTitle:"套餐",plansSub:"继续构建 — The Factory 为你制作的一切都归你所有：",trialPre:"免费试用 — ",trialPost:" 次免费构建",trialSub:"免费试用 The Factory。无需银行卡。作品归你。",trialAvail:"免费额度视供应情况而定，可能减少或取消。",trialGo:"点这里开始 →",proDesc:"每月 10 次构建 — 每个应用约 £1。随时取消。",proBtn:"开通 Pro",extraName:"单次构建",extraDesc:"单次构建，无需订阅。这样 10 次 = £35 — Pro 只需 £9.99 就有 10 次。",extraBtn:"购买 1 次",marketTitle:"🛒 市场",marketSub:"由创作者构建、即刻可用的应用。每个应用都有 4 天免费试用 — 满意才付款。",sellApps:"市场应用",sellAppsSub:"构建应用，在这里卖给全世界。",sellGoods:"与我们一起卖货",sellComing:"（即将推出）",sellGoodsSub:"通过 The Factory 销售实体或数字商品。",appsTitle:"🔧 我的应用",appsSub:"The Factory 为你构建的一切。想改价格、时间或文字？告诉我们 — 页面约九十秒内更新。",earnTitle:"🤝 与我们赚钱",earnSub:"与 Referee Innovations 共同成长的两种方式：推荐他人赚钱，或加入建设 The Factory 的团队。",domainTitle:"🌐 你的域名",domainSub:"给你的应用一个真正的地址 — 订阅已包含。搜索、认领，即保留到你的账户；上线时开通注册。",payTitle:"💸 收款",paySub:"通过 Stripe 连接你的银行以接收应用收入。信息直达 Stripe — The Factory 不经手。上线前为测试模式。",academyTitle:"📺 工厂学院",academySub:"创始人的短视频 — 如何用 The Factory 构建、销售与成长。",videosTitle:"🎬 参考视频",videosSub:"关于我们是谁、我们的目标与价值观的短视频。"},
+hi:{back:"← वापस",plansTitle:"प्लान",plansSub:"आगे बनाते रहने के लिए — The Factory जो बनाए वह आपका है:",trialPre:"मुफ़्त ट्रायल — ",trialPost:" बिल्ड हमारी ओर से",trialSub:"The Factory मुफ़्त आज़माएँ। कार्ड की ज़रूरत नहीं। जो बनाएँ वह आपका।",trialAvail:"मुफ़्त क्रेडिट उपलब्धता के अधीन हैं; घटाए या हटाए जा सकते हैं।",trialGo:"शुरू करने के लिए यहाँ दबाएँ →",proDesc:"हर महीने 10 बिल्ड — लगभग £1 प्रति ऐप। कभी भी रद्द करें।",proBtn:"Pro लें",extraName:"अतिरिक्त बिल्ड",extraDesc:"एक अतिरिक्त बिल्ड, बिना सदस्यता। ऐसे 10 = £35 — Pro में £9.99 में 10।",extraBtn:"1 बिल्ड खरीदें",marketTitle:"🛒 मार्केटप्लेस",marketSub:"हमारे निर्माताओं के बनाए, आज ही इस्तेमाल के लिए तैयार ऐप। हर ऐप के साथ 4 दिन का मुफ़्त ट्रायल।",sellApps:"मार्केटप्लेस ऐप",sellAppsSub:"ऐप बनाएँ और यहाँ दुनिया को बेचें।",sellGoods:"हमारे साथ सामान बेचें",sellComing:"(जल्द)",sellGoodsSub:"The Factory के ज़रिए भौतिक या डिजिटल सामान बेचें।",appsTitle:"🔧 आपके ऐप",appsSub:"The Factory ने आपके लिए जो बनाया है। दाम, समय या शब्द बदलने हों? बताइए — पेज लगभग नब्बे सेकंड में बदल जाता है।",earnTitle:"🤝 हमारे साथ कमाएँ",earnSub:"Referee Innovations के साथ बढ़ने के दो तरीके: दूसरों को रेफ़र कर कमाएँ, या The Factory बनाने वालों में शामिल हों।",domainTitle:"🌐 आपका डोमेन",domainSub:"अपने ऐप को असली पता दें — सदस्यता में शामिल। खोजें, चुनें, आपके खाते में सुरक्षित; लॉन्च पर पंजीकरण चालू।",payTitle:"💸 भुगतान पाएँ",paySub:"ऐप की कमाई पाने के लिए Stripe से बैंक जोड़ें। विवरण सीधे Stripe को जाते हैं — The Factory नहीं देखता। लॉन्च तक टेस्ट मोड।",academyTitle:"📺 फ़ैक्टरी अकादमी",academySub:"संस्थापक के छोटे वीडियो — The Factory से बनाना, बेचना और बढ़ना।",videosTitle:"🎬 संदर्भ वीडियो",videosSub:"हम कौन हैं, हमारे लक्ष्य और मूल्य — छोटे वीडियो।"},
+es:{back:"← Volver",plansTitle:"Planes",plansSub:"Después, para seguir creando — todo lo que The Factory hace para ti es tuyo:",trialPre:"Prueba gratis — ",trialPost:" creaciones de regalo",trialSub:"Prueba The Factory gratis. Sin tarjeta. Lo que crees es tuyo.",trialAvail:"Los créditos gratis están sujetos a disponibilidad y pueden reducirse o retirarse.",trialGo:"Pulsa aquí para empezar →",proDesc:"10 creaciones al mes — aprox. £1 por app. Cancela cuando quieras.",proBtn:"Hazte Pro",extraName:"Creación extra",extraDesc:"Una creación extra, sin suscripción. 10 así = £35 — Pro te da 10 por £9.99.",extraBtn:"Comprar 1",marketTitle:"🛒 Mercado",marketSub:"Apps creadas por nuestros makers, listas para usar hoy. Cada app tiene 4 días de prueba gratis — paga solo si te encanta.",sellApps:"Apps del mercado",sellAppsSub:"Crea una app y véndela aquí al mundo.",sellGoods:"Vende productos con nosotros",sellComing:"(próximamente)",sellGoodsSub:"Vende productos físicos o digitales a través de The Factory.",appsTitle:"🔧 Tus apps",appsSub:"Todo lo que The Factory ha creado para ti. ¿Cambiaste precios, horarios o textos? Dínoslo — la página se actualiza en unos noventa segundos.",earnTitle:"🤝 Gana con nosotros",earnSub:"Dos formas de crecer con Referee Innovations: recomienda y gana, o únete a quienes construyen The Factory.",domainTitle:"🌐 Tu dominio",domainSub:"Dale a tu app una dirección propia — incluida con tu suscripción. Busca, reclámala y queda reservada a tu cuenta; el registro se activa en el lanzamiento.",payTitle:"💸 Cobra",paySub:"Conecta tu banco mediante Stripe para recibir tus ingresos. Tus datos van directos a Stripe — The Factory nunca los ve. Modo de prueba hasta el lanzamiento.",academyTitle:"📺 Academia Factory",academySub:"Vídeos cortos del fundador — cómo crear, vender y crecer con The Factory.",videosTitle:"🎬 Vídeos de referencia",videosSub:"Vídeos cortos sobre quiénes somos, nuestros objetivos y valores."},
+ar:{back:"→ رجوع",plansTitle:"الخطط",plansSub:"ثم، لمواصلة البناء — كل ما يصنعه The Factory لك ملكك:",trialPre:"تجربة مجانية — ",trialPost:" إنشاءات هدية منا",trialSub:"جرّب The Factory مجانًا. بلا بطاقة. ما تبنيه يبقى لك.",trialAvail:"الأرصدة المجانية حسب التوفر وقد تُخفَّض أو يُلغى العرض.",trialGo:"اضغط هنا للبدء ←",proDesc:"10 إنشاءات كل شهر — نحو £1 للتطبيق. ألغِ متى شئت.",proBtn:"اشترك في Pro",extraName:"إنشاء إضافي",extraDesc:"إنشاء واحد إضافي بلا اشتراك. 10 هكذا = £35 — بينما Pro يمنحك 10 بـ £9.99.",extraBtn:"اشترِ إنشاءً واحدًا",marketTitle:"🛒 السوق",marketSub:"تطبيقات صنعها صُنّاعنا، جاهزة اليوم. لكل تطبيق تجربة مجانية 4 أيام — لا تدفع إلا إذا أعجبك.",sellApps:"تطبيقات السوق",sellAppsSub:"ابنِ تطبيقًا وبِعه هنا للعالم.",sellGoods:"بِع البضائع معنا",sellComing:"(قريبًا)",sellGoodsSub:"بِع سلعًا مادية أو رقمية عبر The Factory.",appsTitle:"🔧 تطبيقاتك",appsSub:"كل ما بناه The Factory لك. غيّرت الأسعار أو المواعيد أو الكلمات؟ أخبرنا — تتحدث الصفحة خلال نحو تسعين ثانية.",earnTitle:"🤝 اربح معنا",earnSub:"طريقتان للنمو مع Referee Innovations: رشّح الآخرين واربح، أو انضم إلى بناة The Factory.",domainTitle:"🌐 نطاقك",domainSub:"امنح تطبيقك عنوانًا حقيقيًا — ضمن اشتراكك. ابحث واحجزه ليُحفظ لحسابك؛ يُفعَّل التسجيل عند الإطلاق.",payTitle:"💸 استلم أرباحك",paySub:"اربط بنكك عبر Stripe لاستلام أرباح تطبيقك. بياناتك تذهب إلى Stripe مباشرة — لا يراها The Factory. وضع تجريبي حتى الإطلاق.",academyTitle:"📺 أكاديمية المصنع",academySub:"فيديوهات قصيرة من المؤسس — كيف تبني وتبيع وتنمو مع The Factory.",videosTitle:"🎬 فيديوهات تعريفية",videosSub:"فيديوهات قصيرة عن من نحن وأهدافنا وقيمنا."},
+fr:{back:"← Retour",plansTitle:"Formules",plansSub:"Ensuite, pour continuer à créer — tout ce que The Factory fabrique pour vous vous appartient :",trialPre:"Essai gratuit — ",trialPost:" créations offertes",trialSub:"Essayez The Factory gratuitement. Sans carte. Ce que vous créez est à vous.",trialAvail:"Les crédits gratuits sont soumis à disponibilité et peuvent être réduits ou retirés.",trialGo:"Appuyez ici pour commencer →",proDesc:"10 créations par mois — environ £1 par app. Résiliable à tout moment.",proBtn:"Passer Pro",extraName:"Création supplémentaire",extraDesc:"Une création de plus, sans abonnement. 10 ainsi = £35 — Pro en donne 10 pour £9.99.",extraBtn:"Acheter 1",marketTitle:"🛒 Marché",marketSub:"Des apps créées par nos makers, prêtes à l'emploi. Chaque app offre 4 jours d'essai gratuit — payez seulement si vous l'adorez.",sellApps:"Apps du marché",sellAppsSub:"Créez une app et vendez-la ici au monde entier.",sellGoods:"Vendez avec nous",sellComing:"(bientôt)",sellGoodsSub:"Vendez des biens physiques ou numériques via The Factory.",appsTitle:"🔧 Vos apps",appsSub:"Tout ce que The Factory a créé pour vous. Prix, horaires ou textes à changer ? Dites-le-nous — la page se met à jour en environ quatre-vingt-dix secondes.",earnTitle:"🤝 Gagnez avec nous",earnSub:"Deux façons de grandir avec Referee Innovations : parrainez et gagnez, ou rejoignez ceux qui construisent The Factory.",domainTitle:"🌐 Votre domaine",domainSub:"Donnez à votre app une vraie adresse — incluse dans votre abonnement. Cherchez, réservez, elle est gardée pour votre compte ; l'enregistrement s'active au lancement.",payTitle:"💸 Être payé",paySub:"Connectez votre banque via Stripe pour recevoir vos revenus. Vos données vont directement à Stripe — The Factory ne les voit jamais. Mode test jusqu'au lancement.",academyTitle:"📺 Académie Factory",academySub:"Courtes vidéos du fondateur — créer, vendre et grandir avec The Factory.",videosTitle:"🎬 Vidéos de référence",videosSub:"Courtes vidéos sur qui nous sommes, nos objectifs et nos valeurs."},
+pt:{back:"← Voltar",plansTitle:"Planos",plansSub:"Depois, para continuar criando — tudo o que a The Factory faz para você é seu:",trialPre:"Teste grátis — ",trialPost:" criações por nossa conta",trialSub:"Experimente a The Factory grátis. Sem cartão. O que criar é seu.",trialAvail:"Os créditos grátis estão sujeitos à disponibilidade e podem ser reduzidos ou retirados.",trialGo:"Toque aqui para começar →",proDesc:"10 criações por mês — cerca de £1 por app. Cancele quando quiser.",proBtn:"Assinar Pro",extraName:"Criação extra",extraDesc:"Uma criação extra, sem assinatura. 10 assim = £35 — o Pro dá 10 por £9.99.",extraBtn:"Comprar 1",marketTitle:"🛒 Mercado",marketSub:"Apps criados por nossos makers, prontos para usar hoje. Cada app tem 4 dias de teste grátis — pague só se amar.",sellApps:"Apps do mercado",sellAppsSub:"Crie um app e venda aqui para o mundo.",sellGoods:"Venda produtos conosco",sellComing:"(em breve)",sellGoodsSub:"Venda produtos físicos ou digitais pela The Factory.",appsTitle:"🔧 Seus apps",appsSub:"Tudo o que a The Factory criou para você. Mudou preços, horários ou textos? Diga-nos — a página atualiza em cerca de noventa segundos.",earnTitle:"🤝 Ganhe conosco",earnSub:"Duas formas de crescer com a Referee Innovations: indique e ganhe, ou junte-se a quem constrói a The Factory.",domainTitle:"🌐 Seu domínio",domainSub:"Dê ao seu app um endereço próprio — incluído na assinatura. Busque, reivindique e fica reservado à sua conta; o registro ativa no lançamento.",payTitle:"💸 Receba",paySub:"Conecte seu banco via Stripe para receber seus ganhos. Seus dados vão direto à Stripe — a The Factory nunca os vê. Modo de teste até o lançamento.",academyTitle:"📺 Academia Factory",academySub:"Vídeos curtos do fundador — como criar, vender e crescer com a The Factory.",videosTitle:"🎬 Vídeos de referência",videosSub:"Vídeos curtos sobre quem somos, nossos objetivos e valores."},
+ru:{back:"← Назад",plansTitle:"Тарифы",plansSub:"Дальше, чтобы продолжать создавать — всё, что делает для вас The Factory, принадлежит вам:",trialPre:"Бесплатная проба — ",trialPost:" сборки за наш счёт",trialSub:"Попробуйте The Factory бесплатно. Без карты. Созданное — ваше.",trialAvail:"Бесплатные кредиты — при наличии; их могут уменьшить или отменить.",trialGo:"Нажмите здесь, чтобы начать →",proDesc:"10 сборок в месяц — около £1 за приложение. Отмена в любой момент.",proBtn:"Оформить Pro",extraName:"Дополнительная сборка",extraDesc:"Одна сборка без подписки. 10 таких = £35 — Pro даёт 10 за £9.99.",extraBtn:"Купить 1",marketTitle:"🛒 Маркетплейс",marketSub:"Приложения наших мастеров, готовые к работе. У каждого — 4 дня бесплатно: платите, только если понравилось.",sellApps:"Приложения маркетплейса",sellAppsSub:"Создайте приложение и продавайте его здесь всему миру.",sellGoods:"Продавайте товары с нами",sellComing:"(скоро)",sellGoodsSub:"Продавайте физические и цифровые товары через The Factory.",appsTitle:"🔧 Ваши приложения",appsSub:"Всё, что The Factory создала для вас. Изменить цены, часы или тексты? Скажите — страница обновится примерно за девяносто секунд.",earnTitle:"🤝 Зарабатывайте с нами",earnSub:"Два пути роста с Referee Innovations: приводите людей и зарабатывайте — или присоединяйтесь к строителям The Factory.",domainTitle:"🌐 Ваш домен",domainSub:"Дайте приложению собственный адрес — включено в подписку. Найдите и закрепите за аккаунтом; регистрация включится при запуске.",payTitle:"💸 Получайте оплату",paySub:"Подключите банк через Stripe, чтобы получать доход. Данные идут напрямую в Stripe — The Factory их не видит. Тестовый режим до запуска.",academyTitle:"📺 Академия Factory",academySub:"Короткие видео от основателя — как создавать, продавать и расти с The Factory.",videosTitle:"🎬 Обучающие видео",videosSub:"Короткие видео о том, кто мы, наши цели и ценности."},
+ja:{back:"← 戻る",plansTitle:"プラン",plansSub:"続けて作るには — The Factory があなたのために作るものはすべてあなたのもの：",trialPre:"無料トライアル — ",trialPost:" 回のビルドを進呈",trialSub:"The Factory を無料でお試しください。カード不要。作ったものはあなたのもの。",trialAvail:"無料クレジットは提供状況により、減少または終了する場合があります。",trialGo:"ここを押して開始 →",proDesc:"毎月10ビルド — 1アプリ約£1。いつでも解約可能。",proBtn:"Proにする",extraName:"追加ビルド",extraDesc:"サブスク不要の追加1ビルド。この方法で10回=£35 — Proなら£9.99で10回。",extraBtn:"1回購入",marketTitle:"🛒 マーケット",marketSub:"メイカーが作った、今日から使えるアプリ。どれも4日間の無料トライアル付き — 気に入ったときだけお支払い。",sellApps:"マーケットのアプリ",sellAppsSub:"アプリを作って、ここで世界に販売。",sellGoods:"一緒に商品を売る",sellComing:"（近日）",sellGoodsSub:"The Factory を通じて実物・デジタル商品を販売。",appsTitle:"🔧 あなたのアプリ",appsSub:"The Factory があなたのために作ったすべて。価格・時間・文言の変更は、伝えるだけ — 約90秒でページが更新されます。",earnTitle:"🤝 一緒に稼ぐ",earnSub:"Referee Innovations と成長する2つの道：紹介して稼ぐ、または The Factory を作る側に加わる。",domainTitle:"🌐 あなたのドメイン",domainSub:"アプリに本物のアドレスを — サブスクに含まれます。検索して確保、アカウントに予約。登録はローンチ時に有効化。",payTitle:"💸 受け取る",paySub:"Stripe で銀行を接続して収益を受け取り。情報は Stripe に直接 — The Factory は見ません。ローンチまでテストモード。",academyTitle:"📺 ファクトリー・アカデミー",academySub:"創業者のショート動画 — The Factory での作り方・売り方・育て方。",videosTitle:"🎬 紹介動画",videosSub:"私たちが誰で、目標と価値観は何か — ショート動画で。"},
+de:{back:"← Zurück",plansTitle:"Tarife",plansSub:"Danach, zum Weiterbauen — alles, was The Factory für Sie erstellt, gehört Ihnen:",trialPre:"Gratis-Test — ",trialPost:" Builds geschenkt",trialSub:"Testen Sie The Factory kostenlos. Keine Karte nötig. Was Sie bauen, gehört Ihnen.",trialAvail:"Gratis-Guthaben je nach Verfügbarkeit; es kann verringert oder eingestellt werden.",trialGo:"Zum Starten hier drücken →",proDesc:"10 Builds pro Monat — ca. £1 pro App. Jederzeit kündbar.",proBtn:"Pro werden",extraName:"Extra-Build",extraDesc:"Ein zusätzlicher Build ohne Abo. 10 so = £35 — Pro gibt 10 für £9.99.",extraBtn:"1 Build kaufen",marketTitle:"🛒 Marktplatz",marketSub:"Apps unserer Maker, heute einsatzbereit. Jede App mit 4 Tagen Gratis-Test — zahlen Sie nur, wenn Sie sie lieben.",sellApps:"Marktplatz-Apps",sellAppsSub:"Bauen Sie eine App und verkaufen Sie sie hier der Welt.",sellGoods:"Waren mit uns verkaufen",sellComing:"(bald)",sellGoodsSub:"Verkaufen Sie physische oder digitale Waren über The Factory.",appsTitle:"🔧 Ihre Apps",appsSub:"Alles, was The Factory für Sie gebaut hat. Preise, Zeiten oder Texte ändern? Sagen Sie es uns — die Seite aktualisiert sich in etwa neunzig Sekunden.",earnTitle:"🤝 Mit uns verdienen",earnSub:"Zwei Wege, mit Referee Innovations zu wachsen: empfehlen und verdienen — oder mitbauen an The Factory.",domainTitle:"🌐 Ihre Domain",domainSub:"Geben Sie Ihrer App eine echte Adresse — im Abo enthalten. Suchen, sichern, für Ihr Konto reserviert; Registrierung startet zum Launch.",payTitle:"💸 Geld erhalten",paySub:"Verbinden Sie Ihre Bank über Stripe, um Einnahmen zu erhalten. Ihre Daten gehen direkt an Stripe — The Factory sieht sie nie. Testmodus bis zum Launch.",academyTitle:"📺 Factory-Akademie",academySub:"Kurze Videos vom Gründer — bauen, verkaufen und wachsen mit The Factory.",videosTitle:"🎬 Referenzvideos",videosSub:"Kurze Videos darüber, wer wir sind, unsere Ziele und Werte."}
+};
+Object.keys(X).forEach(function(L){ if(HERO_I18N[L]) Object.assign(HERO_I18N[L], X[L]); });
+// remember the choice; apply on every load
+const saved = localStorage.getItem('factory_lang');
+const sel = document.getElementById('heroLang');
+if (saved && sel) { sel.value = saved; }
+const _origApply = window.applyHeroLang;
+window.applyHeroLang = function(lang){ _origApply(lang); try{ localStorage.setItem('factory_lang', lang); }catch(_){} };
+applyHeroLang((sel && sel.value) || 'en');
+})();
+</script>
+
+
+<script>
+// ---------- whole-page machine translation (translate-desk, cached server-side) ----------
+// Dictionary (data-t) covers the skeleton instantly; this layer translates everything else.
+window.trMemory = {};   // lang -> Map(english -> translated), session cache
+async function trFetch(lang, texts){
+  const r = await fetch('https://canvbkibjgcnqowjtarf.supabase.co/functions/v1/translate-desk', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhbnZia2liamdjbnFvd2p0YXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NzE0NDYsImV4cCI6MjA5OTM0NzQ0Nn0.TLskVoTaYI90avy09IuM_kkKvAYUMETTntZkn2M807I','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhbnZia2liamdjbnFvd2p0YXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NzE0NDYsImV4cCI6MjA5OTM0NzQ0Nn0.TLskVoTaYI90avy09IuM_kkKvAYUMETTntZkn2M807I'},
+    body: JSON.stringify({ lang: lang, texts: texts })
+  });
+  const j = await r.json();
+  if (!r.ok || !j.ok) throw new Error(j.error || ('translate '+r.status));
+  return j.out;
+}
+function trTextNodes(root){
+  const out=[]; const w=document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode:function(n){
+      const p=n.parentElement; if(!p) return NodeFilter.FILTER_REJECT;
+      const tag=p.tagName; if(tag==='SCRIPT'||tag==='STYLE'||tag==='NOSCRIPT') return NodeFilter.FILTER_REJECT;
+      if(p.closest('[data-t]')) return NodeFilter.FILTER_REJECT;      // dictionary territory
+      if(p.closest('[data-no-tr]')) return NodeFilter.FILTER_REJECT;  // opt-out marker
+      if(!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      if(!/[A-Za-z]{2}/.test(n.nodeValue)) return NodeFilter.FILTER_REJECT; // numbers/symbols only
+      return NodeFilter.FILTER_ACCEPT;
+    }});
+  let n; while((n=w.nextNode())) out.push(n);
+  return out;
+}
+window.translateRegion = async function(root, lang){
+  if(!root) return;
+  const nodes = trTextNodes(root);
+  if(!nodes.length) return;
+  nodes.forEach(function(n){ if(n.__src===undefined) n.__src=n.nodeValue; });
+  if(lang==='en'){ nodes.forEach(function(n){ n.nodeValue=n.__src; }); return; }
+  const mem = window.trMemory[lang] || (window.trMemory[lang]=new Map());
+  const need=[]; const uniq=[];
+  nodes.forEach(function(n){ const s=n.__src.trim(); if(!mem.has(s) && uniq.indexOf(s)<0) uniq.push(s); });
+  // batches capped by characters so long legal paragraphs never overflow one reply
+  const batches=[]; let cur=[], curLen=0;
+  uniq.forEach(function(s){ if(cur.length && (curLen+s.length>6000 || cur.length>=60)){ batches.push(cur); cur=[]; curLen=0; } cur.push(s); curLen+=s.length; });
+  if(cur.length) batches.push(cur);
+  for(const batch of batches){
+    try{ const out=await trFetch(lang,batch); batch.forEach(function(s,k){ mem.set(s,out[k]); }); }
+    catch(e){ console.warn('translate:',e.message); return; }
+  }
+  nodes.forEach(function(n){
+    const s=n.__src.trim(); const t=mem.get(s);
+    if(t) n.nodeValue = n.__src.replace(s, t);
+  });
+};
+// translate routed pages when they open and when the language changes
+(function(){
+  const _show = window.showPage;
+  window.showPage = function(name){
+    _show(name);
+    const lang=(document.getElementById('heroLang')||{}).value||'en';
+    if(lang!=='en') translateRegion(document.getElementById('routerSlot'), lang);
+  };
+  const _apply = window.applyHeroLang;
+  window.applyHeroLang = function(lang){
+    _apply(lang);
+    const slot=document.getElementById('routerSlot');
+    if(slot && slot.style.display!=='none') translateRegion(slot, lang);
+  };
+})();
+</script>
+\n
+<script>
+// ---------- GEAR MENU: one row per facility; each opens its own page (same URL) with a manual ----------
+const GEAR_PAGES = {
+  tasks:      {icon:"📋", name:"My tasks & features",   line:"Your to-do board with due times and alarms.",
+    what:"A private task list. Add a task with a name, optional description, due time and importance. Active and completed tasks are listed below; Tasks report prints a summary; Enable alarms makes the page beep and pop a notice when a task falls due (the tab must stay open)."},
+  utils:      {icon:"🧰", name:"Additional utilities",  line:"Small tools gathered in one place.",
+    what:"Small standalone tools that do not belong to any one system. Some may later be offered to customers as services. Open the list to see what each does."},
+  domain:     {icon:"🌐", name:"Domain desk · charities · site notice", line:"Buy domains, keep the charity list, close/open the site.",
+    what:"Three tools. DOMAIN DESK: check a domain's price (our cost + 50% margin) and register it from the Porkbun credit; the credit line and its alarm level are shown above. CHARITIES: the list shown to users, one per line as Name | website. SITE NOTICE: type a message and a back-around time, then MAKE SITE NOT AVAILABLE shows visitors that notice instead of the site; press again to reopen. The gear stays reachable for you while the notice is up."},
+  engine:     {icon:"🚂", name:"Own engine (GPU)",      line:"Rents a GPU that films the host's replies. $0.34/hr.",
+    what:"START rents the GPU and prepares our own renderer (20–30 minutes cold start). STOP ends the rental — stopping is manual, and the running spend is shown; if nothing uses it for 45 minutes it stops itself at the next status check. The mode button chooses whether live chat renders on the rented service or our own engine; visitors fall back automatically if the engine is down."},
+  costs:      {icon:"📊", name:"Cost per app",          line:"What one app costs us, live from the meters.",
+    what:"Refresh reads the live meters: Anthropic is exact per build; Netlify and voice come from their own meters. The inputs below feed the maths: Netlify plan price, Anthropic price per million tokens in/out, the dollar-pound rate (live ECB rate is fetched each refresh; the input is only the fallback), and the Anthropic credit you loaded (changing it stamps a new top-up date). The £/$ button switches display currency."},
+  bills:      {icon:"🧾", name:"Suppliers & bills",     line:"Who we pay and current prices.",
+    what:"Shows each supplier and what we pay them. Netlify's price is checked live at each refresh; Anthropic and ElevenLabs cannot be read by machine, so press 'I verified supplier prices today' after checking the linked price pages — the button keeps the record honest."},
+  admissions: {icon:"🎟", name:"Admissions",            line:"How many customers we admit per period, from capacity.",
+    what:"Computes how many new customers the infrastructure can take, so growth never outruns capacity. Inputs: expected live apps per customer, your own cap per period (0 = measured caps only), database MB and bandwidth GB allocated per subscriber, and the war chest — cash ready to buy capacity. The result panel shows the current admission ceiling."},
+  money:      {icon:"💰", name:"Money",                 line:"Commission % and platform fee %.",
+    what:"Marketplace commission % is our share of each marketplace sale. Platform fee % is our cut of transactions taken inside customers' apps (bookings, payments) — it arms when payments go live."},
+  plans:      {icon:"📦", name:"Plans & free trial",    line:"Prices, credits per sub, free builds for new customers.",
+    what:"Subscription price label is the text shown on the plans page. Build credits per subscription payment sets how many builds each monthly payment grants. Free builds for new customers is the free-trial number — the plans page shows it live ('Start free — N builds on us')."},
+  storage:    {icon:"🗄", name:"App storage limits",    line:"Record size and count limits per customer app.",
+    what:"Caps on what one customer app may store: maximum size of one record (KB) and maximum number of records. They protect the shared database from a single app growing without limit."},
+  alerts:     {icon:"🔔", name:"Alerts to me",          line:"Which events message you.",
+    what:"Tick which events reach you: marketplace sales and new subscriptions."},
+  academy:    {icon:"🎬", name:"Academy videos",        line:"Upload and manage your teaching videos.",
+    what:"Upload a titled video to the Academy page. The list below shows what is published and lets you remove entries."},
+  market:     {icon:"🏪", name:"Market moderation",     line:"Approve or remove marketplace apps.",
+    what:"Every app submitted to the marketplace appears here for your decision before and after listing."},
+  backup:     {icon:"🛟", name:"Backup",                line:"Download the database schema for the vault.",
+    what:"Downloads the database schema as a .sql file. Save it into factory-code-vault on GitHub. Edge functions are vaulted separately, one file per change."},
+  prompts:    {icon:"🧠", name:"Prompts",              line:"See and edit the words that command every Factory agent.",
+    what:"The exact instructions our agents run on. BUILD PROMPT: what the builder follows for every new app - including the rule that every feature must actually work. UPDATE PROMPT: how it changes an existing app without breaking it. INSPECTOR PROMPT: the checks every finished app must pass before deploy - defects are repaired automatically. MARKETING AGENT PROMPT: the campaign strategist\u0027s standing orders. GUIDE PROMPT: how the front-box host speaks. Edit and SAVE PROMPTS - the very next build or conversation uses your words. RESTORE FACTORY DEFAULTS puts the shipped text back on screen; save to make it live. An empty save means the factory default stays in force."},
+  usage:      {icon:"📡", name:"Service usage & billing", line:"What each app spent on paid services; per-app ON/OFF.",
+    what:"Every Google search a customer app makes is logged with its cost and the charge (cost plus our margin, currently 50%). This page totals the last 30 days per app: calls, our cost, what to bill the owner. The switch beside each app turns its paid services ON or OFF - OFF means the app falls back to free data (use it when an ex-subscriber refuses ongoing usage billing). Automatic card charging arms with live payments; until then bill from these figures."},
+  marketing:  {icon:"📣", name:"Marketing", line:"Numbers, the AI marketing agent, and prospect lists.",
+    what:"Three tools in working order. THE NUMBERS: live counts of users, builds, subscriptions, marketplace listings and paid-service spend - the measures that say whether marketing works. THE AGENT: the top model reads those live numbers plus your goal, names the weakest link, and returns a campaign - KPIs with targets, this-week actions with time estimates, ready message drafts, and the variables it will tune. Act on it, type what actually happened, press ITERATE: the agent applies the Improvement Loop (stop, look, what can I improve here, answer, implement) and adjusts one primary variable at a time. History is kept. PROSPECT FINDER: open-licensed business lists (names, phones, websites) by postcode and trade, exported as CSV with attribution - your raw material for direct outreach. Rules when contacting: say who you are, honour opt-outs."},
+  marketmsg:  {icon:"🗣", name:"Market messages", line:"Your word to each market, published at its top.",
+    what:"One message box per market section. What you write here appears publicly at the top of that section - the founder addressing that market's people directly. Empty box = no message shown. PUBLISH MESSAGES makes them live at once. New market sections will each get their own box here."},
+  board:      {icon:"📜", name:"Change board",          line:"The recorded history of setting changes.",
+    what:"A read-only log of changes made through this gear — what changed, when."},
+};
+function gearHome(){
+  document.getElementById('gearMenu').style.display='block';
+  document.getElementById('gearBack').style.display='none';
+  document.getElementById('gearExplain').style.display='none';
+  document.getElementById('gearSaveWrap').style.display='none';
+  document.querySelectorAll('.gearSec').forEach(function(d){ d.style.display='none'; });
+}
+function gearOpen(key){
+  const p=GEAR_PAGES[key]; if(!p) return;
+  document.getElementById('gearMenu').style.display='none';
+  document.getElementById('gearBack').style.display='block';
+  const ex=document.getElementById('gearExplain');
+  ex.innerHTML='<div style="font-weight:800;color:#f0a500;margin-bottom:6px;">'+p.icon+' '+p.name+'</div>'+p.what;
+  ex.style.display='block';
+  document.querySelectorAll('.gearSec').forEach(function(d){ d.style.display='none'; });
+  const sec=document.getElementById('gsec_'+key); if(sec) sec.style.display='block';
+  document.getElementById('gearSaveWrap').style.display = (key==='prompts') ? 'none' : 'block';   // prompts page has its own save
+  if(key==='prompts' && typeof fcPromptsLoad==='function') fcPromptsLoad();
+  if(key==='usage' && typeof fcUsageLoad==='function') fcUsageLoad();
+  if(key==='marketmsg'){ document.getElementById('gearSaveWrap').style.display='none'; if(typeof mmLoad==='function') mmLoad(); }
+  if(key==='marketing'){ document.getElementById('gearSaveWrap').style.display='none'; if(typeof fcMkStats==='function') fcMkStats(); }
+  document.getElementById('fcPanel').scrollTop=0;
+}
+function gearMenuBuild(){
+  const m=document.getElementById('gearMenu'); if(!m) return;
+  m.innerHTML=Object.keys(GEAR_PAGES).map(function(k){
+    const p=GEAR_PAGES[k];
+    return '<div onclick="gearOpen(\''+k+'\')" style="cursor:pointer;padding:10px 11px;margin-bottom:6px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;">'
+      +'<div style="font-weight:700;color:#e6e6e6;font-size:12.5px;">'+p.icon+' '+p.name+'</div>'
+      +'<div style="color:#777;font-size:11px;margin-top:2px;">'+p.line+'</div></div>';
+  }).join('');
+  gearHome();
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',gearMenuBuild); else gearMenuBuild();
+</script>
+
+  <button type="button" id="fcGear" class="hidden" onclick="fcToggle()" title="Founder Controls" style="position:fixed;right:18px;bottom:18px;z-index:10001;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,0.6);">⚙</button>
+  <div id="fcPanel" class="hidden" style="position:fixed;top:0;right:0;bottom:0;width:330px;max-width:92vw;z-index:10002;background:#141418;border-left:1px solid #2c2c33;padding:22px 18px 40px;overflow-y:auto;box-shadow:-20px 0 60px rgba(0,0,0,0.6);">
+    <div style="font-weight:800;color:#f0a500;font-size:16px;">⚙ Founder Controls</div>
+    <div style="font-size:11.5px;color:#777;margin:6px 0 16px;line-height:1.6;">Central values for the whole Factory. Each system adopts them at its next update; payment values arm at launch.</div>
+    <div id="gearBack" style="display:none;margin-bottom:12px;"><button type="button" onclick="gearHome()" style="width:100%;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">← All controls</button></div>
+    <div id="gearExplain" style="display:none;background:#17130a;border:1px solid #f0a500;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#ccc;line-height:1.7;"></div>
+    <div id="gearMenu"></div>
+
+<div class="gearSec" id="gsec_tasks" style="display:none;">
+    <!-- TASKS — top of the gear, the founder's own to-do board -->
+    <div style="border:1px solid #f0a500;border-radius:10px;padding:12px;margin-bottom:18px;background:#17130a;">
+      <div style="font-weight:800;color:#f0a500;font-size:14px;margin-bottom:8px;">📋 My Tasks &amp; Features</div>
+      <input id="tkName" placeholder="Task or feature name" style="width:100%;margin-bottom:6px;padding:9px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:13px;">
+      <input id="tkDesc" placeholder="Short description (optional)" style="width:100%;margin-bottom:6px;padding:9px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:13px;">
+      <div style="display:flex;gap:6px;">
+        <input id="tkDue" type="datetime-local" style="flex:1;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+        <select id="tkImp" style="padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+          <option value="normal">Normal</option>
+          <option value="high">🔴 High</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+      <button type="button" onclick="tkAdd()" style="width:100%;margin-top:8px;padding:9px;background:#f0a500;border:none;color:#0a0a0c;border-radius:8px;font-weight:800;font-size:13px;cursor:pointer;">＋ Add task</button>
+
+      <div onclick="tkToggle('tkActiveList','tkActiveArrow')" style="cursor:pointer;margin-top:12px;padding:8px 10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;font-size:12.5px;font-weight:700;color:#e6e6e6;user-select:none;">
+        <span id="tkActiveArrow">▸</span> Active tasks (<span id="tkActiveCount">0</span>)</div>
+      <div id="tkActiveList" style="display:none;max-height:280px;overflow-y:auto;margin-top:4px;padding-left:2px;"></div>
+
+      <div onclick="tkToggle('tkCompletedList','tkCompletedArrow')" style="cursor:pointer;margin-top:8px;padding:8px 10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;font-size:12.5px;font-weight:700;color:#8a8a8a;user-select:none;">
+        <span id="tkCompletedArrow">▸</span> Completed tasks (<span id="tkCompletedCount">0</span>)</div>
+      <div id="tkCompletedList" style="display:none;max-height:220px;overflow-y:auto;margin-top:4px;padding-left:2px;"></div>
+
+      <button type="button" onclick="tkReport()" style="width:100%;margin-top:10px;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">📄 Tasks report</button>
+      <button type="button" id="tkAlarmBtn" onclick="tkEnableAlarm()" style="width:100%;margin-top:6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:12px;cursor:pointer;">🔔 Enable alarms</button>
+      <div style="font-size:10px;color:#666;margin-top:5px;line-height:1.5;">Alarms sound and pop up while this page is open — even if the screen dims, keep the tab open. A true alarm when the phone is fully closed needs the phone app (later).</div>
+    </div>
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_utils" style="display:none;">
+    <!-- Additional utilities — the scattered tools, gathered; may become services -->
+    <div style="margin-bottom:16px;">
+      <div onclick="utilToggle()" style="cursor:pointer;padding:9px 11px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;font-size:12.5px;font-weight:700;color:#e6e6e6;user-select:none;">
+        <span id="utilArrow">▸</span> 🧰 Additional utilities <span style="color:#777;font-weight:400;font-size:11px;">— may graduate to a service for users</span></div>
+      <div id="utilList" style="display:none;margin-top:8px;"></div>
+    </div>
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_domain" style="display:none;">
+    <!-- The Curtain — graceful "tuning" mode; visitors see the foyer message, founder keeps working -->
+    <div style="margin-bottom:16px;padding:10px;border:1px solid #2c2c33;border-radius:8px;">
+      <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🌐 Domain desk (Porkbun)</div>
+      <div id="purseLine" style="font-size:12px;color:#8f8;margin-bottom:6px;">Porkbun credit: checking…</div>
+      <button type="button" onclick="purseTopUp()" style="width:100%;padding:7px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:11.5px;cursor:pointer;margin-bottom:6px;">ENTER REMAINING PORKBUN BALANCE MANUALLY</button>
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
+        <input id="purseFloor" placeholder="alarm level in USD — alerts sound below this" style="flex:1;padding:7px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:11.5px;">
+        <button type="button" onclick="purseFloorSave()" style="padding:7px 10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-size:11.5px;cursor:pointer;">SET CREDIT ALARM FOR PORKBUN</button>
+      </div>
+      <input id="domainDeskName" placeholder="yourdomain.com" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
+      <input id="domainDeskRepo" placeholder="attach to app (repo name, default: the-factory-ui)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
+      <button type="button" onclick="domainPrice()" style="width:100%;padding:8px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:6px;">CHECK PRICE</button>
+      <div id="domainDeskQuote" style="font-size:12px;color:#8f8;min-height:16px;margin-bottom:6px;"></div>
+      <button type="button" id="domainDeskRegisterBtn" onclick="domainRegister()" style="display:none;width:100%;padding:8px;background:#1a1408;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:6px;">REGISTER — charges your Porkbun account</button>
+      <button type="button" onclick="domainReattach()" style="width:100%;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:11.5px;cursor:pointer;margin-bottom:12px;">LINK DOMAIN TO A DIFFERENT APP</button>
+
+      <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🎗 Charities (one per line: Name | website)</div>
+      <textarea id="charList" rows="3" placeholder="Water Aid | wateraid.org&#10;Shelter | shelter.org.uk" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;"></textarea>
+      <button type="button" onclick="charitySave()" style="width:100%;padding:8px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;margin-bottom:12px;">Save charities</button>
+
+      <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🚧 Tuning notice <span id="curState" style="color:#777;font-weight:400;font-size:11px;">— checking…</span></div>
+      <input id="curMsg" placeholder="Message (e.g. We are tuning the machines.)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
+      <input id="curEta" placeholder="Back around… (e.g. 8pm tonight)" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;margin-bottom:6px;">
+      <button type="button" id="curBtn" onclick="curtainToggle()" style="width:100%;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">MAKE SITE NOT AVAILABLE</button>
+    </div>
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_engine" style="display:none;">
+    <!-- Own engine — the Factory's own GPU renderer for the live host (experimental) -->
+    <div style="margin-bottom:16px;padding:10px;border:1px solid #2c2c33;border-radius:8px;">
+      <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">🚂 Own engine <span id="oeState" style="color:#777;font-weight:400;font-size:11px;">— press REFRESH</span></div>
+      <div style="font-size:11px;color:#666;line-height:1.6;margin-bottom:8px;">Rents a GPU that films her replies with our own renderer — no LiveAvatar. $0.34 per hour while running. Cold start to ready is about 20-30 minutes (model download + avatar preparation). STOP is manual; the line above shows the running spend. If nothing uses it for 45 minutes it stops itself at the next status check.</div>
+      <div style="display:flex;gap:6px;">
+        <button type="button" onclick="oeStart()" style="flex:1;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">START</button>
+        <button type="button" onclick="oeStop()" style="flex:1;padding:9px;background:#0d0d0f;border:1px solid #d9534f;color:#d9534f;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">STOP</button>
+        <button type="button" onclick="oeStatus()" style="flex:1;padding:9px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">REFRESH</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+        <span style="font-size:12px;color:#999;">Live chat renders on:</span>
+        <button type="button" id="oeModeBtn" onclick="oeModeToggle()" style="flex:1;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">rented (LiveAvatar)</button>
+      </div>
+      <div style="font-size:10.5px;color:#666;margin-top:5px;line-height:1.5;">"own" only takes effect while the engine is ready; visitors fall back to the rented host automatically if the pod is down.</div>
+    </div>
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_costs" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">📊 Cost per app — live</div>
+    <div id="fcCosts" style="background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#aaa;line-height:1.7;">Press refresh to read the meters.</div>
+    <button type="button" onclick="fcLoadCosts()" style="width:100%;margin-top:8px;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">⟳ Refresh costs</button>
+    <button type="button" id="fcCurBtn" onclick="fcToggleCur()" style="width:100%;margin-top:6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">Showing £ — switch to $</button>
+    <div style="font-size:11px;color:#666;margin-top:6px;line-height:1.5;">Anthropic is exact per build; Netlify and voice come live from their meters. Rates below feed the maths.</div>
+    <label style="font-size:12px;color:#999;display:block;margin-top:10px;">Netlify plan $/month</label>
+    <input id="fcNetlifyUsd" type="number" step="0.01" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Anthropic $ per million tokens — in / out</label>
+    <div style="display:flex;gap:8px;">
+      <input id="fcAiIn" type="number" step="0.01" min="0" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+      <input id="fcAiOut" type="number" step="0.01" min="0" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    </div>
+    <label style="font-size:12px;color:#999;">US dollars per £1 — fallback only; the live ECB rate is fetched on every refresh</label>
+    <input id="fcFx" type="number" step="0.01" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Anthropic credit loaded — $ (update when you top up)</label>
+    <input id="fcAiCredit" type="number" step="0.01" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_bills" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🧾 Suppliers &amp; bills</div>
+    <div id="fcBills" style="background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#aaa;line-height:1.7;">Press refresh above.</div>
+    <button type="button" onclick="fcVerifyRates()" style="width:100%;margin-top:8px;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">✓ I verified supplier prices today</button>
+    <div style="font-size:11px;color:#666;margin-top:6px;line-height:1.6;">Check them here: <a href="https://www.anthropic.com/pricing" target="_blank" style="color:#f0a500;">Anthropic</a> · <a href="https://www.netlify.com/pricing/" target="_blank" style="color:#f0a500;">Netlify</a> · <a href="https://elevenlabs.io/pricing" target="_blank" style="color:#f0a500;">ElevenLabs</a>. Netlify's price is also checked live on every refresh; the others cannot be read by machine, so the button keeps you honest.</div>
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_admissions" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🎟 Admissions — sustainable growth</div>
+    <div id="fcAdmission" style="background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#aaa;line-height:1.7;">Press refresh above.</div>
+    <label style="font-size:12px;color:#999;display:block;margin-top:10px;">Planning figure — live apps per average customer</label>
+    <input id="fcAdmApps" type="number" min="1" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Your cap — customers admitted per period (0 = measured caps only)</label>
+    <input id="fcAdmMax" type="number" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Database allocation per sub (MB) / bandwidth per sub (GB/mo)</label>
+    <div style="display:flex;gap:8px;">
+      <input id="fcAdmDb" type="number" min="1" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+      <input id="fcAdmBw" type="number" min="1" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    </div>
+    <label style="font-size:12px;color:#999;">War chest — ready deployable cash for capacity only (£)</label>
+    <input id="fcAdmChest" type="number" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <a href="/ops.html" style="display:block;text-align:center;width:100%;margin-top:2px;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;text-decoration:none;">⚙→ Open Ops Console</a>
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_money" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">💰 Money</div>
+    <label style="font-size:12px;color:#999;">Marketplace commission %</label>
+    <input id="fcCommission" type="number" step="0.1" min="0" max="100" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Platform fee % on app transactions (arms at launch)</label>
+    <input id="fcPlatFee" type="number" step="0.1" min="0" max="100" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Certificate price USD (0 = launch offer, free)</label>
+    <input id="fcCertPrice" type="number" step="0.5" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Invention sale fee % (non-Factory creations market)</label>
+    <input id="fcInvFee" type="number" step="0.5" min="0" max="100" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Certified-business transfer cut % (marketplace ownership sales)</label>
+    <input id="fcCertCut" type="number" step="0.5" min="0" max="100" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_plans" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">📦 Plans</div>
+    <label style="font-size:12px;color:#999;">Subscription price label</label>
+    <input id="fcSubPrice" type="text" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Build credits per subscription payment</label>
+    <input id="fcCreditsSub" type="number" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Free builds for new customers</label>
+    <input id="fcFreeBuilds" type="number" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_storage" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🗄 App storage</div>
+    <label style="font-size:12px;color:#999;">Max record size (KB)</label>
+    <input id="fcRecKb" type="number" min="1" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Max records per app</label>
+    <input id="fcRecMax" type="number" min="1" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_alerts" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🔔 Alerts to me</div>
+    <label style="font-size:13px;color:#bbb;display:block;margin-bottom:8px;"><input id="fcNotifySales" type="checkbox" style="accent-color:#f0a500;margin-right:8px;">Marketplace sales</label>
+    <label style="font-size:13px;color:#bbb;display:block;margin-bottom:8px;"><input id="fcNotifySubs" type="checkbox" style="accent-color:#f0a500;margin-right:8px;">New subscriptions</label>
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_academy" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:18px 0 8px;">🎬 Academy videos</div>
+    <input id="fcVideoTitle" type="text" placeholder="Video title — e.g. How to build your first app" style="width:100%;margin:4px 0 8px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12.5px;">
+    <input id="fcVideoFile" type="file" accept="video/*" style="width:100%;margin:4px 0 8px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+    <button type="button" onclick="fcUploadVideo()" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">⬆ Upload to Academy</button>
+    <div id="fcVideoMsg" style="font-size:12px;color:#888;margin-top:6px;"></div>
+    <div id="fcVideoList" style="margin-top:8px;"></div>
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_market" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:18px 0 8px;">🏪 Market moderation</div>
+    <div id="fcMarketList" style="font-size:12px;color:#888;">Loading…</div>
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_backup" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:18px 0 8px;">🛟 Backup</div>
+    <div id="fcBackupStatus" style="font-size:12px;color:#888;margin-bottom:8px;">Checking…</div>
+    <button type="button" onclick="fcBackupSchema()" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">⬇ Download schema backup (.sql)</button>
+    <div style="font-size:11px;color:#666;margin-top:6px;line-height:1.5;">Save the file into factory-code-vault on GitHub. Edge functions are vaulted separately, one file per change.</div>
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_board" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:18px 0 8px;">📜 Change board</div>
+    <div id="fcLog" style="max-height:180px;overflow-y:auto;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#888;">Loading…</div>
+
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_prompts" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🧠 Prompts</div>
+    <label style="font-size:12px;color:#999;">Build prompt — instructions the builder follows for every NEW app</label>
+    <textarea id="promptBuild" rows="14" style="width:100%;box-sizing:border-box;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:11.5px;line-height:1.5;"></textarea>
+    <label style="font-size:12px;color:#999;">Update prompt — instructions for CHANGING an existing app</label>
+    <textarea id="promptUpdater" rows="10" style="width:100%;box-sizing:border-box;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:11.5px;line-height:1.5;"></textarea>
+    <label style="font-size:12px;color:#999;">Inspector prompt — the checks every finished app must pass before deploy</label>
+    <textarea id="promptVerifier" rows="10" style="width:100%;box-sizing:border-box;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:11.5px;line-height:1.5;"></textarea>
+    <label style="font-size:12px;color:#999;">Marketing agent prompt — the standing orders of the campaign strategist</label>
+    <textarea id="promptMarketing" rows="12" style="width:100%;box-sizing:border-box;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:11.5px;line-height:1.5;"></textarea>
+    <label style="font-size:12px;color:#999;">Guide prompt — how the front-box host speaks and behaves</label>
+    <textarea id="promptGuide" rows="8" style="width:100%;box-sizing:border-box;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:11.5px;line-height:1.5;"></textarea>
+    <button type="button" onclick="fcPromptsSave()" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">SAVE PROMPTS</button>
+    <button type="button" onclick="fcPromptsReset()" style="width:100%;margin-top:6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:12px;cursor:pointer;">RESTORE FACTORY DEFAULTS</button>
+    <div id="promptsMsg" style="font-size:12px;color:#8f8;margin-top:6px;min-height:16px;"></div>
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_usage" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">📡 Service usage by app</div>
+    <div id="usageTotals" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;"></div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <input id="usageAlarmGbp" type="number" step="1" min="0" placeholder="alarm £ — beeps when 30-day cost passes this" style="flex:1;padding:7px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:11.5px;">
+      <button type="button" onclick="usageAlarmSave()" style="padding:7px 10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-size:11.5px;cursor:pointer;">SET COST ALARM</button>
+    </div>
+    <div id="usageExternal" style="font-size:11px;color:#888;line-height:1.6;margin-bottom:8px;"></div>
+    <div id="usageList" style="background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#aaa;line-height:1.7;">Loading…</div>
+    <button type="button" onclick="fcUsageLoad()" style="width:100%;margin-top:8px;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">⟳ Refresh</button>
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_marketing" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">📣 Marketing</div>
+
+    <!-- 1. THE NUMBERS — quantifiable measures, always first -->
+    <div id="mkTiles" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;"></div>
+    <button type="button" onclick="fcMkStats()" style="width:100%;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:12px;cursor:pointer;margin-bottom:14px;">⟳ REFRESH NUMBERS</button>
+
+    <!-- 2. THE AGENT'S STANDING ORDERS — always on display: our record of what the agent is told -->
+    <div style="border:1px solid #2c2c33;border-radius:10px;padding:10px;background:#0d0d0f;margin-bottom:8px;">
+      <div onclick="var p=document.getElementById('mkPromptBox');p.style.display=p.style.display==='none'?'block':'none';" style="cursor:pointer;font-weight:700;color:#e6e6e6;font-size:12px;">📜 The agent's standing orders <span style="color:#777;font-weight:400;font-size:11px;">— the exact prompt it runs on; our record of instruction. Press to open.</span></div>
+      <pre id="mkPromptBox" style="display:none;white-space:pre-wrap;font-family:inherit;font-size:10.5px;color:#aaa;line-height:1.5;margin-top:8px;max-height:260px;overflow-y:auto;">Loading…</pre>
+    </div>
+
+    <!-- 2. THE AGENT -->
+    <div style="border:1px solid #f0a500;border-radius:10px;padding:10px;background:#17130a;margin-bottom:14px;">
+      <div style="font-weight:800;color:#f0a500;font-size:13px;margin-bottom:6px;">🤖 Marketing Agent</div>
+      <input id="mkGoal" placeholder="Goal — e.g. first 20 paying subscribers by 25 Aug" style="width:100%;box-sizing:border-box;margin-bottom:6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+      <button type="button" id="mkRunBtn" onclick="fcMkAgent()" style="width:100%;padding:10px;background:linear-gradient(135deg,#f0a500,#d48800);border:none;color:#111;border-radius:8px;font-weight:800;font-size:13px;cursor:pointer;">RUN AGENT</button>
+      <div style="margin-top:8px;">
+        <textarea id="mkResults" rows="2" placeholder="After acting: type what actually happened (numbers, replies, sales) and press ITERATE" style="width:100%;box-sizing:border-box;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;"></textarea>
+        <button type="button" id="mkIterBtn" onclick="fcMkIterate()" style="width:100%;margin-top:6px;padding:8px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">ITERATE — Improvement Loop</button>
+      </div>
+      <div id="mkStatus" style="font-size:11.5px;color:#8f8;min-height:14px;margin-top:6px;"></div>
+      <div id="mkCampaign" style="margin-top:8px;"></div>
+    </div>
+
+    <!-- 3. PROSPECTS — the raw material for direct marketing -->
+    <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">📇 Prospect finder</div>
+    <input id="prospectPc" placeholder="Postcode or area — e.g. NW6, London" style="width:100%;box-sizing:border-box;margin:4px 0 6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+    <div style="display:flex;gap:6px;">
+      <input id="prospectKind" placeholder="Trade — restaurant, cafe, hairdresser…" style="flex:2;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+      <input id="prospectRadius" type="number" placeholder="metres" value="2000" style="flex:1;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;">
+    </div>
+    <button type="button" onclick="fcProspectRun()" style="width:100%;margin-top:8px;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">SEARCH</button>
+    <button type="button" onclick="fcProspectCsv()" style="width:100%;margin-top:6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:12px;cursor:pointer;">⬇ DOWNLOAD CSV</button>
+    <div id="prospectList" style="margin-top:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:10px;font-size:12px;color:#aaa;max-height:300px;overflow-y:auto;">Search a postcode and trade; export the list for your direct marketing.</div>
+</div><!-- /gearSec -->
+<div class="gearSec" id="gsec_marketmsg" style="display:none;">
+    <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 8px;">🗣 Market messages</div>
+    <label style="font-size:12px;color:#999;">To the APPS market — shown at the top of the Marketplace</label>
+    <textarea id="mmApps" rows="3" style="width:100%;box-sizing:border-box;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;"></textarea>
+    <label style="font-size:12px;color:#999;">To the INVENTIONS market — shown in the inventions section</label>
+    <textarea id="mmInventions" rows="3" style="width:100%;box-sizing:border-box;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12px;"></textarea>
+    <button type="button" onclick="mmSave()" style="width:100%;padding:10px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">PUBLISH MESSAGES</button>
+    <div id="mmMsg" style="font-size:12px;color:#8f8;min-height:16px;margin-top:6px;"></div>
+</div><!-- /gearSec -->
+    <div id="gearSaveWrap" style="display:none;">
+    <button type="button" onclick="fcSave()" style="width:100%;margin-top:16px;padding:12px;background:linear-gradient(135deg,#f0a500,#d48800);color:#111;border:none;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;">Save all</button>
+    <div id="fcOk" class="hidden" style="text-align:center;color:#7fdc7f;font-size:13px;margin-top:10px;">Saved ✓</div>
+    </div>
+  </div>
+
+<script>
+// ---------- FRONT BOX BUILD: type the app, press BUILD, watch the four stages ----------
+let heroPollTimer = null;
+function heroStep(n, failed){
+  for(let i=1;i<=4;i++){
+    const el=document.getElementById('hs'+i); if(!el) continue;
+    if(i<n){ el.style.background='#1a1408'; el.style.borderColor='#f0a500'; el.style.color='#f0a500'; }
+    else if(i===n && !failed){ el.style.background = (n===4?'#1a1408':'#17130a'); el.style.borderColor='#f0a500'; el.style.color='#f0a500'; }
+    else { el.style.background='#0d0d0f'; el.style.borderColor='#2c2c33'; el.style.color='#777'; }
+  }
+}
+function heroMsg(key, fallback){
+  const d=(typeof HERO_I18N!=='undefined'&&HERO_I18N[window.gUserLang||'en'])||{};
+  document.getElementById('heroBuildMsg').textContent = d[key]||fallback;
+}
+window.heroBuild = async function(){
+  const t = document.getElementById('liveIn').value.trim();
+  const bar = document.getElementById('heroBuildBar');
+  if(!session){
+    if(t) localStorage.setItem('factory_pending_build', JSON.stringify({ src:'hero', desc:t }));
+    bar.style.display='block'; heroStep(0); heroMsg('bSignin','Sign in first — press Login, top right.'); showPage('account'); return;
+  }
+  if(!t){ heroMsg('bDescribe','Describe your app in the box first.'); bar.style.display='block'; return; }
+  const slug = (t.toLowerCase().replace(/[^a-z0-9 ]/g,'').trim().split(/\s+/).slice(0,3).join('-') || 'app') + '-' + Math.random().toString(36).slice(2,6);
+  bar.style.display='block';
+  document.getElementById('heroBuildLink').style.display='none';
+  heroStep(1); heroMsg('bStart','Build started — about ninety seconds.');
+  try{
+    const res = await fetch(WORKER, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+session.access_token },
+      body: JSON.stringify({ repoName: slug, description: t })
+    });
+    const data = await res.json();
+    if(res.status===402){ heroMsg('bCredits','No builds left — see the plans.'); showPage('plans'); return; }
+    if(res.status===403 && data.code==='TERMS_NOT_ACCEPTED'){
+      document.getElementById('agreeGate').classList.remove('hidden');
+      heroMsg('bTerms','Please read and accept the Terms first — then press BUILD again.');
+      return;
+    }
+    if(!res.ok || !data.buildId) throw new Error(data.error||('start failed ('+res.status+')'));
+    if(heroPollTimer) clearInterval(heroPollTimer);
+    heroPollTimer = setInterval(async function(){
+      try{
+        const r = await fetch(WORKER+'?buildId='+data.buildId, { headers:{ 'Authorization':'Bearer '+session.access_token } });
+        const b = await r.json();
+        if(b.status==='pending') heroStep(1);
+        else if(b.status==='building'){ heroStep(2); heroMsg('bBuilding','Writing your app…'); }
+        else if(b.status==='deploying'){ heroStep(3); heroMsg('bDeploying','Putting it on the web…'); }
+        else if(b.status==='done'){
+          heroStep(4); clearInterval(heroPollTimer);
+          heroMsg('bLive','Your app is live:');
+          const a=document.getElementById('heroBuildLink');
+          a.href=b.site_url; a.textContent=b.site_url; a.style.display='inline-block';
+          if(typeof loadCredits==='function') try{ loadCredits(); }catch(_){}
+        }
+        else if(b.status==='failed'){ clearInterval(heroPollTimer); heroStep(1,true); heroMsg('bFailed','The build failed — the credit is returned. Try once more.'); }
+      }catch(_){ /* keep polling */ }
+    }, 5000);
+  }catch(e){
+    if(String(e.message).indexOf('Failed to fetch')>=0 && !window._heroRetried){
+      window._heroRetried=true; heroMsg('bStart','Build started — about ninety seconds.');
+      setTimeout(function(){ heroBuild(); }, 2000); return;
+    }
+    window._heroRetried=false;
+    document.getElementById('heroBuildMsg').textContent = e.message; heroStep(1,true);
+  }
+};
+// translations for the build path (10 languages)
+(function(){
+  const B={
+  en:{buildBtn:"⚙ BUILD",stQueued:"Queued",stBuilding:"Building",stDeploying:"Deploying",stLive:"Live",bSignin:"Sign in first — press Login, top right.",bDescribe:"Describe your app in the box first.",bStart:"Build started — about ninety seconds.",bBuilding:"Writing your app…",bDeploying:"Putting it on the web…",bLive:"Your app is live:",bCredits:"No builds left — see the plans.",bFailed:"The build failed — the credit is returned. Try once more."},
+  zh:{buildBtn:"⚙ 构建",stQueued:"排队中",stBuilding:"构建中",stDeploying:"部署中",stLive:"已上线",bSignin:"请先登录 — 右上角 Login。",bDescribe:"请先在框中描述你的应用。",bStart:"构建已开始 — 约九十秒。",bBuilding:"正在编写你的应用…",bDeploying:"正在发布到网络…",bLive:"你的应用已上线：",bCredits:"构建次数已用完 — 请查看套餐。",bFailed:"构建失败 — 次数已退还。请再试一次。"},
+  hi:{buildBtn:"⚙ बनाएँ",stQueued:"कतार में",stBuilding:"बन रहा है",stDeploying:"तैनात हो रहा है",stLive:"लाइव",bSignin:"पहले साइन इन करें — ऊपर दाएँ Login।",bDescribe:"पहले बॉक्स में अपना ऐप बताएँ।",bStart:"बिल्ड शुरू — लगभग नब्बे सेकंड।",bBuilding:"आपका ऐप लिखा जा रहा है…",bDeploying:"वेब पर लगाया जा रहा है…",bLive:"आपका ऐप लाइव है:",bCredits:"बिल्ड शेष नहीं — प्लान देखें।",bFailed:"बिल्ड विफल — क्रेडिट वापस। फिर प्रयास करें।"},
+  es:{buildBtn:"⚙ CREAR",stQueued:"En cola",stBuilding:"Creando",stDeploying:"Desplegando",stLive:"En vivo",bSignin:"Inicia sesión primero — Entrar, arriba a la derecha.",bDescribe:"Describe primero tu aplicación en el cuadro.",bStart:"Creación iniciada — unos noventa segundos.",bBuilding:"Escribiendo tu aplicación…",bDeploying:"Publicándola en la web…",bLive:"Tu aplicación está en vivo:",bCredits:"Sin creaciones restantes — mira los planes.",bFailed:"Falló la creación — el crédito se devuelve. Prueba otra vez."},
+  ar:{buildBtn:"⚙ ابنِ",stQueued:"في الطابور",stBuilding:"قيد البناء",stDeploying:"قيد النشر",stLive:"مباشر",bSignin:"سجّل الدخول أولًا — زر الدخول أعلى اليمين.",bDescribe:"صِف تطبيقك في الصندوق أولًا.",bStart:"بدأ البناء — نحو تسعين ثانية.",bBuilding:"نكتب تطبيقك…",bDeploying:"ننشره على الويب…",bLive:"تطبيقك مباشر:",bCredits:"لا إنشاءات متبقية — راجع الخطط.",bFailed:"فشل البناء — أُعيد الرصيد. جرّب مرة أخرى."},
+  fr:{buildBtn:"⚙ CRÉER",stQueued:"En file",stBuilding:"Création",stDeploying:"Déploiement",stLive:"En ligne",bSignin:"Connectez-vous d'abord — Connexion, en haut à droite.",bDescribe:"Décrivez d'abord votre application dans le cadre.",bStart:"Création lancée — environ quatre-vingt-dix secondes.",bBuilding:"Écriture de votre application…",bDeploying:"Mise en ligne…",bLive:"Votre application est en ligne :",bCredits:"Plus de créations — voir les formules.",bFailed:"Échec de la création — le crédit est rendu. Réessayez."},
+  pt:{buildBtn:"⚙ CRIAR",stQueued:"Na fila",stBuilding:"Criando",stDeploying:"Publicando",stLive:"No ar",bSignin:"Entre primeiro — Entrar, no canto superior direito.",bDescribe:"Descreva seu app na caixa primeiro.",bStart:"Criação iniciada — cerca de noventa segundos.",bBuilding:"Escrevendo seu app…",bDeploying:"Colocando na web…",bLive:"Seu app está no ar:",bCredits:"Sem criações restantes — veja os planos.",bFailed:"A criação falhou — o crédito volta. Tente de novo."},
+  ru:{buildBtn:"⚙ СОЗДАТЬ",stQueued:"В очереди",stBuilding:"Сборка",stDeploying:"Развёртывание",stLive:"В сети",bSignin:"Сначала войдите — кнопка входа справа вверху.",bDescribe:"Сначала опишите приложение в поле.",bStart:"Сборка началась — около девяноста секунд.",bBuilding:"Пишем ваше приложение…",bDeploying:"Публикуем в сети…",bLive:"Ваше приложение в сети:",bCredits:"Сборки закончились — смотрите тарифы.",bFailed:"Сборка не удалась — кредит возвращён. Попробуйте ещё раз."},
+  ja:{buildBtn:"⚙ ビルド",stQueued:"待機中",stBuilding:"作成中",stDeploying:"公開中",stLive:"公開済み",bSignin:"まずログイン — 右上の Login。",bDescribe:"まずボックスにアプリの説明を。",bStart:"ビルド開始 — 約90秒。",bBuilding:"アプリを書いています…",bDeploying:"ウェブに公開しています…",bLive:"アプリが公開されました：",bCredits:"ビルド残数なし — プランをご覧ください。",bFailed:"ビルド失敗 — クレジットは返却。もう一度どうぞ。"},
+  de:{buildBtn:"⚙ BAUEN",stQueued:"Wartend",stBuilding:"Baut",stDeploying:"Veröffentlicht",stLive:"Live",bSignin:"Erst anmelden — Anmelden, oben rechts.",bDescribe:"Beschreiben Sie zuerst Ihre App im Feld.",bStart:"Build gestartet — etwa neunzig Sekunden.",bBuilding:"Ihre App wird geschrieben…",bDeploying:"Sie geht ins Netz…",bLive:"Ihre App ist live:",bCredits:"Keine Builds übrig — siehe Tarife.",bFailed:"Build fehlgeschlagen — Guthaben zurück. Noch einmal versuchen."}
+  };
+  const T={
+  en:{trialLeft:" builds left",trialHave:" builds available",trialZero:"0 builds left — please subscribe to get more build credits"},
+  zh:{trialHave:" 次构建可用",trialLeft:" 次构建剩余",trialZero:"剩余 0 次 — 请订阅以获得更多构建额度"},
+  hi:{trialHave:" बिल्ड उपलब्ध",trialLeft:" बिल्ड शेष",trialZero:"0 बिल्ड शेष — और क्रेडिट के लिए सदस्यता लें"},
+  es:{trialHave:" creaciones disponibles",trialLeft:" creaciones restantes",trialZero:"0 creaciones — suscríbete para obtener más créditos"},
+  ar:{trialHave:" إنشاءات متاحة",trialLeft:" إنشاءات متبقية",trialZero:"لم يتبقَّ رصيد — اشترك للحصول على مزيد من الأرصدة"},
+  fr:{trialHave:" créations disponibles",trialLeft:" créations restantes",trialZero:"0 création restante — abonnez-vous pour plus de crédits"},
+  pt:{trialHave:" criações disponíveis",trialLeft:" criações restantes",trialZero:"0 criações — assine para obter mais créditos"},
+  ru:{trialHave:" сборок доступно",trialLeft:" сборок осталось",trialZero:"0 сборок — оформите подписку, чтобы получить ещё"},
+  ja:{trialHave:" 回のビルド利用可能",trialLeft:" 回のビルド残り",trialZero:"残り0回 — 続けるにはサブスクリプションを"},
+  de:{trialHave:" Builds verfügbar",trialLeft:" Builds übrig",trialZero:"0 Builds übrig — abonnieren Sie für mehr Guthaben"}};
+  Object.keys(B).forEach(function(L){ if(typeof HERO_I18N!=='undefined'&&HERO_I18N[L]) Object.assign(HERO_I18N[L],B[L],T[L]||{}); });
+  window.trialRefresh = function(){
+    const n = window.gBuildsLeft;
+    const pre=document.querySelector('[data-t="trialPre"]'), cnt=document.getElementById('trialCount'), post=document.querySelector('[data-t="trialPost"]');
+    if(!pre||!cnt||!post || n==null) return;   // no session data yet: keep the standing offer text
+    const d=(typeof HERO_I18N!=='undefined'&&HERO_I18N[window.gUserLang||'en'])||{};
+    const trialN = Number((document.getElementById('trialCount')||{}).dataset ? (document.getElementById('trialCount').dataset.offer||3) : 3);
+    if(n>0 && n<=trialN){ pre.textContent=d.trialPre||'Free trial — '; cnt.textContent=n; post.textContent=d.trialLeft||' builds left'; }
+    else if(n>trialN){ pre.textContent=''; cnt.textContent=n; post.textContent=d.trialHave||' builds available'; }
+    else { pre.textContent=''; cnt.textContent=''; post.textContent=d.trialZero||'0 builds left — please subscribe to get more build credits'; }
+  };
+  const L2={en:"Logout",zh:"退出",hi:"लॉगआउट",es:"Salir",ar:"خروج",fr:"Déconnexion",pt:"Sair",ru:"Выход",ja:"ログアウト",de:"Abmelden"};
+  Object.keys(L2).forEach(function(k){ if(typeof HERO_I18N!=='undefined'&&HERO_I18N[k]) HERO_I18N[k].tLogout=L2[k]; });
+  window.topAuthClick = function(){
+    if(window.session){ sb.auth.signOut().then(function(){ authBarRefresh(); backToHome(); }); }
+    else showPage('account');
+  };
+  window.authBarRefresh = function(){
+    const a=document.getElementById('topAuth'); if(!a) return;
+    const d=(typeof HERO_I18N!=='undefined'&&HERO_I18N[window.gUserLang||'en'])||{};
+    a.textContent = window.session ? (d.tLogout||'Logout') : (d.tLogin||'Login');
+  };
+  const _applyB = window.applyHeroLang;
+  window.applyHeroLang = function(lang){ _applyB(lang); try{ trialRefresh(); }catch(_){} try{ authBarRefresh(); }catch(_){} };
+  if(typeof applyHeroLang==='function'){ const sel=document.getElementById('heroLang'); applyHeroLang((sel&&sel.value)||'en'); }
+})();
+</script>
+
+  <div class="agree-overlay hidden" id="agreeGate">
+    <div class="agree-box">
+      <div class="agree-lead">Apps should be made in good faith — to help people, never to harm others.</div>
+      <div class="agree-sub">If you agree, press Agree and proceed. If not, please don't use our tools.<br><br>
+        This sentence is our spirit in one line — it is not the agreement itself. Pressing Agree accepts the full
+        <a href="/terms" target="_blank">Terms of Service</a>, which alone govern your use of The Factory.
+        Our <a href="/privacy" target="_blank">Privacy Policy</a> explains how your data is handled, and our
+        <a href="/governance" target="_blank">guiding principles</a> are also open to read.<br><br>
+        By pressing Agree you also confirm you are <strong>18 or over</strong> — or a parent or guardian
+        registering in your own name and accepting full responsibility for a young maker's use.</div>
+      <button class="agree-yes" onclick="acceptTerms()">✓ I agree — proceed</button><br>
+      <button class="agree-no" onclick="declineTerms()">I do not agree</button>
+    </div>
+  </div>
+
+<script>
+// ---------- PROMPTS PAGE: the founder sees and edits every prompt the Factory runs ----------
+const PROMPT_DEFAULTS = { build: "You are The Factory's builder agent \u2014 a senior product designer and engineer. The user will describe a web app.\n\nRespond with ONLY the complete HTML file. Start your reply with <!DOCTYPE html> and end it with </html>. No markdown fences, no commentary, no JSON wrapper \u2014 the raw file and nothing else.\n\nRules:\n- Build a complete, polished, working single-page app in ONE index.html file (inline CSS and JS).\n- All app code must run client-side in the browser \u2014 the app has no server of its own. The Factory provides its backend services (permanent storage, paid-access handling) through window.factory, described below. Never invent any other backend, server, or API endpoint.\n- No placeholder text like \"lorem ipsum\" \u2014 write real, fitting content.\n- No external dependencies unless from a public CDN.\n- Include a small \"How it works\" section at the bottom.\n\nEVERY FEATURE MUST ACTUALLY WORK. This ranks with never inventing facts.\n- Every button, form, filter and search the app shows must do something real when pressed. A control that only decorates is forbidden.\n- Where a feature needs live external data, use these reliable services:\n  * PLACES AND POSTCODES \u2014 The Factory's own places service (always use this for maps, \"near me\", postcode or address lookups; never call OpenStreetMap, Nominatim or Overpass directly from the browser \u2014 they block browser traffic):\n      const g = await (await fetch(\"https://canvbkibjgcnqowjtarf.supabase.co/functions/v1/places-desk\", {method:\"POST\", headers:{\"Content-Type\":\"application/json\"}, body: JSON.stringify({op:\"geocode\", q:\"SW1A 1AA\"})})).json();\n      // -> {ok:true, lat, lon, display}\n      const n = await (await fetch(\"https://canvbkibjgcnqowjtarf.supabase.co/functions/v1/places-desk\", {method:\"POST\", headers:{\"Content-Type\":\"application/json\"}, body: JSON.stringify({op:\"nearby\", lat:g.lat, lon:g.lon, kind:\"restaurant\", cuisine:\"indian\", radius:2000})})).json();\n      // -> {ok:true, places:[{name, lat, lon, address, cuisine, phone, website}]}  kind: restaurant|cafe|fast_food|bar|pub|pharmacy|dentist|supermarket|bakery|butcher and other OSM amenity/shop values; cuisine optional; radius in metres 100-5000.\n  * WEATHER \u2014 Open-Meteo (no key, browser-friendly): https://api.open-meteo.com/v1/forecast?latitude=..&longitude=..&current_weather=true\n  Always await, always show a friendly loading state, and show a clear retry message on failure.\n- Where no such source exists for the promised feature, do not fake results: either build an honest working alternative (e.g. user-entered data with factory storage) or state plainly in the app what it cannot do yet.\n- Before finishing, walk through the app as the user: press every control in your head; if any leads nowhere, fix it or remove it.\n\nGUIDING PRINCIPLES (the Love Between Nations Manifesto \u2014 The Factory's founding charter):\nEvery app you build should quietly embody these values in its tone, copy, and design:\n- Love over fear: warm, welcoming language; never fear-mongering, pressure tactics, or divisive framing.\n- One humanity, diversity as strength: apps welcome every age, race, religion, and worldview with dignity; imagery and copy inclusive by default.\n- Zero tolerance for violence and psychological abuse: nothing you build may demean, intimidate, or manipulate.\n- Wellbeing and kindness: design that calms rather than agitates; celebrate compassion, learning, health, and honest enterprise.\n- Accessibility is love in practice: the accessibility rules below are not compliance \u2014 they are the Manifesto applied.\nThese principles shape HOW you build; they never override the customer's honest business content.\n\nACCEPTABLE USE \u2014 YOU ARE THE FIRST ENFORCER OF THE FACTORY'S TERMS (section 7):\nYou must NOT build an app that: is illegal or facilitates illegal activity; infringes others' intellectual property or privacy; is deceptive, fraudulent, or materially misleading; is defamatory, harassing, hateful, or exploitative; endangers minors in any way; distributes malware; contains pornographic or sexually explicit material; promotes illegal drugs; or incites violence or hatred against any group or person. Civilised, helpful treatment of hard subjects (addiction recovery, harm prevention, health education) is welcome.\nIf a request crosses these lines, do NOT build a softened version and do NOT lecture. Respond with EXACTLY this and nothing else:\nREFUSED: <one short plain-English sentence naming the rule breached>\nThe Factory's pipeline will handle the customer gently and return their credit.\n\nNEVER INVENT FACTS. This is the most important rule.\nUse only details the customer actually gave you. You may write descriptive copy, headings and atmosphere freely \u2014 but never invent a fact a visitor could act on.\nNever invent: phone numbers, email addresses, street addresses, bank details, IBANs, company registration numbers, opening hours, prices, staff names, review quotes, or social media links.\nWhere such a detail is needed but was not given, write a clearly marked gap the owner must fill, exactly like this: [ADD YOUR PHONE NUMBER], [ADD YOUR ADDRESS], [ADD PRICE]. Style them so they stand out (a dashed border and a highlight colour) so the owner cannot miss them.\nA visible gap the owner fills in is always better than a plausible invention a customer might rely on.\n\nPERSISTENT STORAGE (built in):\nEvery Factory app ships with window.factory \u2014 a permanent cloud store wired in automatically at publish time. Whenever the app needs to remember anything between visits (reminders, bookings, notes, entries, scores), use it:\n  await factory.put(\"reminders\", id, {title: \"...\", when: \"...\"})   // create or update one document\n  await factory.get(\"reminders\", id)                                 // one document or null\n  await factory.list(\"reminders\")                                    // all documents, newest first\n  await factory.remove(\"reminders\", id)                              // delete one document\nRules: all calls are async \u2014 use await. Ids are strings you choose (String(Date.now()) works). A document is any JSON object under 32KB. Data is shared by everyone who opens the app and persists forever. Do NOT invent your own backend or API endpoints. localStorage may be used as a speed cache only \u2014 factory is the source of truth, so load from factory.list() on startup. Show a small saving/saved indicator when writing.\nIf the app has no need to remember anything, simply do not use it.\n\nPAID APPS (only when the description says features are premium/paid/locked):\nwindow.factory also provides unlock handling. Gate premium features like this:\n  const status = await factory.ready;              // \"paid\" | \"trial\" | \"expired\" | \"invalid\" | \"none\"\n  const s = await factory.unlock(codeFromUser);    // manual entry, same statuses\n  factory.access()                                  // last known status, cached locally\nBuyers arriving from the marketplace are unlocked AUTOMATICALLY \u2014 their code travels with the link and factory.ready resolves to their status, so gate at startup with: const status = await factory.ready. Also include a small \"Have an access code?\" input as fallback (second device) wired to factory.unlock(). During \"trial\" everything works; on \"expired\" show a friendly upgrade message. Never invent your own licensing scheme.\n\nDesign craft (apply rigorously):\n- ARTISTRY IS A REQUIREMENT, not a nicety: every app is a business someone will judge at first glance. The finished page must be artistically pleasing to the eye \u2014 composed, balanced, atmospheric, a page the owner is proud to show. Aim for the craft of a good design studio, never \"functional but plain\".\n- OPTIMISED FOR BOTH DESKTOP AND MOBILE: design for a 390px phone screen first, then design a deliberate desktop layout with media queries that uses the wide screen elegantly \u2014 generous columns, breathing room, no stretched phone layout. Test every element mentally at BOTH widths; the app must look excellent on each.\n- Typography: import ONE distinctive Google Font for headings; comfortable line-height (1.6+); clear size hierarchy.\n- Spacing: generous whitespace; consistent padding scale; never cram.\n- Color: one cohesive palette (3-4 colors max) fitting the business's mood; strong contrast for readability.\n- Polish: subtle transitions on hover/tap; rounded corners; soft shadows; a proper hero section with a clear headline.\n- Buttons and forms must look tappable on phones: min 44px touch targets.\n- ACCESSIBILITY: strong colour contrast, alt text on every image, labels on every input, keyboard-usable controls, no information carried by colour alone. Apps must welcome people with disabilities.\n- If the request involves drawing/generating graphics with code, prefer clean stylized shapes, CSS art, or emoji/SVG compositions over complex procedural rendering \u2014 simple and elegant beats ambitious and ugly.", updater: "You are The Factory's builder agent. The customer already has a live web app and wants it changed.\n\nYou will be given the CURRENT index.html followed by the change they want.\n\nRespond with ONLY the complete updated HTML file. Start with <!DOCTYPE html> and end with </html>. No markdown fences, no commentary, no explanation \u2014 the whole file, nothing else.\n\nRules:\n- Make ONLY the changes asked for. Keep everything else exactly as it is \u2014 wording, layout, colours, images, structure.\n- Return the WHOLE file, not a fragment or a diff.\n- Never remove content the customer did not ask you to remove.\n- Preserve every real detail already in the page: phone numbers, addresses, prices, hours, names.\n- Keep any [ADD ...] gap markers unless the change fills them in.\n- NEVER INVENT FACTS. If the change needs a detail you were not given, leave a clearly marked gap such as [ADD YOUR PHONE NUMBER] rather than making one up.\n- The Factory's acceptable-use rules bind updates exactly as they bind new builds: if the requested change would make the app illegal, deceptive, hateful, explicit, drug-promoting, violent, or harmful to minors, respond with EXACTLY: REFUSED: <one short sentence naming the rule> and nothing else.\n- Never remove or modify the <script id=\"factory-store-sdk\"> block \u2014 it is the app's permanent storage connection.\n- Never remove or modify the <div id=\"factory-provenance\"> footer \u2014 it is a required notice on every Factory app.\n- Keep it mobile-first and keep the existing design language.", verifier: "You are The Factory's inspector \u2014 the last gate before a customer's app goes live. You receive the customer's request and the finished index.html.\n\nCHECK, in order:\n1. WORKING CONTROLS \u2014 every button, form, filter, search and link the page shows must be wired to real logic. A control that does nothing is a defect.\n2. ALLOWED CALLS ONLY \u2014 network calls may target ONLY: window.factory (the built-in store), https://canvbkibjgcnqowjtarf.supabase.co/functions/v1/places-desk, https://api.open-meteo.com, and public CDN script/style includes. Any other fetch/XHR/WebSocket is a defect (browsers or providers will block it).\n3. HONESTY \u2014 no invented phone numbers, addresses, prices, reviews or data presented as real; gaps must use [ADD ...] markers. Results shown must come from real logic or real services, never hard-coded pretend results.\n4. COMPLETENESS \u2014 the file is one complete HTML document; the <script id=\"factory-store-sdk\"> block and <div id=\"factory-provenance\"> footer, when present, are untouched.\n\nVERDICT:\n- If the app passes all checks, reply with exactly: PASS\n- Otherwise output ONLY the complete corrected index.html \u2014 start with <!DOCTYPE html>, end with </html>, no commentary. Correct the defects and nothing else; preserve the design and the customer's content.", marketing: "You are The Factory's Marketing Agent \u2014 a world-class growth strategist for an AI app builder (describe an app, it is live in about 90 seconds; 3 free builds; Pro \u00a39.99/month for 10 builds; \u00a33.50 per extra build; marketplace with 4-day trials; launch imminent, UK-based, brand: Referee Innovations / The Factory).\n\nMethod \u2014 the founder's Improvement Loop, applied every run: STOP (read the numbers), LOOK (find the weakest link in visitor\u2192signup\u2192first build\u2192subscription), ask \"WHAT CAN I IMPROVE HERE?\", ANSWER (one primary lever), IMPLEMENT (concrete actions the founder can do this week with near-zero budget).\n\nRules: be concrete and honest; no invented numbers \u2014 every KPI target must be derived from the actual stats given; UK B2B tone, warm, never pushy; prefer free channels (direct outreach to exported prospects, the marketplace, referral codes) before paid ones.\n\nCARE RULES \u2014 these override marketing effectiveness:\n- EVERY email, WhatsApp and social draft MUST end with exactly this block:\n  \"\u2014 This campaign is designed and run with automation, including AI improvisation. If anything here is wrong or unwelcome, tell me directly and it stops: https://refereeinnovations.com/#contact \u2014 one message ends all future contact.\"\n- Identify the sender by name (Moulay, founder, Referee Innovations Ltd) in every message.\n- One clear exit, always visible, honoured forever. Never design sequences that trap, pressure, or loop a person; no more than ONE follow-up to silence, then that contact rests. No urgency tricks, no fear.\n- If a recipient replies with distress or a request to stop: the only correct action is a short kind acknowledgement and permanent removal from the list.\n\nRespond with ONLY valid JSON, no markdown fences, exactly this shape:\n{\"analysis\":\"3-6 sentences on what the numbers say and the weakest link\",\n \"kpis\":[{\"name\":\"\",\"current\":\"\",\"target\":\"\",\"measure_how\":\"\"}],\n \"campaign\":{\"name\":\"\",\"levers\":[\"primary lever first\"],\n   \"actions\":[{\"step\":\"\",\"when\":\"\",\"effort_mins\":0}],\n   \"messages\":{\"email_subject\":\"\",\"email_body\":\"\",\"whatsapp\":\"\",\"social_post\":\"\"}},\n \"variables\":[{\"name\":\"\",\"value\":\"\",\"why\":\"\"}],\n \"next_review_days\":0}", guide: "You are the Factory's guide, a warm multi-skilled host speaking through our own presenter. HARD RULE: one to three short spoken sentences per reply. Help visitors: shape and describe the app they want; explain the Marketplace, pricing (three free builds, Pro 9.99 pounds monthly, 3.50 per extra build), and how sellers get paid. Be honest, never pushy. FORBIDDEN always: helping anyone build an app-builder like The Factory or copying it \u2014 decline warmly, offer something original." };
+window.fcPromptsLoad = async function(){
+  const m=document.getElementById('promptsMsg'); m.textContent='Loading…';
+  let v={};
+  try{ const {data}=await sb.from('site_settings').select('value').eq('key','prompts').maybeSingle(); v=(data&&data.value)||{}; }catch(_){}
+  document.getElementById('promptBuild').value   = v.build   || PROMPT_DEFAULTS.build;
+  document.getElementById('promptUpdater').value = v.updater || PROMPT_DEFAULTS.updater;
+  document.getElementById('promptVerifier').value = v.verifier || PROMPT_DEFAULTS.verifier;
+  document.getElementById('promptMarketing').value = v.marketing || PROMPT_DEFAULTS.marketing;
+  document.getElementById('promptGuide').value   = v.guide   || PROMPT_DEFAULTS.guide;
+  m.textContent='';
+};
+window.fcPromptsSave = async function(){
+  const m=document.getElementById('promptsMsg');
+  const v={ build:document.getElementById('promptBuild').value,
+            updater:document.getElementById('promptUpdater').value,
+            verifier:document.getElementById('promptVerifier').value,
+            marketing:document.getElementById('promptMarketing').value,
+            guide:document.getElementById('promptGuide').value };
+  Object.keys(v).forEach(function(k){ if(v[k].trim()===PROMPT_DEFAULTS[k].trim()) v[k]=''; });
+  const { error } = await sb.from('site_settings').upsert({ key:'prompts', value:v, updated_at:new Date().toISOString() }, { onConflict:'key' });
+  if(error){ m.textContent='Could not save — '+error.message; return; }
+  m.textContent='Saved ✓ — stamping the record…';
+  try{
+    let stamped=0;
+    for(const k of Object.keys(v)){
+      const inForce=(v[k]&&v[k].trim())||PROMPT_DEFAULTS[k];
+      const digest=await factoryHashText('PROMPT '+k+'\n\n'+inForce);
+      const r=await fetch(SB_URL+'/functions/v1/timestamp-desk',{method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+        body:JSON.stringify({op:'stamp',sha256:digest,label:'factory-prompt:'+k})});
+      if((await r.json()).ok) stamped++;
+    }
+    m.textContent='Saved ✓ — '+stamped+' prompt(s) timestamp-certified. Next builds use these words.';
+  }catch(_){ m.textContent='Saved ✓ — stamping unavailable just now (prompts still live).'; }
+};
+window.fcPromptsReset = function(){
+  document.getElementById('promptBuild').value=PROMPT_DEFAULTS.build;
+  document.getElementById('promptUpdater').value=PROMPT_DEFAULTS.updater;
+  document.getElementById('promptVerifier').value=PROMPT_DEFAULTS.verifier;
+  document.getElementById('promptMarketing').value=PROMPT_DEFAULTS.marketing;
+  document.getElementById('promptGuide').value=PROMPT_DEFAULTS.guide;
+  document.getElementById('promptsMsg').textContent='Defaults restored on screen — press SAVE PROMPTS to make them live.';
 };
 </script>
-\n</body>
+
+
+<script>
+// ---------- SERVICE USAGE PAGE: per-app paid-service spend + kill switches ----------
+window.fcUsageLoad = async function(){
+  const el=document.getElementById('usageList'); el.textContent='Loading…';
+  try{
+    const since=new Date(Date.now()-30*24*3600*1000).toISOString();
+    const [{data:rows,error:e1},{data:sw}] = await Promise.all([
+      sb.from('service_usage').select('repo_name,op,cost_usd,charge_usd').gte('created_at',since).limit(5000),
+      sb.from('app_services').select('repo_name,paid_services')
+    ]);
+    if(e1){ el.textContent='Cannot read usage — '+e1.message+' (paste service_usage.sql first).'; return; }
+    const off={}; (sw||[]).forEach(function(r){ off[r.repo_name]=r.paid_services==='off'; });
+    const agg={}; let T={calls:0,cost:0,charge:0};
+    (rows||[]).forEach(function(r){
+      const a=agg[r.repo_name]||(agg[r.repo_name]={calls:0,cost:0,charge:0});
+      a.calls++; a.cost+=Number(r.cost_usd); a.charge+=Number(r.charge_usd);
+      T.calls++; T.cost+=Number(r.cost_usd); T.charge+=Number(r.charge_usd);
+    });
+    // totals + continuous profit/cost of the paid API
+    const fx=1.27; const costG=T.cost/fx, chargeG=T.charge/fx, profitG=(T.charge-T.cost)/fx;
+    function ut(l,v,sub){ return '<div style="background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:8px;"><div style="font-size:16px;font-weight:800;color:#f0a500;">'+v+'</div><div style="font-size:10px;color:#999;">'+l+(sub?(' <span style=\'color:#666\'>'+sub+'</span>'):'')+'</div></div>'; }
+    document.getElementById('usageTotals').innerHTML=
+      ut('Google calls 30d', T.calls,'')+
+      ut('Our cost', '£'+costG.toFixed(2),'$'+T.cost.toFixed(2))+
+      ut('Billable to owners', '£'+chargeG.toFixed(2),'')+
+      ut('Profit on services', '£'+profitG.toFixed(2), T.cost>0?(Math.round(100*(T.charge-T.cost)/T.cost)+'% margin'):'');
+    // configurable alarm: beeps + red line when 30d cost passes the floor
+    try{
+      const {data:pb}=await sb.from('site_settings').select('value').eq('key','places_billing').maybeSingle();
+      const floor=(pb&&pb.value&&Number(pb.value.alarm_gbp))||0;
+      const inEl=document.getElementById('usageAlarmGbp'); if(inEl&&!inEl.value&&floor) inEl.value=floor;
+      const ext=document.getElementById('usageExternal');
+      let msg='Charged only per call — no standing fee; Google grants $200 free monthly. Factory-metered calls this month: '+T.calls+'. Compare with the request count in your Google console (APIs & Services → Metrics): a HIGHER console number means someone uses the key outside The Factory — regenerate the key there at once. Budget emails: console → Billing → Budgets & alerts → set £100 and £200.';
+      if(floor>0 && costG>floor){
+        msg='⚠ COST ALARM: £'+costG.toFixed(2)+' in 30 days exceeds your £'+floor+' floor. '+msg;
+        ext.style.color='#d9534f';
+        try{ const ac=new (window.AudioContext||window.webkitAudioContext)(); [0,0.4,0.8].forEach(function(t){ const o=ac.createOscillator(),g2=ac.createGain(); o.connect(g2); g2.connect(ac.destination); o.frequency.value=880; g2.gain.value=0.12; o.start(ac.currentTime+t); o.stop(ac.currentTime+t+0.25); }); }catch(_){}
+      } else { ext.style.color='#888'; }
+      ext.textContent=msg;
+    }catch(_){}
+    const names=Object.keys(agg).sort();
+    if(!names.length){ el.textContent='No paid-service calls in the last 30 days.'; return; }
+    el.innerHTML=names.map(function(n){
+      const a=agg[n]; const isOff=!!off[n];
+      return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #1c1c22;padding:6px 0;">'
+        +'<div><div style="color:#e6e6e6;font-weight:700;">'+n+'</div>'
+        +'<div style="font-size:11px;color:#888;">'+a.calls+' calls · cost $'+a.cost.toFixed(3)+' · bill $'+a.charge.toFixed(3)+'</div></div>'
+        +'<button onclick="fcUsageToggle(\''+n+'\','+(isOff?'false':'true')+')" style="padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:#0d0d0f;border:1px solid '+(isOff?'#d9534f':'#f0a500')+';color:'+(isOff?'#d9534f':'#f0a500')+';">'+(isOff?'OFF — free data':'ON — paid')+'</button></div>';
+    }).join('');
+  }catch(e){ el.textContent='Error — '+e.message; }
+};
+window.usageAlarmSave = async function(){
+  const v=Number(document.getElementById('usageAlarmGbp').value)||0;
+  const { error } = await sb.from('site_settings').upsert({ key:'places_billing', value:{ alarm_gbp:v }, updated_at:new Date().toISOString() }, { onConflict:'key' });
+  document.getElementById('usageExternal').textContent = error ? ('Could not save — '+error.message) : ('Cost alarm set at £'+v+' per 30 days.');
+  fcUsageLoad();
+};
+window.fcUsageToggle = async function(repo, turnOff){
+  const { error } = await sb.from('app_services').upsert({ repo_name:repo, paid_services:turnOff?'off':'on', updated_at:new Date().toISOString() }, { onConflict:'repo_name' });
+  if(error) alert('Could not switch — '+error.message); else fcUsageLoad();
+};
+</script>
+
+
+<script>
+// ---------- YOUR APPS: the owner reads everything their app stored, and exports CSV ----------
+function csvDownload(filename, rows){
+  const csv = rows.map(function(r){ return r.map(function(c){ c=String(c==null?'':c); return /[",\n]/.test(c) ? '"'+c.replace(/"/g,'""')+'"' : c; }).join(','); }).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=filename; a.click();
+}
+window.appContacts = async function(repo, row){
+  let box=row.querySelector('.a-contactsBox');
+  if(box){ box.remove(); return; }   // second press closes it
+  box=document.createElement('div');
+  box.className='a-contactsBox';
+  box.style.cssText='margin-top:8px;padding:10px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;font-size:12px;color:#aaa;';
+  box.textContent='Loading…';
+  row.appendChild(box);
+  try{
+    const r=await fetch(SB_URL+'/functions/v1/app-market',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({op:'owner-list',repoName:repo})});
+    const j=await r.json();
+    if(!r.ok||!j.ok){ box.textContent=j.error||('read failed '+r.status); return; }
+    const cols=Object.keys(j.collections||{});
+    if(!cols.length){ box.textContent='This app has not stored anything yet.'; return; }
+    box.innerHTML='';
+    cols.forEach(function(cn){
+      const items=j.collections[cn];
+      const line=document.createElement('div');
+      line.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #1c1c22;';
+      line.innerHTML='<span style="color:#e6e6e6;font-weight:700;">'+cn+' <span style="color:#777;font-weight:400;">('+items.length+')</span></span>';
+      const btn=document.createElement('button');
+      btn.textContent='⬇ CSV';
+      btn.style.cssText='background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:11px;';
+      btn.onclick=function(){
+        const keys={}; items.forEach(function(it){ Object.keys(it.data||{}).forEach(function(k){ keys[k]=1; }); });
+        const head=Object.keys(keys);
+        const rows=[['id'].concat(head,['updated_at'])];
+        items.forEach(function(it){ rows.push([it.id].concat(head.map(function(k){ const v=(it.data||{})[k]; return typeof v==='object'?JSON.stringify(v):v; }),[it.updated_at])); });
+        csvDownload(repo+'-'+cn+'.csv', rows);
+      };
+      line.appendChild(btn);
+      box.appendChild(line);
+    });
+  }catch(e){ box.textContent='Error — '+e.message; }
+};
+
+// ---------- GEAR: PROSPECT FINDER — open-licensed business lists for launch marketing ----------
+window.fcProspectRun = async function(){
+  const out=document.getElementById('prospectList');
+  const pc=document.getElementById('prospectPc').value.trim();
+  const kind=(document.getElementById('prospectKind').value.trim()||'restaurant').toLowerCase().replace(/\s+/g,'_');
+  const radius=Math.min(Math.max(Number(document.getElementById('prospectRadius').value)||2000,100),5000);
+  if(!pc){ out.textContent='Give a postcode or area first.'; return; }
+  out.textContent='Searching…';
+  try{
+    const P=SB_URL+'/functions/v1/places-desk';
+    const g=await(await fetch(P,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({op:'geocode',q:pc,prefer:'osm'})})).json();
+    if(!g.ok) throw new Error('area not found');
+    const n=await(await fetch(P,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({op:'nearby',lat:g.lat,lon:g.lon,kind:kind,radius:radius,prefer:'osm'})})).json();
+    if(!n.ok) throw new Error(n.error||'search failed');
+    window._prospects=n.places||[];
+    if(!window._prospects.length){ out.textContent='Nothing found — widen the radius or change the trade.'; return; }
+    out.innerHTML=window._prospects.map(function(p){
+      return '<div style="border-bottom:1px solid #1c1c22;padding:5px 0;"><span style="color:#e6e6e6;font-weight:700;">'+p.name+'</span>'
+        +'<div style="font-size:11px;color:#888;">'+[p.address,p.phone,p.website].filter(Boolean).join(' · ')+'</div></div>';
+    }).join('')+'<div style="font-size:10px;color:#666;margin-top:6px;">Data © OpenStreetMap contributors (ODbL)</div>';
+  }catch(e){ out.textContent='Error — '+e.message; }
+};
+window.fcProspectCsv = function(){
+  const ps=window._prospects||[];
+  if(!ps.length){ alert('Run a search first.'); return; }
+  const rows=[['name','address','phone','website','cuisine','lat','lon']];
+  ps.forEach(function(p){ rows.push([p.name,p.address,p.phone,p.website,p.cuisine,p.lat,p.lon]); });
+  rows.push(['Data © OpenStreetMap contributors (ODbL)','','','','','','']);
+  csvDownload('prospects.csv', rows);
+};
+</script>
+
+
+<script>
+// ---------- MARKETING PAGE: numbers, agent, iteration ----------
+function mkDesk(body){
+  return fetch(SB_URL+'/functions/v1/marketing-desk',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(session?session.access_token:SB_ANON)},
+    body:JSON.stringify(body)}).then(function(r){ return r.json().then(function(j){ j._status=r.status; return j; }); });
+}
+window.fcMkStats = async function(){
+  const t=document.getElementById('mkTiles'); t.innerHTML='<div style="grid-column:1/3;color:#888;font-size:12px;">Reading the meters…</div>';
+  const j=await mkDesk({op:'stats'});
+  if(!j.ok){ t.innerHTML='<div style="grid-column:1/3;color:#d9534f;font-size:12px;">'+(j.error||('stats '+j._status))+'</div>'; return; }
+  const s=j.stats||{};
+  if(j.agent_prompt){ const pb=document.getElementById('mkPromptBox'); if(pb) pb.textContent=j.agent_prompt; }
+  function tile(label,val,sub){ return '<div style="background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:8px;">'
+    +'<div style="font-size:18px;font-weight:800;color:#f0a500;">'+(val==null?'—':val)+'</div>'
+    +'<div style="font-size:10.5px;color:#999;">'+label+(sub?(' <span style=\'color:#666\'>'+sub+'</span>'):'')+'</div></div>'; }
+  const ps=s.paid_services_30d||{};
+  t.innerHTML=
+    tile('Users', s.users_total, s.users_new_7d!=null?('+'+s.users_new_7d+' this week'):'')+
+    tile('Builds done', s.builds_done_total, s.builds_7d!=null?('+'+s.builds_7d+' this week'):'')+
+    tile('Sub payments', s.sub_payments_total,'')+
+    tile('Marketplace apps', s.market_listings,'')+
+    tile('Live sites', s.netlify_sites_total, s.netlify_sites_7d!=null?('+'+s.netlify_sites_7d+' this week'):'')+
+    tile('Paid services 30d', ps.calls!=null?(ps.calls+' calls'):'—', ps.billable_usd!=null?('bill $'+ps.billable_usd):'');
+};
+function mkRender(c){
+  const el=document.getElementById('mkCampaign');
+  function esc(x){ return String(x==null?'':x).replace(/</g,'&lt;'); }
+  function copyBtn(txt){ return '<button onclick="navigator.clipboard.writeText(this.dataset.t);this.textContent=\'Copied ✓\'" data-t="'+esc(txt).replace(/"/g,'&quot;')+'" style="background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:6px;padding:2px 8px;font-size:10.5px;cursor:pointer;margin-left:6px;">Copy</button>'; }
+  let h='';
+  h+='<div style="font-size:12px;color:#ccc;line-height:1.6;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;padding:8px;margin-bottom:6px;"><b style="color:#f0a500;">'+esc(c.campaign&&c.campaign.name||'Campaign')+'</b><br>'+esc(c.analysis)+'</div>';
+  if(Array.isArray(c.kpis)&&c.kpis.length){
+    h+='<div style="font-size:11px;color:#999;margin:6px 0 2px;font-weight:700;">MEASURES</div>';
+    c.kpis.forEach(function(k){ h+='<div style="display:flex;justify-content:space-between;font-size:11.5px;border-bottom:1px solid #1c1c22;padding:3px 0;"><span style="color:#e6e6e6;">'+esc(k.name)+'</span><span style="color:#f0a500;">'+esc(k.current)+' → '+esc(k.target)+'</span></div>'
+      +'<div style="font-size:10px;color:#666;">'+esc(k.measure_how)+'</div>'; });
+  }
+  const acts=(c.campaign&&c.campaign.actions)||[];
+  if(acts.length){
+    h+='<div style="font-size:11px;color:#999;margin:8px 0 2px;font-weight:700;">THIS WEEK</div>';
+    acts.forEach(function(a,i){ h+='<div style="font-size:11.5px;color:#ccc;padding:3px 0;border-bottom:1px solid #1c1c22;">'+(i+1)+'. '+esc(a.step)+' <span style="color:#666;">('+esc(a.when)+(a.effort_mins?(' · '+a.effort_mins+' min'):'')+')</span></div>'; });
+  }
+  const msg=(c.campaign&&c.campaign.messages)||{};
+  if(msg.email_subject||msg.whatsapp||msg.social_post){
+    h+='<div style="font-size:11px;color:#999;margin:8px 0 2px;font-weight:700;">READY MESSAGES</div>';
+    if(msg.email_subject) h+='<div style="font-size:11.5px;color:#ccc;padding:3px 0;"><b>Email:</b> '+esc(msg.email_subject)+copyBtn((msg.email_subject||'')+'\n\n'+(msg.email_body||''))+'</div>';
+    if(msg.whatsapp) h+='<div style="font-size:11.5px;color:#ccc;padding:3px 0;"><b>WhatsApp:</b> '+esc(msg.whatsapp.slice(0,70))+'…'+copyBtn(msg.whatsapp)+'</div>';
+    if(msg.social_post) h+='<div style="font-size:11.5px;color:#ccc;padding:3px 0;"><b>Social:</b> '+esc(msg.social_post.slice(0,70))+'…'+copyBtn(msg.social_post)+'</div>';
+  }
+  if(Array.isArray(c.variables)&&c.variables.length){
+    h+='<div style="font-size:11px;color:#999;margin:8px 0 2px;font-weight:700;">VARIABLES THE AGENT IS TUNING</div>';
+    c.variables.forEach(function(v){ h+='<div style="font-size:11px;color:#ccc;padding:2px 0;">• <b>'+esc(v.name)+'</b> = '+esc(v.value)+' <span style="color:#666;">('+esc(v.why)+')</span></div>'; });
+  }
+  if(c.next_review_days) h+='<div style="font-size:11px;color:#8f8;margin-top:6px;">Next review: in '+c.next_review_days+' day(s) — act, record results, press ITERATE.</div>';
+  el.innerHTML=h;
+}
+window.fcMkAgent = async function(){
+  const st=document.getElementById('mkStatus'); const btn=document.getElementById('mkRunBtn');
+  btn.disabled=true; st.textContent='The agent is reading your numbers and thinking… (up to two minutes)';
+  const j=await mkDesk({op:'agent', goal:document.getElementById('mkGoal').value.trim()});
+  btn.disabled=false;
+  if(!j.ok){ st.textContent='Agent error — '+(j.error||j._status); return; }
+  st.textContent='Campaign ready — act on it, then record results below and ITERATE.';
+  mkRender(j.campaign);
+};
+window.fcMkIterate = async function(){
+  const st=document.getElementById('mkStatus'); const res=document.getElementById('mkResults').value.trim();
+  if(!res){ st.textContent='Type what actually happened first — numbers, replies, sales.'; return; }
+  const btn=document.getElementById('mkIterBtn'); btn.disabled=true;
+  st.textContent='Improvement Loop running — stop, look, improve…';
+  const j=await mkDesk({op:'iterate', results:res});
+  btn.disabled=false;
+  if(!j.ok){ st.textContent='Agent error — '+(j.error||j._status); return; }
+  st.textContent='Iteration ready — one variable changed. Act, record, iterate again.';
+  document.getElementById('mkResults').value='';
+  mkRender(j.campaign);
+};
+</script>
+
+
+<script>
+// ---------- CERTIFY: hash locally (content never leaves the device), stamp the fingerprint ----------
+async function factoryHashText(text){
+  const d=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(d)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+async function factoryHashFile(file){
+  const d=await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
+  return Array.from(new Uint8Array(d)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+window.certStamp = async function(){
+  const msg=document.getElementById('certMsg');
+  if(!session){ msg.textContent='Sign in first — press Login, top right.'; showPage('account'); return; }
+  const f=document.getElementById('certFile').files[0];
+  const t=document.getElementById('certText').value.trim();
+  const label=document.getElementById('certLabel').value.trim()||'untitled';
+  if(!f && !t){ msg.textContent='Choose a file or paste text first.'; return; }
+  msg.textContent='Fingerprinting on your device…';
+  try{
+    const sha = f ? await factoryHashFile(f) : await factoryHashText(t);
+    let anonymous=false, ownerPubJwk=null;
+    if(document.getElementById('certAnon').checked){
+      anonymous=true;
+      msg.textContent='Forging your ownership key on your device…';
+      const kp=await crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']);
+      ownerPubJwk=await crypto.subtle.exportKey('jwk',kp.publicKey);
+      const priv=await crypto.subtle.exportKey('jwk',kp.privateKey);
+      const kd=document.createElement('a');
+      kd.href=URL.createObjectURL(new Blob([JSON.stringify({warning:'THIS IS YOUR OWNERSHIP KEY. Keep it safe and private. Whoever holds it owns the certified work. Lost key = lost proof.',label:label,private_key_jwk:priv,public_key_jwk:ownerPubJwk},null,2)],{type:'application/json'}));
+      kd.download='OWNERSHIP-KEY-'+label.replace(/[^a-z0-9-]/gi,'_')+'.json'; kd.click();
+    }
+    msg.textContent='Anchoring with independent witnesses…';
+    const r=await fetch(SB_URL+'/functions/v1/timestamp-desk',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({op:'stamp',sha256:sha,label:label,anonymous:anonymous,owner_pubkey:ownerPubJwk?JSON.stringify(ownerPubJwk):undefined})});
+    const j=await r.json();
+    if(!r.ok||!j.ok){ msg.textContent=j.error||('stamp failed '+r.status); return; }
+    msg.textContent='Certified ✓ — '+j.witnesses+' independent witnesses hold your fingerprint. Certificate downloading.';
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(j.certificate,null,2)],{type:'application/json'}));
+    a.download='factory-certificate-'+j.id+'.json'; a.click();
+    certList();
+  }catch(e){ msg.textContent='Error — '+e.message; }
+};
+window.certPrice = async function(){
+  try{
+    const {data}=await sb.from('site_settings').select('value').eq('key','commerce').maybeSingle();
+    const p=(data&&data.value&&Number(data.value.cert_price_usd))||0;
+    const cut=(data&&data.value&&Number(data.value.cert_transfer_cut_pct))||10;
+    const el=document.getElementById('certPriceLine');
+    if(el) el.textContent = p>0
+      ? ('Certificate: $'+p+' each. Sell your certified business in our Marketplace — ownership transfers there ('+cut+'% transfer cut).')
+      : ('Launch offer: free for signed-in makers. Later $ per certificate; certified businesses sell in our Marketplace ('+cut+'% transfer cut).');
+  }catch(_){}
+};
+window.certList = async function(){
+  if(!session) return;
+  const box=document.getElementById('certMine'); if(!box) return;
+  try{
+    const r=await fetch(SB_URL+'/functions/v1/timestamp-desk',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({op:'list'})});
+    const j=await r.json(); if(!j.ok) return;
+    if(!(j.certificates||[]).length){ box.innerHTML=''; return; }
+    box.innerHTML='<div style="font-size:11px;color:#999;font-weight:700;margin-bottom:4px;">MY CERTIFICATES</div>'+
+      j.certificates.map(function(c){
+        return '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1c1c22;padding:5px 0;font-size:12px;">'
+          +'<span><span style="color:#e6e6e6;font-weight:700;">'+c.label+'</span> <span style="color:#666;font-size:10.5px;">'+new Date(c.created_at).toLocaleString()+'</span></span>'
+          +'<button onclick="certGet('+c.id+')" style="background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">⬇</button></div>';
+      }).join('');
+  }catch(_){}
+};
+window.certGet = async function(id){
+  const r=await fetch(SB_URL+'/functions/v1/timestamp-desk',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+    body:JSON.stringify({op:'get',id:id})});
+  const j=await r.json(); if(!j.ok) return;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(j.certificate,null,2)],{type:'application/json'}));
+  a.download='factory-certificate-'+id+'.json'; a.click();
+};
+</script>
+
+
+<script>
+// ---------- INVENTIONS MARKET + MARKET MESSAGES ----------
+window.invSubmit = async function(){
+  const m=document.getElementById('invMsg');
+  if(!session){ m.textContent='Sign in first — press Login, top right.'; showPage('account'); return; }
+  const title=document.getElementById('invTitleIn').value.trim();
+  const summary=document.getElementById('invSummaryIn').value.trim();
+  const price=document.getElementById('invPriceIn').value.trim();
+  if(!title||!summary){ m.textContent='Give a title and a summary.'; return; }
+  const { data: me } = await sb.from('users').select('id').eq('auth_id', session.user.id).single();
+  if(!me){ m.textContent='Account not found.'; return; }
+  const { error } = await sb.from('invention_listings').insert({ seller_id: me.id, title: title, summary: summary, price_label: price });
+  m.textContent = error ? ('Could not submit — '+error.message) : 'Submitted ✓ — live once the founder approves it.';
+  if(!error){ document.getElementById('invTitleIn').value=''; document.getElementById('invSummaryIn').value=''; document.getElementById('invPriceIn').value=''; invLoad(); }
+};
+window.invLoad = async function(){
+  const box=document.getElementById('inventionList'); if(!box) return;
+  try{
+    const { data, error } = await sb.from('invention_listings').select('id,title,summary,price_label,status,created_at').order('created_at',{ascending:false}).limit(50);
+    if(error){ box.innerHTML=''; return; }
+    const rows=(data||[]).filter(function(r){ return r.status==='approved' || meIsFounder; });
+    box.innerHTML = rows.length ? rows.map(function(r){
+      return '<div style="border:1px solid #2c2c33;border-radius:10px;padding:10px;margin-bottom:8px;background:#0d0d0f;">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;"><span style="color:#e6e6e6;font-weight:700;">'+r.title+'</span>'
+        +'<span style="color:#f0a500;font-weight:700;font-size:12.5px;">'+(r.price_label||'')+'</span></div>'
+        +'<div style="color:#999;font-size:12px;margin-top:4px;line-height:1.6;">'+r.summary+'</div>'
+        +(r.status!=='approved'?'<div style="color:#d9a500;font-size:10.5px;margin-top:4px;">pending approval</div>':'')
+        +'<button onclick="showPage(\'contact\')" style="margin-top:6px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;padding:5px 12px;font-size:11.5px;cursor:pointer;">ENQUIRE</button>'
+        +(meIsFounder&&r.status==='pending'?'<button onclick="invApprove('+r.id+')" style="margin-top:6px;margin-left:6px;background:#0d2a0d;border:1px solid #5ae055;color:#9dff9d;border-radius:8px;padding:5px 12px;font-size:11.5px;cursor:pointer;">APPROVE</button>':'')
+        +(meIsFounder?'<button onclick="invRemove('+r.id+')" style="margin-top:6px;margin-left:6px;background:#2a0d0d;border:1px solid #e05555;color:#ff9d9d;border-radius:8px;padding:5px 12px;font-size:11.5px;cursor:pointer;">REMOVE</button>':'')
+        +'</div>';
+    }).join('') : '';
+  }catch(_){}
+};
+window.invApprove = async function(id){ await sb.from('invention_listings').update({status:'approved'}).eq('id',id); invLoad(); };
+window.invRemove  = async function(id){ await sb.from('invention_listings').update({status:'removed'}).eq('id',id); invLoad(); };
+
+window.mmLoad = async function(){
+  try{
+    const {data}=await sb.from('site_settings').select('value').eq('key','market_messages').maybeSingle();
+    const v=(data&&data.value)||{};
+    document.getElementById('mmApps').value=v.apps||'';
+    document.getElementById('mmInventions').value=v.inventions||'';
+  }catch(_){}
+};
+window.mmSave = async function(){
+  const v={ apps:document.getElementById('mmApps').value.trim(), inventions:document.getElementById('mmInventions').value.trim() };
+  const { error } = await sb.from('site_settings').upsert({ key:'market_messages', value:v, updated_at:new Date().toISOString() }, { onConflict:'key' });
+  document.getElementById('mmMsg').textContent = error ? ('Could not publish — '+error.message) : 'Published ✓ — live in the market now.';
+};
+window.mmShow = async function(){
+  try{
+    const {data}=await sb.from('site_settings').select('value').eq('key','market_messages').maybeSingle();
+    const v=(data&&data.value)||{};
+    const a=document.getElementById('marketMsgApps'), b=document.getElementById('marketMsgInventions');
+    if(a){ if(v.apps){ a.textContent='🗣 '+v.apps; a.style.display='block'; } else a.style.display='none'; }
+    if(b){ if(v.inventions){ b.textContent='🗣 '+v.inventions; b.style.display='block'; } else b.style.display='none'; }
+  }catch(_){}
+};
+</script>
+
+</body>
 </html>
