@@ -447,7 +447,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v19c</div>
+        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v19d</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;">
@@ -3599,21 +3599,29 @@ let gHoldFrame='rest';
   gCx.clearRect(0,0,gCv.width,gCv.height);
   const m={x:gMeta.x/gMeta.frameW,y:gMeta.y/gMeta.frameH,w:gMeta.w/gMeta.frameW,h:gMeta.h/gMeta.frameH};
   const X=m.x*gCv.width,Y=m.y*gCv.height,W=m.w*gCv.width,H=m.h*gCv.height;
-  // one frame per paint at full alpha — no overlapped draws, so no double exposure.
-  // f<0.5 keeps the previous segment's frame, f>=0.5 switches to the current one.
-  let name;
+  // SMOOTH TRANSITIONS, NO GHOSTS: the outgoing frame stays fully opaque underneath
+  // while the incoming frame fades in on top. One opaque base always covers the
+  // mouth region, so there is never a translucent double-exposure — and never a
+  // hard cut between shapes, which at speech speed read as facial distortion.
   if(gPlaying&&gAudio){
     const [prev,ps,cur,cs,f]=guideStateAt(gSegs,gAudio.currentTime);
     const t=gAudio.currentTime;
-    name=(f<0.5)?guideClipFrame(prev,t-ps):guideClipFrame(cur,t-cs);
-    gHoldFrame=name;
+    const prevName=guideClipFrame(prev,t-ps), curName=guideClipFrame(cur,t-cs);
+    if(f>=1||prevName===curName){
+      guideDrawSprite(curName,1,X,Y,W,H);
+      gHoldFrame=curName;
+    }else{
+      guideDrawSprite(prevName,1,X,Y,W,H);      // opaque base — no see-through
+      guideDrawSprite(curName,f,X,Y,W,H);       // incoming shape eases in on top
+      gHoldFrame=(f>=0.5)?curName:prevName;
+    }
   } else if(gQueueDepth>0){
-    name=gHoldFrame;   // next sentence is queued: keep the last frame, no rest snap
+    guideDrawSprite(gHoldFrame,1,X,Y,W,H);   // next sentence queued: hold, no rest snap
   } else {
-    name=guideClipFrame('rest',0);
-    gHoldFrame=name;
+    const rn=guideClipFrame('rest',0);
+    guideDrawSprite(rn,1,X,Y,W,H);
+    gHoldFrame=rn;
   }
-  guideDrawSprite(name,1,X,Y,W,H);
   if(gBlinkStart>0&&gMeta.blink){
     const st2=Math.floor((performance.now()-gBlinkStart)/40), SEQ=[0,1,1,2];
     if(st2>=SEQ.length) gBlinkStart=-1;
