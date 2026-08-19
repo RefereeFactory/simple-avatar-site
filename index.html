@@ -810,6 +810,11 @@
 
   <div class="card hidden" id="appsCard">
     <div class="section-title" data-t="appsTitle">🔧 Your apps</div>
+    <div id="afFilm" style="position:relative;border:1px solid #2c2c33;border-radius:12px;background:#0a0a0c;overflow:hidden;margin:6px 0 12px;">
+      <div id="afFilmStage" style="position:relative;width:100%;aspect-ratio:16/7;display:flex;align-items:center;justify-content:center;"></div>
+      <div id="afFilmCaption" style="padding:10px 14px;font-size:12.5px;color:#ccc;line-height:1.6;min-height:40px;text-align:center;"></div>
+      <button id="afFilmBtn" onclick="afFilmToggle()" style="position:absolute;top:10px;right:10px;padding:8px 16px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer;">▶ PLAY</button>
+    </div>
     <div class="section-sub" data-t="appsSub">Everything The Factory has built for you. Changed your prices, hours or wording? Tell us what to change — the live page updates in about ninety seconds.</div>
     <div id="appsList"></div>
     <div class="empty-state hidden" id="appsEmpty">Nothing built yet. Your apps will appear here.</div>
@@ -1252,6 +1257,7 @@
       document.getElementById('founderCard').classList.add('hidden');
       document.getElementById('inboxBanner').classList.add('hidden');
       document.getElementById('fcGear').classList.add('hidden');
+      var rb0=document.getElementById('fcRevBtn'); if(rb0) rb0.classList.add('hidden');
       document.getElementById('fcPanel').classList.add('hidden');
       document.getElementById('healthPlate').classList.add('hidden');
     }
@@ -1506,6 +1512,7 @@
 
   async function loadFounderControls() {
     document.getElementById('fcGear').classList.remove('hidden');
+    var rb1=document.getElementById('fcRevBtn'); if(rb1) rb1.classList.remove('hidden');
     loadHealthPlate();
     tkLoad();
     tkStartAlarms();
@@ -3891,6 +3898,7 @@ function routerReturnCards(){
 window.showPage = function(name){
   if(name==='certify') setTimeout(function(){ if(typeof certList==='function') certList(); if(typeof certPrice==='function') certPrice(); }, 400);
   if(name==='marketplace') setTimeout(function(){ if(typeof invLoad==='function') invLoad(); if(typeof mmShow==='function') mmShow(); if(typeof invFilmShow==='function'&&!invFilmOn) invFilmShow(0); }, 400);
+  if(name==='apps') setTimeout(function(){ if(typeof afShow==='function'&&!afOn) afShow(0); }, 400);
   try{ if(typeof stopLiveHost==='function' && window.gStarted) stopLiveHost(); }catch(_){}
   routerReturnCards();
   document.getElementById('homePanel').style.display='none';
@@ -4121,6 +4129,36 @@ function gearMenuBuild(){
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',gearMenuBuild); else gearMenuBuild();
 </script>
 
+  <button type="button" id="fcRevBtn" class="hidden" onclick="revOpen()" title="Revenue Agent" style="position:fixed;right:18px;bottom:80px;z-index:10001;background:#0d0d0f;border:1px solid #8f8;color:#8f8;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,0.6);">📈</button>
+  <div id="revPanel" class="hidden" style="position:fixed;inset:0;z-index:10003;background:#0a0a0c;color:#eee;overflow-y:auto;padding:22px 16px 60px;">
+    <div style="max-width:680px;margin:0 auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="font-weight:800;color:#8f8;font-size:17px;">📈 Revenue Agent</div>
+        <button onclick="document.getElementById('revPanel').classList.add('hidden')" style="padding:8px 16px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">✕ CLOSE</button>
+      </div>
+      <div style="font-size:11.5px;color:#777;margin-bottom:14px;line-height:1.6;">The chancellor: watches every cut we take, reports the business, and optimises revenue one variable at a time — your Improvement Loop, on schedule.</div>
+      <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:10px 0 6px;">All our percentages</div>
+      <div id="revPcts" style="background:#101014;border:1px solid #2c2c33;border-radius:10px;padding:10px;font-size:12px;color:#aaa;">Loading…</div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button id="revReportBtn" onclick="revRun('report')" style="flex:1;padding:11px;background:linear-gradient(135deg,#f0a500,#d48800);border:none;color:#111;border-radius:9px;font-weight:800;font-size:13px;cursor:pointer;">REPORT NOW</button>
+        <button id="revOptBtn" onclick="revRun('optimise')" style="flex:1;padding:11px;background:#0d0d0f;border:1px solid #8f8;color:#8f8;border-radius:9px;font-weight:800;font-size:13px;cursor:pointer;">OPTIMISE</button>
+      </div>
+      <div id="revStatus" style="font-size:12px;color:#8f8;min-height:16px;margin-top:8px;"></div>
+      <div style="border:1px solid #2c2c33;border-radius:10px;padding:10px;margin-top:12px;">
+        <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">⏰ Schedule</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:#bbb;">
+          <label><input id="revSchedOn" type="checkbox" style="accent-color:#f0a500;"> daily report at</label>
+          <input id="revSchedTime" type="time" value="08:00" style="padding:6px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:6px;color:#eee;">
+          <label><input id="revSchedAudio" type="checkbox" style="accent-color:#f0a500;"> auto-download the audio</label>
+          <button onclick="revSchedSave()" style="padding:7px 14px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-size:11.5px;font-weight:700;cursor:pointer;">SET</button>
+        </div>
+        <div id="revSchedMsg" style="font-size:10.5px;color:#666;margin-top:6px;line-height:1.5;">Honest limit: the schedule fires while a Factory page is open on this device (audio keeps playing if the screen dims). True fire-while-everything-is-closed needs a server clock — say the word and I wire it.</div>
+      </div>
+      <div style="font-weight:700;color:#e6e6e6;font-size:13px;margin:14px 0 6px;">Reports</div>
+      <div id="revList" style="font-size:12px;color:#888;">—</div>
+      <div id="revReport" style="margin-top:14px;"></div>
+    </div>
+  </div>
   <button type="button" id="fcGear" class="hidden" onclick="fcToggle()" title="Founder Controls" style="position:fixed;right:18px;bottom:18px;z-index:10001;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,0.6);">⚙</button>
   <div id="fcPanel" class="hidden" style="position:fixed;top:0;right:0;bottom:0;width:330px;max-width:92vw;z-index:10002;background:#141418;border-left:1px solid #2c2c33;padding:22px 18px 40px;overflow-y:auto;box-shadow:-20px 0 60px rgba(0,0,0,0.6);">
     <div style="font-weight:800;color:#f0a500;font-size:16px;">⚙ Founder Controls</div>
@@ -5017,6 +5055,156 @@ else if(document.getElementById('invFilmStage')) invFilmShow(0);
 @keyframes invSlide{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
 @keyframes invFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 </style>
+
+
+<script>
+// ---------- YOUR-APPS FILM: how apps are made, deeded, and grow into businesses ----------
+const AF_SCENES=[
+ {cap:"Tell The Factory what you want, in your own words. About ninety seconds later your app is live on the web, at its own address, inspected before it ships.",
+  svg:'<svg viewBox="0 0 320 140"><rect x="44" y="40" width="110" height="24" rx="12" fill="none" stroke="#f0a500" stroke-width="2.5"/><text x="56" y="56" fill="#aaa" font-size="10">describe it\u2026</text><g style="animation:invSlide 2s ease-in-out infinite;"><path d="M164 52 h44" stroke="#f0a500" stroke-width="2.5" stroke-dasharray="5 5"/></g><g style="animation:invPulse 1.7s ease-in-out infinite;transform-origin:250px 62px;"><rect x="216" y="34" width="68" height="52" rx="6" fill="none" stroke="#ffd766" stroke-width="2.5"/><path d="M224 48 h52 M224 60 h36 M224 72 h44" stroke="#5a5a66" stroke-width="2"/><text x="230" y="100" fill="#8f8" font-size="9">LIVE \u2713 90s</text></g></svg>'},
+ {cap:"The moment it is born, The Factory stamps its deed: a cryptographic certificate in your name, anchored through independent witnesses into the Bitcoin blockchain. Dated proof the app is yours.",
+  svg:'<svg viewBox="0 0 320 140"><rect x="70" y="28" width="92" height="84" rx="6" fill="none" stroke="#f0a500" stroke-width="2.5"/><path d="M82 46 h68 M82 60 h68 M82 74 h44" stroke="#5a5a66" stroke-width="2"/><g style="animation:invPulse 1.8s ease-in-out infinite;transform-origin:216px 70px;"><circle cx="216" cy="70" r="26" fill="none" stroke="#ffd766" stroke-width="2.5"/><text x="196" y="66" fill="#ffd766" font-size="9">DEED</text><path d="M204 78 l8 8 l16 -18" fill="none" stroke="#8f8" stroke-width="3" stroke-linecap="round"/></g></svg>'},
+ {cap:"Your app is a working business. It takes bookings, signups and enquiries \u2014 and every customer it gathers is yours: press Contacts under any app to see them and download the list.",
+  svg:'<svg viewBox="0 0 320 140"><rect x="52" y="30" width="120" height="80" rx="8" fill="none" stroke="#f0a500" stroke-width="2.5"/><path d="M64 50 h96 M64 66 h72 M64 82 h84" stroke="#5a5a66" stroke-width="2.5"/><g style="animation:invPulse 1.6s ease-in-out infinite;transform-origin:236px 70px;"><circle cx="222" cy="58" r="10" fill="none" stroke="#ffd766" stroke-width="2.5"/><circle cx="252" cy="58" r="10" fill="none" stroke="#ffd766" stroke-width="2.5"/><path d="M206 92 q16 -18 32 0 M236 92 q16 -18 32 0" fill="none" stroke="#ffd766" stroke-width="2.5"/><text x="212" y="116" fill="#8f8" font-size="9">\ud83d\udcc7 Contacts \u2192 CSV</text></g></svg>'},
+ {cap:"Change it any time by telling it what to change. And because the deed proves ownership, your app is a tradeable asset \u2014 sell it in our Marketplace when you choose.",
+  svg:'<svg viewBox="0 0 320 140"><g style="animation:invPulse 1.8s ease-in-out infinite;transform-origin:160px 70px;"><rect x="120" y="40" width="80" height="60" rx="8" fill="none" stroke="#f0a500" stroke-width="2.5"/><text x="139" y="74" fill="#f0a500" font-size="12" font-weight="bold">\u00a3 SALE</text></g><path d="M60 70 h48 M212 70 h48" stroke="#5a5a66" stroke-width="2" stroke-dasharray="5 5"/><text x="42" y="58" fill="#aaa" font-size="9">your deed</text><text x="234" y="58" fill="#aaa" font-size="9">buyer</text></svg>'},
+ {cap:"That is The Factory: capable apps \u2014 real businesses \u2014 born certified, owned by you, ready to grow. Welcome to the good life, built with your own hands.",
+  svg:'<svg viewBox="0 0 320 140"><g style="animation:invPulse 1.8s ease-in-out infinite;transform-origin:160px 66px;"><circle cx="160" cy="66" r="30" fill="none" stroke="#8f8" stroke-width="3"/><path d="M144 66 l12 12 l22 -24" fill="none" stroke="#8f8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></g><text x="92" y="122" fill="#f0a500" font-size="11">described \u00b7 built \u00b7 deeded \u00b7 yours</text></svg>'}
+];
+let afOn=false, afAudio=null, afTimer=null;
+function afShow(i){
+  const st=document.getElementById('afFilmStage'), cp=document.getElementById('afFilmCaption');
+  if(!st) return;
+  st.innerHTML='<div style="width:92%;max-width:460px;opacity:0;animation:invFade .8s ease forwards;">'+AF_SCENES[i].svg+'</div>';
+  cp.textContent=AF_SCENES[i].cap;
+}
+async function afVoice(text){
+  try{
+    const r=await fetch(SB_URL+'/functions/v1/voice-speak',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+(session?session.access_token:SB_ANON)},
+      body:JSON.stringify({text:text})});
+    if(!r.ok) throw new Error('tts');
+    const blob=await r.blob(); if(blob.size<200) throw new Error('empty');
+    return new Promise(function(res){ afAudio=new Audio(URL.createObjectURL(blob)); afAudio.onended=res; afAudio.onerror=res; afAudio.play().catch(res); });
+  }catch(_){ return new Promise(function(res){ afTimer=setTimeout(res,6000); }); }
+}
+window.afFilmToggle = async function(){
+  const btn=document.getElementById('afFilmBtn');
+  if(afOn){ afOn=false; btn.textContent='\u25b6 PLAY'; if(afAudio){try{afAudio.pause();}catch(_){}} if(afTimer) clearTimeout(afTimer); return; }
+  afOn=true; btn.textContent='\u25a0 STOP';
+  for(let i=0;i<AF_SCENES.length&&afOn;i++){ afShow(i); await afVoice(AF_SCENES[i].cap); }
+  afOn=false; btn.textContent='\u25b6 REPLAY';
+};
+
+// ---------- REVENUE AGENT (Chancellor) ----------
+function revDesk(body){
+  return fetch(SB_URL+'/functions/v1/revenue-desk',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(session?session.access_token:SB_ANON)},
+    body:JSON.stringify(body)}).then(function(r){ return r.json().then(function(j){ j._status=r.status; return j; }); });
+}
+window.revOpen = async function(){
+  document.getElementById('revPanel').classList.remove('hidden');
+  const sc=JSON.parse(localStorage.getItem('revSched')||'{}');
+  document.getElementById('revSchedOn').checked=!!sc.enabled;
+  if(sc.time) document.getElementById('revSchedTime').value=sc.time;
+  document.getElementById('revSchedAudio').checked=!!sc.audio;
+  const p=await revDesk({op:'percentages'});
+  document.getElementById('revPcts').innerHTML = p.ok
+    ? p.percentages.map(function(x){ return '<div style="display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #1c1c22;padding:5px 0;"><span style="color:#e6e6e6;">'+x.product+'</span><span style="color:#f0a500;white-space:nowrap;">'+x.value+'</span></div><div style="font-size:10px;color:#666;">'+x.where+'</div>'; }).join('')
+    : (p.error||'error');
+  revListLoad();
+};
+window.revListLoad = async function(){
+  const j=await revDesk({op:'reports'});
+  const el=document.getElementById('revList');
+  if(!j.ok||!(j.reports||[]).length){ el.textContent='No reports yet — press REPORT NOW.'; return; }
+  el.innerHTML=j.reports.slice().reverse().map(function(r,i){
+    const idx=j.reports.length-1-i;
+    return '<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1c1c22;padding:5px 0;">'
+      +'<span>'+new Date(r._created_at).toLocaleString()+' <span style="color:#666;">('+r._kind+')</span></span>'
+      +'<button onclick="revShow('+idx+')" style="background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">OPEN</button></div>';
+  }).join('');
+  window._revReports=j.reports;
+};
+window.revRun = async function(kind){
+  const st=document.getElementById('revStatus');
+  st.textContent='The chancellor is reading the books\u2026 (up to two minutes)';
+  const j=await revDesk({op:kind});
+  if(!j.ok){ st.textContent='Error \u2014 '+(j.error||j._status); return null; }
+  st.textContent='Ready.';
+  await revListLoad();
+  revRender(j.report);
+  return j.report;
+};
+function esc2(x){ return String(x==null?'':x).replace(/</g,'&lt;'); }
+window.revShow = function(i){ if(window._revReports&&window._revReports[i]) revRender(window._revReports[i]); };
+window.revRender = function(r){
+  const el=document.getElementById('revReport');
+  const pr=r.proposal||{};
+  el.innerHTML=
+   '<div style="background:#101014;border:1px solid #f0a500;border-radius:12px;padding:14px;">'
+   +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><b style="color:#f0a500;">Report \u00b7 '+new Date(r._created_at).toLocaleString()+'</b>'
+   +'<span><button onclick="revRead()" style="background:#0d0d0f;border:1px solid #8f8;color:#8f8;border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer;">\ud83d\udd0a READ TO ME</button> '
+   +'<button onclick="revAudioDownload()" style="background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;padding:6px 12px;font-size:11.5px;cursor:pointer;">\u2b07 AUDIO</button></span></div>'
+   +'<div style="font-size:12.5px;color:#ccc;line-height:1.7;">'+esc2(r.state_summary)+'</div>'
+   +'<div style="font-size:11px;color:#999;font-weight:700;margin:10px 0 4px;">HOW PAST ATTEMPTS DID</div>'
+   +'<div style="font-size:12px;color:#bbb;line-height:1.7;">'+esc2(r.attempts_review)+'</div>'
+   +'<div style="font-size:11px;color:#999;font-weight:700;margin:10px 0 4px;">'+(pr.hold?'HOLD':'ONE CHANGE PROPOSED')+'</div>'
+   +'<div style="font-size:12px;color:#bbb;line-height:1.7;">'+(pr.hold?esc2(pr.why):('<b style="color:#e6e6e6;">'+esc2(pr.variable)+'</b>: '+esc2(pr.current)+' \u2192 <b style="color:#f0a500;">'+esc2(pr.proposed)+'</b><br>'+esc2(pr.why)+'<br><span style="color:#8f8;">Expected: '+esc2(pr.expected_effect)+'</span><br><span style="color:#666;">Change it at: '+esc2(pr.where_to_change)+'</span>'))+'</div>'
+   +((r.watch&&r.watch.length)?('<div style="font-size:11px;color:#999;font-weight:700;margin:10px 0 4px;">WATCH</div>'+r.watch.map(function(w){return '<div style="font-size:11.5px;color:#bbb;">\u2022 '+esc2(w.measure)+' \u2014 '+esc2(w.why)+'</div>';}).join('')):'')
+   +'</div>';
+  window._revCurrent=r;
+  el.scrollIntoView({behavior:'smooth'});
+};
+let revAudioEl=null;
+window.revRead = async function(){
+  const r=window._revCurrent; if(!r||!r.narration) return;
+  try{
+    const resp=await fetch(SB_URL+'/functions/v1/voice-speak',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+(session?session.access_token:SB_ANON)},
+      body:JSON.stringify({text:r.narration})});
+    const blob=await resp.blob();
+    if(revAudioEl){ try{revAudioEl.pause();}catch(_){} }
+    revAudioEl=new Audio(URL.createObjectURL(blob)); revAudioEl.play();
+  }catch(_){}
+};
+window.revAudioDownload = async function(){
+  const r=window._revCurrent; if(!r||!r.narration) return;
+  try{
+    const resp=await fetch(SB_URL+'/functions/v1/voice-speak',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+(session?session.access_token:SB_ANON)},
+      body:JSON.stringify({text:r.narration})});
+    const blob=await resp.blob();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='factory-report-'+String(r._created_at).slice(0,10)+'.mp3'; a.click();
+  }catch(_){}
+};
+window.revSchedSave = function(){
+  const v={ enabled:document.getElementById('revSchedOn').checked,
+            time:document.getElementById('revSchedTime').value||'08:00',
+            audio:document.getElementById('revSchedAudio').checked };
+  localStorage.setItem('revSched', JSON.stringify(v));
+  document.getElementById('revSchedMsg').textContent = v.enabled
+    ? ('Set: daily report at '+v.time+(v.audio?' with audio auto-download':'')+' — fires while a Factory page is open on this device.')
+    : 'Schedule off.';
+};
+setInterval(async function(){
+  try{
+    const sc=JSON.parse(localStorage.getItem('revSched')||'{}');
+    if(!sc.enabled || typeof meIsFounder==='undefined' || !meIsFounder) return;
+    const now=new Date();
+    const hhmm=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    const today=now.toISOString().slice(0,10);
+    if(hhmm>=sc.time && localStorage.getItem('revSchedLast')!==today){
+      localStorage.setItem('revSchedLast', today);
+      document.getElementById('revPanel').classList.remove('hidden');
+      const rep=await revRun('report');
+      if(rep){ revRead(); if(sc.audio) revAudioDownload(); }
+    }
+  }catch(_){}
+}, 30000);
+</script>
 
 </body>
 </html>
