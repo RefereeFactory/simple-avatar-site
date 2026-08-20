@@ -447,7 +447,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v20e</div>
+        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v20f</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;">
@@ -1574,6 +1574,11 @@
     document.getElementById('fcCommission').value = c.marketplace_commission_pct ?? 26.5;
     document.getElementById('fcCertPrice').value = c.cert_price_usd ?? 0;
     document.getElementById('fcInvFee').value = c.invention_fee_pct ?? 15;
+    const pc = c.patent_costs || {};
+    document.getElementById('fcPatCUK').value = pc.uk ?? 310;
+    document.getElementById('fcPatCEU').value = pc.eu ?? 5000;
+    document.getElementById('fcPatCUS').value = pc.usa ?? 800;
+    document.getElementById('fcPatCWO').value = pc.world ?? 3000;
     const pp = c.patent_prices || {};
     document.getElementById('fcPatUK').value = pp.uk ?? 650;
     document.getElementById('fcPatEU').value = pp.eu ?? 5500;
@@ -1610,6 +1615,7 @@
         platform_fee_pct: Number(document.getElementById('fcPlatFee').value),
         cert_price_usd: Number(document.getElementById('fcCertPrice').value) || 0,
         invention_fee_pct: Number(document.getElementById('fcInvFee').value) || 0,
+        patent_costs: { uk: Number(document.getElementById('fcPatCUK').value)||0, eu: Number(document.getElementById('fcPatCEU').value)||0, usa: Number(document.getElementById('fcPatCUS').value)||0, world: Number(document.getElementById('fcPatCWO').value)||0 },
         patent_prices: { uk: Number(document.getElementById('fcPatUK').value)||0, eu: Number(document.getElementById('fcPatEU').value)||0, usa: Number(document.getElementById('fcPatUS').value)||0, world: Number(document.getElementById('fcPatWO').value)||0 },
         patent_margin_pct: Number(document.getElementById('fcPatMargin').value) || 0,
         cert_transfer_cut_pct: Number(document.getElementById('fcCertCut').value) || 0
@@ -4394,7 +4400,16 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
     <input id="fcCertPrice" type="number" step="0.5" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
     <label style="font-size:12px;color:#999;">Invention sale fee % (non-Factory creations market)</label>
     <input id="fcInvFee" type="number" step="0.5" min="0" max="100" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
-    <label style="font-size:12px;color:#999;">Patent route — full price to customer per territory (£, professional + official fees; 0 hides it)</label>
+    <label style="font-size:12px;color:#999;">Patent route — OUR COST per territory (£ official/supplier fees; the suggestion engine feeds on these)</label>
+    <div style="display:flex;gap:6px;">
+      <input id="fcPatCUK" type="number" min="0" placeholder="UK cost" title="UK official fees" style="flex:1;margin:4px 0 6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+      <input id="fcPatCEU" type="number" min="0" placeholder="EU cost" title="EPO official fees" style="flex:1;margin:4px 0 6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+      <input id="fcPatCUS" type="number" min="0" placeholder="USA cost" title="USPTO fees" style="flex:1;margin:4px 0 6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+      <input id="fcPatCWO" type="number" min="0" placeholder="World cost" title="PCT fees" style="flex:1;margin:4px 0 6px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    </div>
+    <button type="button" onclick="fcPatSuggest()" style="width:100%;margin:0 0 8px;padding:8px;background:#0d0d0f;border:1px solid #8f8;color:#8f8;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;">COMPUTE SUGGESTED PRICES (cost + margin, rounded up)</button>
+    <div id="fcPatSuggestOut" style="font-size:11px;color:#8f8;min-height:14px;margin-bottom:6px;"></div>
+    <label style="font-size:12px;color:#999;">Patent route — full price to customer per territory (£; 0 hides it)</label>
     <div style="display:flex;gap:6px;">
       <input id="fcPatUK" type="number" min="0" placeholder="UK" title="UK" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
       <input id="fcPatEU" type="number" min="0" placeholder="EU" title="EU" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
@@ -5586,6 +5601,28 @@ window.patFilmToggle = async function(){
   patFilmOn2=true; btn.textContent='\u25a0 STOP';
   for(let i=0;i<PAT_SCENES.length&&patFilmOn2;i++){ patShow2(i); await patVoice2(PAT_SCENES[i].cap); }
   patFilmOn2=false; btn.textContent='\u25b6 REPLAY';
+};
+</script>
+
+
+<script>
+// ---------- SUGGESTED PATENT PRICES: cost x (1+margin), rounded up to clean money ----------
+window.fcPatSuggest = function(){
+  const m=(Number(document.getElementById('fcPatMargin').value)||20)/100;
+  function clean(x){ // round UP to a customer-clean figure so the margin is never eroded
+    if(x<=0) return 0;
+    if(x<1000) return Math.ceil(x/10)*10;
+    return Math.ceil(x/50)*50;
+  }
+  const pairs=[['fcPatCUK','fcPatUK'],['fcPatCEU','fcPatEU'],['fcPatCUS','fcPatUS'],['fcPatCWO','fcPatWO']];
+  const outs=[];
+  pairs.forEach(function(p){
+    const cost=Number(document.getElementById(p[0]).value)||0;
+    const sug=clean(cost*(1+m));
+    document.getElementById(p[1]).value=sug;
+    outs.push('£'+cost+'→£'+sug);
+  });
+  document.getElementById('fcPatSuggestOut').textContent='Suggested (cost→price at '+Math.round(m*100)+'% margin, rounded up): '+outs.join('  ·  ')+' — press Save all to make them live.';
 };
 </script>
 
