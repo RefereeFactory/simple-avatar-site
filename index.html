@@ -447,7 +447,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v20c</div>
+        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v20d</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;">
@@ -703,7 +703,9 @@
         <label style="display:flex;align-items:center;gap:4px;border:1px solid #2c2c33;border-radius:8px;padding:6px 10px;cursor:pointer;"><input type="checkbox" class="patJur" value="USA" style="accent-color:#f0a500;">USA</label>
         <label style="display:flex;align-items:center;gap:4px;border:1px solid #2c2c33;border-radius:8px;padding:6px 10px;cursor:pointer;"><input type="checkbox" class="patJur" value="World (PCT)" style="accent-color:#f0a500;">World</label>
       </div>
-      <button onclick="patentRequest()" style="width:100%;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">REQUEST PATENT HELP</button>
+      <div id="patTotal" style="font-size:13px;color:#f0a500;font-weight:800;margin-bottom:8px;min-height:18px;"></div>
+      <button onclick="patentRequest()" style="width:100%;padding:9px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:700;font-size:12.5px;cursor:pointer;">SEND PATENT REQUEST</button>
+      <div style="font-size:10px;color:#666;margin-top:4px;" data-t="patNote">All-in prices; a qualified professional stands behind every filing where the law requires one. Payment is taken only after we confirm your request.</div>
     </div>
     <div id="certMsg" style="font-size:12.5px;color:#8f8;min-height:18px;margin-top:8px;"></div>
     <div id="certMine" style="margin-top:10px;"></div>
@@ -1567,6 +1569,12 @@
     document.getElementById('fcCommission').value = c.marketplace_commission_pct ?? 26.5;
     document.getElementById('fcCertPrice').value = c.cert_price_usd ?? 0;
     document.getElementById('fcInvFee').value = c.invention_fee_pct ?? 15;
+    const pp = c.patent_prices || {};
+    document.getElementById('fcPatUK').value = pp.uk ?? 650;
+    document.getElementById('fcPatEU').value = pp.eu ?? 5500;
+    document.getElementById('fcPatUS').value = pp.usa ?? 2800;
+    document.getElementById('fcPatWO').value = pp.world ?? 4200;
+    document.getElementById('fcPatMargin').value = c.patent_margin_pct ?? 20;
     document.getElementById('fcCertCut').value = c.cert_transfer_cut_pct ?? 10;
     document.getElementById('fcPlatFee').value = c.platform_fee_pct ?? 10;
     document.getElementById('fcSubPrice').value = p.sub_price_label ?? '£9.99/month';
@@ -1597,6 +1605,8 @@
         platform_fee_pct: Number(document.getElementById('fcPlatFee').value),
         cert_price_usd: Number(document.getElementById('fcCertPrice').value) || 0,
         invention_fee_pct: Number(document.getElementById('fcInvFee').value) || 0,
+        patent_prices: { uk: Number(document.getElementById('fcPatUK').value)||0, eu: Number(document.getElementById('fcPatEU').value)||0, usa: Number(document.getElementById('fcPatUS').value)||0, world: Number(document.getElementById('fcPatWO').value)||0 },
+        patent_margin_pct: Number(document.getElementById('fcPatMargin').value) || 0,
         cert_transfer_cut_pct: Number(document.getElementById('fcCertCut').value) || 0
       },
       plans: {
@@ -3953,7 +3963,7 @@ function routerReturnCards(){
   slot.innerHTML='';
 }
 window.showPage = function(name){
-  if(name==='certify') setTimeout(function(){ if(typeof certList==='function') certList(); if(typeof certPrice==='function') certPrice(); }, 400);
+  if(name==='certify') setTimeout(function(){ if(typeof certList==='function') certList(); if(typeof certPrice==='function') certPrice(); if(typeof patPricesLoad==='function') patPricesLoad(); }, 400);
   if(name==='marketplace') setTimeout(function(){ if(typeof invLoad==='function') invLoad(); if(typeof mmShow==='function') mmShow(); if(typeof invFilmShow==='function'&&!invFilmOn) invFilmShow(0); }, 400);
   if(name==='apps') setTimeout(function(){ if(typeof afShow==='function'&&!afOn) afShow(0); }, 400);
   try{ if(typeof stopLiveHost==='function' && window.gStarted) stopLiveHost(); }catch(_){}
@@ -4379,6 +4389,15 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
     <input id="fcCertPrice" type="number" step="0.5" min="0" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
     <label style="font-size:12px;color:#999;">Invention sale fee % (non-Factory creations market)</label>
     <input id="fcInvFee" type="number" step="0.5" min="0" max="100" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    <label style="font-size:12px;color:#999;">Patent route — full price to customer per territory (£, professional + official fees; 0 hides it)</label>
+    <div style="display:flex;gap:6px;">
+      <input id="fcPatUK" type="number" min="0" placeholder="UK" title="UK" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+      <input id="fcPatEU" type="number" min="0" placeholder="EU" title="EU" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+      <input id="fcPatUS" type="number" min="0" placeholder="USA" title="USA" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+      <input id="fcPatWO" type="number" min="0" placeholder="World" title="World (PCT)" style="flex:1;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
+    </div>
+    <label style="font-size:12px;color:#999;">Patent route — our margin % on top</label>
+    <input id="fcPatMargin" type="number" step="0.5" min="0" max="100" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
     <label style="font-size:12px;color:#999;">Certified-business transfer cut % (marketplace ownership sales)</label>
     <input id="fcCertCut" type="number" step="0.5" min="0" max="100" style="width:100%;margin:4px 0 10px;padding:8px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;">
 
@@ -4974,7 +4993,8 @@ window.certStamp = async function(){
       body:JSON.stringify({op:'stamp',sha256:sha,label:label,anonymous:anonymous,owner_pubkey:ownerPubJwk?JSON.stringify(ownerPubJwk):undefined})});
     const j=await r.json();
     if(!r.ok||!j.ok){ msg.textContent=j.error||('stamp failed '+r.status); return; }
-    msg.textContent='Certified ✓ — '+j.witnesses+' independent witnesses hold your fingerprint. Certificate downloading.';
+    msg.textContent='Certified ✓ — '+j.witnesses+' independent witnesses hold your fingerprint. Certificate downloading. Would you like to patent it as well? Choose territories below — the price computes itself.';
+    try{ patPricesLoad(); }catch(_){}
     const a=document.createElement('a');
     a.href=URL.createObjectURL(new Blob([JSON.stringify(j.certificate,null,2)],{type:'application/json'}));
     a.download='factory-certificate-'+j.id+'.json'; a.click();
@@ -5017,7 +5037,8 @@ window.patentRequest = function(){
   showPage('contact');
   setTimeout(function(){
     const m=document.getElementById('rqMsg');
-    if(m) m.value='PATENT PATH ['+(jur.join(', ')||'UK')+']: I hold a timestamp certificate for my invention and want help taking the patent route in the territories above. Please contact me about next steps and costs.';
+    const tot=document.getElementById('patTotal')?document.getElementById('patTotal').textContent:'';
+    if(m) m.value='PATENT REQUEST ['+(jur.join(', ')||'UK')+']'+(tot?(' — '+tot):'')+': I hold a timestamp certificate for my invention and want the patent route in these territories at the stated all-in price. Please confirm and take payment.';
     const f=document.getElementById('rqName'); if(f) f.focus();
   }, 500);
 };
@@ -5484,6 +5505,38 @@ window.revFilmPlay = async function(){
     await revFilmVoice(scenes[i].cap);
   }
   revFilmOn=false;
+};
+</script>
+
+
+<script>
+// ---------- PATENT PRICING: territory prices from the gear, our margin on top, live total ----------
+window._patPrices=null;
+window.patPricesLoad = async function(){
+  try{
+    const {data}=await sb.from('site_settings').select('value').eq('key','commerce').maybeSingle();
+    const c=(data&&data.value)||{};
+    const pp=c.patent_prices||{uk:650,eu:5500,usa:2800,world:4200};
+    const m=Number(c.patent_margin_pct)||20;
+    window._patPrices={uk:pp.uk,eu:pp.eu,usa:pp.usa,world:pp.world,margin:m};
+    // write each price onto its tick label
+    const map={'UK':'uk','EU':'eu','USA':'usa','World (PCT)':'world'};
+    document.querySelectorAll('.patJur').forEach(function(c2){
+      const key=map[c2.value]; const base=Number(window._patPrices[key])||0;
+      const full=Math.round(base*(1+m/100));
+      const lab=c2.parentElement;
+      if(base>0 && !lab.querySelector('.patP')){ const sp=document.createElement('span'); sp.className='patP'; sp.style.cssText='color:#f0a500;font-weight:700;'; sp.textContent='£'+full.toLocaleString(); lab.appendChild(sp); }
+      c2.onchange=patTotalShow;
+    });
+    patTotalShow();
+  }catch(_){}
+};
+window.patTotalShow = function(){
+  const p=window._patPrices; if(!p) return;
+  const map={'UK':'uk','EU':'eu','USA':'usa','World (PCT)':'world'};
+  let total=0, picks=[];
+  document.querySelectorAll('.patJur:checked').forEach(function(c){ const b=Number(p[map[c.value]])||0; if(b>0){ total+=Math.round(b*(1+p.margin/100)); picks.push(c.value); } });
+  document.getElementById('patTotal').textContent = total>0 ? ('Your all-in price: £'+total.toLocaleString()+' ('+picks.join(' + ')+')') : '';
 };
 </script>
 
