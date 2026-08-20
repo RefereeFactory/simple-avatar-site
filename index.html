@@ -363,6 +363,44 @@
   .earn-block { background: #0d0d0f; border: 1px solid #2c2c33; border-radius: 12px; padding: 16px; }
   .earn-block h3 { font-size: 14.5px; color: #f0a500; margin-bottom: 6px; }
 </style>
+
+<style>
+/* ---------- PHONE STRUCTURE: the same factory, folded for one hand ---------- */
+@media (max-width: 700px){
+  #heroStage > div:first-child{ flex-direction: column !important; }
+  #sideMenu{
+    width: 100% !important; flex-shrink: 1 !important;
+    border-right: none !important; border-bottom: 1px solid #26262c !important;
+    padding: 8px 8px 6px !important;
+    display: flex !important; align-items: center !important; gap: 2px !important;
+    overflow-x: auto !important; white-space: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  #sideMenu > div:first-child{ display:none !important; }              /* FEATURES label */
+  #sideMenu a{ display:inline-block !important; padding: 8px 9px !important; font-size: 12px !important; }
+  #sideMenu > div:last-child{ margin: 0 0 0 auto !important; border: none !important; padding: 0 !important; display:flex !important; align-items:center !important; }
+  #sideMenu > div:last-child > div{ display:none !important; }         /* LANGUAGE label */
+  #heroLang{ width: auto !important; min-width: 92px; }
+  #topBar{
+    position: static !important; justify-content: center !important;
+    margin: 4px 0 10px !important; gap: 10px !important; font-size: 12px !important;
+  }
+  #homePanel{ padding: 0 !important; }
+  #heroStage .hero-main, #homePanel{ text-align: center; }
+  #homePanel > div[style*="letter-spacing:6px"]{ font-size: 9px !important; }
+  #liveIn{ font-size: 16px !important; }                                /* 16px stops iOS zoom-jump */
+  #routerSlot{ max-width: 100% !important; padding: 0 4px; }
+  #guideStage{ max-width: 94vw !important; }
+  #revPanel{ padding: 14px 10px 40px !important; }
+  #fcPanel{ width: 100vw !important; max-width: 100vw !important; }
+}
+</style>
+
+<style>
+@media (max-width: 700px){
+  .hero-main{ padding: 12px 10px 30px !important; }
+}
+</style>
 </head>
 <body>
 
@@ -393,10 +431,10 @@
       </div>
 
       <!-- MAIN COLUMN: the reason people came, first and prominent -->
-      <div style="flex:1;text-align:center;padding:34px 18px;position:relative;">
+      <div class="hero-main" style="flex:1;text-align:center;padding:34px 18px;position:relative;">
 
         <!-- TOP-RIGHT: account + rules -->
-        <div style="position:absolute;top:12px;right:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;font-size:11.5px;">
+        <div id="topBar" style="position:absolute;top:12px;right:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;font-size:11.5px;">
           <a id="topAuth" onclick="topAuthClick()" data-t="tLogin" style="cursor:pointer;color:#f0a500;text-decoration:none;font-weight:700;">Login</a>
           <a onclick="showPage('marketplace')" data-t="tMarket" style="cursor:pointer;color:#999;text-decoration:none;">Marketplace</a>
           <a onclick="showPage('revenue')" data-t="tRevenue" style="cursor:pointer;color:#999;text-decoration:none;">Revenue share</a>
@@ -447,7 +485,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v21</div>
+        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v21b</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;">
