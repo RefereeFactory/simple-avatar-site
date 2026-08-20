@@ -447,7 +447,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v20g</div>
+        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v21</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;">
@@ -3602,7 +3602,9 @@ let gMicMuted=false, gQueue=Promise.resolve(), gQueueDepth=0;
 (function guideBlinkLoop(){
   setTimeout(function(){ if(gSprites['blink1']) gBlinkStart=performance.now(); guideBlinkLoop(); },3000+Math.random()*4000);
 })();
+const G_STEADY = new URLSearchParams(location.search).get('steady')==='1' || Math.min(screen.width,screen.height)<500;
 (function guideSway(){
+  if(G_STEADY) return;   // steady mode: no sway — phones and ?steady=1
   const el=document.getElementById('guideSwayer'), t0=performance.now();
   (function tick(){
     const t=(performance.now()-t0)/1000;
@@ -3836,6 +3838,7 @@ async function guideEnsureStarted(){
   // She steps out the moment the conversation starts — SEND or mic alike.
   document.getElementById('guideStage').style.display='block';
   document.getElementById('liveControls').style.display='block';
+  if(G_STEADY){ var br=document.getElementById('guideBreather'); if(br) br.style.animation='none'; }
   // size the mouth canvas only AFTER layout settles — sizing while hidden warps the face
   if(typeof guideFit==='function'){
     requestAnimationFrame(function(){ try{ guideFit(); }catch(_){} });
