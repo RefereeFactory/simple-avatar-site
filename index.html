@@ -447,7 +447,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v19d</div>
+        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v20a</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;">
@@ -4188,7 +4188,21 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
         <button id="revReportBtn" onclick="revRun('report')" style="flex:1;padding:11px;background:linear-gradient(135deg,#f0a500,#d48800);border:none;color:#111;border-radius:9px;font-weight:800;font-size:13px;cursor:pointer;">REPORT NOW</button>
         <button id="revOptBtn" onclick="revRun('optimise')" style="flex:1;padding:11px;background:#0d0d0f;border:1px solid #8f8;color:#8f8;border-radius:9px;font-weight:800;font-size:13px;cursor:pointer;">OPTIMISE</button>
       </div>
+      <button onclick="revFilmPlay()" style="width:100%;margin-top:8px;padding:11px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:9px;font-weight:800;font-size:13px;cursor:pointer;">🎞 ANIMATED REPORT</button>
       <div id="revStatus" style="font-size:12px;color:#8f8;min-height:16px;margin-top:8px;"></div>
+      <div id="revFilm" style="display:none;position:relative;border:1px solid #f0a500;border-radius:12px;background:#060608;overflow:hidden;margin-top:10px;">
+        <div id="revFilmStage" style="width:100%;aspect-ratio:16/8;display:flex;align-items:center;justify-content:center;"></div>
+        <div id="revFilmCaption" style="padding:10px 14px;font-size:12.5px;color:#ccc;line-height:1.6;min-height:44px;text-align:center;"></div>
+        <button id="revFilmBtn" onclick="revFilmStop()" style="position:absolute;top:10px;right:10px;padding:7px 14px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer;">■ STOP</button>
+      </div>
+      <div style="border:1px solid #2c2c33;border-radius:10px;padding:10px;margin-top:12px;">
+        <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">💬 Ask the chancellor</div>
+        <div id="revChatLog" style="max-height:260px;overflow-y:auto;font-size:12.5px;line-height:1.6;margin-bottom:8px;"></div>
+        <div style="display:flex;gap:6px;">
+          <input id="revChatIn" placeholder="How is the business doing? What should I change?" onkeydown="if(event.key==='Enter')revChatSend()" style="flex:1;padding:9px;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:12.5px;">
+          <button onclick="revChatSend()" style="padding:9px 18px;background:#f0a500;border:none;color:#111;border-radius:8px;font-weight:800;font-size:12.5px;cursor:pointer;">SEND</button>
+        </div>
+      </div>
       <div style="border:1px solid #2c2c33;border-radius:10px;padding:10px;margin-top:12px;">
         <div style="font-weight:700;color:#e6e6e6;font-size:12.5px;margin-bottom:6px;">⏰ Schedule</div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:#bbb;">
@@ -5320,6 +5334,107 @@ window.vrfKeyCheck = async function(){
     if(okv){ out.style.color='#8f8'; out.textContent='VERDICT: BEARER PROVEN — this key signs for the certificate "'+(cert.label||'')+'" stamped '+new Date(cert.stamped_at_utc).toLocaleString()+'. The holder of this key and passphrase is the owner.'; }
     else { out.style.color='#d9534f'; out.textContent='VERDICT: key does NOT match this certificate. This person is not the owner.'; }
   }catch(e){ out.style.color='#d9534f'; out.textContent='Error — '+e.message; }
+};
+</script>
+
+
+<script>
+// ---------- CHANCELLOR DIALOGUE ----------
+window._revChat=[];
+function revChatLine(who,text){
+  const log=document.getElementById('revChatLog');
+  const d=document.createElement('div');
+  d.style.cssText='margin-bottom:6px;'+(who==='you'?'color:#f0a500;':'color:#ccc;');
+  d.textContent=(who==='you'?'You: ':'Agent: ')+text;
+  log.appendChild(d); log.scrollTop=log.scrollHeight;
+}
+window.revChatSend = async function(){
+  const inp=document.getElementById('revChatIn');
+  const t=inp.value.trim(); if(!t) return; inp.value='';
+  revChatLine('you',t);
+  window._revChat.push({role:'user',content:t});
+  const d=document.createElement('div'); d.id='revThinking'; d.style.cssText='color:#666;font-size:11.5px;margin-bottom:6px;'; d.textContent='reading the books…';
+  document.getElementById('revChatLog').appendChild(d);
+  const j=await revDesk({op:'chat',messages:window._revChat});
+  const th=document.getElementById('revThinking'); if(th) th.remove();
+  if(!j.ok){ revChatLine('agent','Trouble — '+(j.error||j._status)); return; }
+  window._revChat.push({role:'assistant',content:j.reply});
+  revChatLine('agent',j.reply);
+};
+
+// ---------- ANIMATED REPORT: illustrated, quantified, narrated from the live report ----------
+let revFilmOn=false, revFilmAudio=null, revFilmTimer=null;
+function revBars(items, colors){
+  const max=Math.max.apply(null, items.map(function(i){return Number(i.v)||0;}).concat([1]));
+  const bw=54, gap=22, x0=40;
+  let out='';
+  items.forEach(function(it,i){
+    const h=Math.max(6, (Number(it.v)||0)/max*120);
+    const x=x0+i*(bw+gap), y=160-h;
+    out+='<g><rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="5" fill="none" stroke="'+(colors[i%colors.length])+'" stroke-width="2.5" style="animation:invFade .9s ease forwards;animation-delay:'+(i*0.18)+'s;opacity:0;"/>'
+      +'<text x="'+(x+bw/2)+'" y="'+(y-8)+'" fill="'+(colors[i%colors.length])+'" font-size="15" font-weight="bold" text-anchor="middle">'+it.v+'</text>'
+      +'<text x="'+(x+bw/2)+'" y="178" fill="#999" font-size="9.5" text-anchor="middle">'+it.l+'</text></g>';
+  });
+  return '<svg viewBox="0 0 360 190">'+out+'</svg>';
+}
+function revFilmScenes(r){
+  const st=r._stats||{};
+  const s1=revBars([
+    {l:'Users',v:st.users_total==null?0:st.users_total},
+    {l:'Apps live',v:st.builds_done_total==null?0:st.builds_done_total},
+    {l:'Sub payments',v:st.sub_payments_total==null?0:st.sub_payments_total},
+    {l:'Certificates',v:st.certificates_total==null?0:st.certificates_total}
+  ],['#f0a500','#ffd766','#8f8','#7fdcff']);
+  const sv=(st.services_30d||{});
+  const s2=revBars([
+    {l:'Service cost $',v:(sv.cost_usd==null?0:sv.cost_usd)},
+    {l:'Billable $',v:(sv.billable_usd==null?0:sv.billable_usd)},
+    {l:'Market apps',v:st.market_listings==null?0:st.market_listings},
+    {l:'Inventions',v:st.invention_listings==null?0:st.invention_listings}
+  ],['#d9534f','#8f8','#f0a500','#ffd766']);
+  const pr=r.proposal||{};
+  const s3='<svg viewBox="0 0 360 190"><text x="180" y="52" fill="#999" font-size="12" text-anchor="middle">'+(pr.hold?'THE AGENT HOLDS':'ONE CHANGE PROPOSED')+'</text>'
+    +(pr.hold?'<g style="animation:invPulse 1.8s ease-in-out infinite;transform-origin:180px 108px;"><circle cx="180" cy="108" r="34" fill="none" stroke="#ffd766" stroke-width="3"/><text x="180" y="114" fill="#ffd766" font-size="14" text-anchor="middle" font-weight="bold">HOLD</text></g>'
+      :'<text x="88" y="112" fill="#ccc" font-size="16" text-anchor="middle" font-weight="bold">'+String(pr.current||'').slice(0,12)+'</text><g style="animation:invSlide 1.6s ease-in-out infinite;"><path d="M140 106 h70" stroke="#f0a500" stroke-width="3"/><path d="M204 98 l14 8 l-14 8 z" fill="#f0a500"/></g><text x="272" y="112" fill="#8f8" font-size="16" text-anchor="middle" font-weight="bold">'+String(pr.proposed||'').slice(0,12)+'</text><text x="180" y="152" fill="#666" font-size="10" text-anchor="middle">'+String(pr.variable||'').slice(0,44)+'</text>')
+    +'</svg>';
+  const s4='<svg viewBox="0 0 360 190"><g style="animation:invPulse 1.8s ease-in-out infinite;transform-origin:180px 84px;"><circle cx="180" cy="84" r="30" fill="none" stroke="#8f8" stroke-width="3"/><path d="M180 62 v22 l14 10" stroke="#8f8" stroke-width="3" fill="none" stroke-linecap="round"/></g><text x="180" y="150" fill="#f0a500" font-size="12" text-anchor="middle" font-weight="bold">Next review: '+(r.next_review_days||3)+' day(s)</text></svg>';
+  function cut(t,n){ t=String(t||''); return t.length>n?t.slice(0,n-1)+'…':t; }
+  return [
+    {svg:s1, cap:cut(r.state_summary, 340)},
+    {svg:s2, cap:cut(r.attempts_review, 300)},
+    {svg:s3, cap: pr.hold ? cut(pr.why,300) : cut((pr.variable||'')+': '+(pr.current||'')+' → '+(pr.proposed||'')+'. '+(pr.why||''),320)},
+    {svg:s4, cap:'Watching: '+((r.watch||[]).map(function(w){return w.measure;}).join(' · ')||'the weekly numbers')+'. Next review in '+(r.next_review_days||3)+' day(s).'}
+  ];
+}
+async function revFilmVoice(text){
+  try{
+    const r=await fetch(SB_URL+'/functions/v1/voice-speak',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+(session?session.access_token:SB_ANON)},
+      body:JSON.stringify({text:text})});
+    if(!r.ok) throw new Error('tts');
+    const blob=await r.blob(); if(blob.size<200) throw new Error('empty');
+    return new Promise(function(res){ revFilmAudio=new Audio(URL.createObjectURL(blob)); revFilmAudio.onended=res; revFilmAudio.onerror=res; revFilmAudio.play().catch(res); });
+  }catch(_){ return new Promise(function(res){ revFilmTimer=setTimeout(res,7000); }); }
+}
+window.revFilmStop = function(){ revFilmOn=false; if(revFilmAudio){try{revFilmAudio.pause();}catch(_){}} if(revFilmTimer) clearTimeout(revFilmTimer); document.getElementById('revFilm').style.display='none'; };
+window.revFilmPlay = async function(){
+  const st=document.getElementById('revStatus');
+  let rep=window._revCurrent;
+  if(!rep){
+    const reports=window._revReports||[];
+    rep=reports.length?reports[reports.length-1]:null;
+  }
+  if(!rep){ st.textContent='No report yet — making one first…'; rep=await revRun('report'); if(!rep) return; }
+  const scenes=revFilmScenes(rep);
+  const film=document.getElementById('revFilm'); film.style.display='block';
+  film.scrollIntoView({behavior:'smooth'});
+  revFilmOn=true;
+  for(let i=0;i<scenes.length&&revFilmOn;i++){
+    document.getElementById('revFilmStage').innerHTML='<div style="width:94%;max-width:520px;opacity:0;animation:invFade .7s ease forwards;">'+scenes[i].svg+'</div>';
+    document.getElementById('revFilmCaption').textContent=scenes[i].cap;
+    await revFilmVoice(scenes[i].cap);
+  }
+  revFilmOn=false;
 };
 </script>
 
