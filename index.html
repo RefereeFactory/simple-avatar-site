@@ -445,6 +445,9 @@
         </div>
 
         <div id="homePanel">
+        <div style="text-align:right;margin:26px 0 0;">
+          <button onclick="learnOpen()" data-t="learnBtn" style="padding:9px 16px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;">🎓 Learn how to use the Factory</button>
+        </div>
         <div style="letter-spacing:6px;color:#888;font-size:11px;">REFEREE INNOVATIONS</div>
         <div style="font-size:30px;font-weight:800;margin:6px 0 2px;">THE <span style="color:#f0a500;">FACTORY</span></div>
         <div data-t="tagline" style="color:#999;font-size:12.5px;margin-bottom:22px;">Describe it. Own it. Live in minutes.</div>
@@ -485,7 +488,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v21c</div>
+        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v21d</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;">
@@ -4052,16 +4055,16 @@ window.revealAll = function(){ showPage('plans'); };
 <script>
 // ---------- front-screen translation (data-t / data-t-ph attributes) ----------
 const HERO_I18N = {
- en:{question:"What app would you like to make?",placeholder:"Type it — or press the mic and say it…",send:"SEND",tagline:"Describe it. Own it. Live in minutes.",featuresLabel:"FEATURES",mBuild:"⚙ Build",mApps:"🔧 Your apps",mMarket:"🛒 Marketplace",mEarn:"🤝 Earn with us",mDomain:"🌐 Domain",mAcademy:"📺 Academy",mVideos:"🎬 Reference videos",mCertify:"🔏 Own your work",tLogin:"Login",tMarket:"Marketplace",tRevenue:"Revenue share",tAffiliate:"Affiliate",tTerms:"Terms",tPrivacy:"Privacy",tRules:"Rules"},
- zh:{question:"你想制作什么应用？",placeholder:"输入，或按麦克风说出来…",send:"发送",tagline:"描述它。拥有它。几分钟内上线。",featuresLabel:"功能",mBuild:"⚙ 构建",mApps:"🔧 我的应用",mMarket:"🛒 市场",mEarn:"🤝 与我们赚钱",mDomain:"🌐 域名",mAcademy:"📺 学院",mVideos:"🎬 参考视频",mCertify:"🔏 拥有你的作品",tLogin:"登录",tMarket:"市场",tRevenue:"收益分成",tAffiliate:"推广伙伴",tTerms:"条款",tPrivacy:"隐私",tRules:"规则"},
- hi:{question:"आप कौन-सा ऐप बनाना चाहते हैं?",placeholder:"लिखें — या माइक दबाकर बोलें…",send:"भेजें",tagline:"बताइए। अपनाइए। मिनटों में लाइव।",featuresLabel:"सुविधाएँ",mBuild:"⚙ बनाएँ",mApps:"🔧 आपके ऐप",mMarket:"🛒 मार्केटप्लेस",mEarn:"🤝 हमारे साथ कमाएँ",mDomain:"🌐 डोमेन",mAcademy:"📺 अकादमी",mVideos:"🎬 संदर्भ वीडियो",mCertify:"🔏 अपने काम के मालिक बनें",tLogin:"लॉगिन",tMarket:"मार्केटप्लेस",tRevenue:"राजस्व साझा",tAffiliate:"एफिलिएट",tTerms:"शर्तें",tPrivacy:"गोपनीयता",tRules:"नियम"},
- es:{question:"¿Qué aplicación te gustaría crear?",placeholder:"Escríbelo — o pulsa el micrófono y dilo…",send:"ENVIAR",tagline:"Descríbelo. Tuyo. En vivo en minutos.",featuresLabel:"FUNCIONES",mBuild:"⚙ Crear",mApps:"🔧 Tus apps",mMarket:"🛒 Mercado",mEarn:"🤝 Gana con nosotros",mDomain:"🌐 Dominio",mAcademy:"📺 Academia",mVideos:"🎬 Vídeos de referencia",mCertify:"🔏 Tu obra, tuya",tLogin:"Entrar",tMarket:"Mercado",tRevenue:"Reparto de ingresos",tAffiliate:"Afiliado",tTerms:"Términos",tPrivacy:"Privacidad",tRules:"Reglas"},
- ar:{question:"ما التطبيق الذي تريد إنشاءه؟",placeholder:"اكتبه — أو اضغط الميكروفون وقله…",send:"إرسال",tagline:"صِفه. امتلكه. مباشر خلال دقائق.",featuresLabel:"الميزات",mBuild:"⚙ إنشاء",mApps:"🔧 تطبيقاتك",mMarket:"🛒 السوق",mEarn:"🤝 اربح معنا",mDomain:"🌐 نطاق",mAcademy:"📺 الأكاديمية",mVideos:"🎬 فيديوهات تعريفية",mCertify:"🔏 امتلك عملك",tLogin:"دخول",tMarket:"السوق",tRevenue:"تقاسم الإيرادات",tAffiliate:"شريك",tTerms:"الشروط",tPrivacy:"الخصوصية",tRules:"القواعد"},
- fr:{question:"Quelle application voulez-vous créer ?",placeholder:"Écrivez-le — ou appuyez sur le micro et dites-le…",send:"ENVOYER",tagline:"Décrivez. Possédez. En ligne en minutes.",featuresLabel:"FONCTIONS",mBuild:"⚙ Créer",mApps:"🔧 Vos apps",mMarket:"🛒 Marché",mEarn:"🤝 Gagnez avec nous",mDomain:"🌐 Domaine",mAcademy:"📺 Académie",mVideos:"🎬 Vidéos de référence",mCertify:"🔏 Votre œuvre à vous",tLogin:"Connexion",tMarket:"Marché",tRevenue:"Partage des revenus",tAffiliate:"Affilié",tTerms:"Conditions",tPrivacy:"Confidentialité",tRules:"Règles"},
- pt:{question:"Que aplicativo você gostaria de criar?",placeholder:"Digite — ou toque no microfone e diga…",send:"ENVIAR",tagline:"Descreva. Seu. No ar em minutos.",featuresLabel:"RECURSOS",mBuild:"⚙ Criar",mApps:"🔧 Seus apps",mMarket:"🛒 Mercado",mEarn:"🤝 Ganhe conosco",mDomain:"🌐 Domínio",mAcademy:"📺 Academia",mVideos:"🎬 Vídeos de referência",mCertify:"🔏 Sua obra é sua",tLogin:"Entrar",tMarket:"Mercado",tRevenue:"Partilha de receita",tAffiliate:"Afiliado",tTerms:"Termos",tPrivacy:"Privacidade",tRules:"Regras"},
- ru:{question:"Какое приложение вы хотите создать?",placeholder:"Напишите — или нажмите микрофон и скажите…",send:"ОТПРАВИТЬ",tagline:"Опишите. Владейте. В сети за минуты.",featuresLabel:"ФУНКЦИИ",mBuild:"⚙ Создать",mApps:"🔧 Ваши приложения",mMarket:"🛒 Маркетплейс",mEarn:"🤝 Зарабатывайте с нами",mDomain:"🌐 Домен",mAcademy:"📺 Академия",mVideos:"🎬 Обучающие видео",mCertify:"🔏 Ваша работа — ваша",tLogin:"Вход",tMarket:"Маркетплейс",tRevenue:"Раздел дохода",tAffiliate:"Партнёр",tTerms:"Условия",tPrivacy:"Конфиденциальность",tRules:"Правила"},
- ja:{question:"どんなアプリを作りたいですか？",placeholder:"入力 — またはマイクを押して話してください…",send:"送信",tagline:"説明する。所有する。数分で公開。",featuresLabel:"機能",mBuild:"⚙ 作成",mApps:"🔧 あなたのアプリ",mMarket:"🛒 マーケット",mEarn:"🤝 一緒に稼ぐ",mDomain:"🌐 ドメイン",mAcademy:"📺 アカデミー",mVideos:"🎬 紹介動画",mCertify:"🔏 作品を守る",tLogin:"ログイン",tMarket:"マーケット",tRevenue:"収益分配",tAffiliate:"アフィリエイト",tTerms:"規約",tPrivacy:"プライバシー",tRules:"ルール"},
- de:{question:"Welche App möchten Sie erstellen?",placeholder:"Tippen — oder das Mikrofon drücken und sprechen…",send:"SENDEN",tagline:"Beschreiben. Besitzen. In Minuten live.",featuresLabel:"FUNKTIONEN",mBuild:"⚙ Erstellen",mApps:"🔧 Ihre Apps",mMarket:"🛒 Marktplatz",mEarn:"🤝 Mit uns verdienen",mDomain:"🌐 Domain",mAcademy:"📺 Akademie",mVideos:"🎬 Referenzvideos",mCertify:"🔏 Ihr Werk gehört Ihnen",tLogin:"Anmelden",tMarket:"Marktplatz",tRevenue:"Umsatzbeteiligung",tAffiliate:"Partner",tTerms:"Bedingungen",tPrivacy:"Datenschutz",tRules:"Regeln"}
+ en:{question:"What app would you like to make?",placeholder:"Type it — or press the mic and say it…",send:"SEND",tagline:"Describe it. Own it. Live in minutes.",featuresLabel:"FEATURES",mBuild:"⚙ Build",mApps:"🔧 Your apps",mMarket:"🛒 Marketplace",mEarn:"🤝 Earn with us",mDomain:"🌐 Domain",mAcademy:"📺 Academy",mVideos:"🎬 Reference videos",mCertify:"🔏 Own your work",tLogin:"Login",tMarket:"Marketplace",tRevenue:"Revenue share",tAffiliate:"Affiliate",tTerms:"Terms",tPrivacy:"Privacy",tRules:"Rules",learnBtn:"🎓 Learn how to use the Factory"},
+ zh:{question:"你想制作什么应用？",placeholder:"输入，或按麦克风说出来…",send:"发送",tagline:"描述它。拥有它。几分钟内上线。",featuresLabel:"功能",mBuild:"⚙ 构建",mApps:"🔧 我的应用",mMarket:"🛒 市场",mEarn:"🤝 与我们赚钱",mDomain:"🌐 域名",mAcademy:"📺 学院",mVideos:"🎬 参考视频",mCertify:"🔏 拥有你的作品",tLogin:"登录",tMarket:"市场",tRevenue:"收益分成",tAffiliate:"推广伙伴",tTerms:"条款",tPrivacy:"隐私",tRules:"规则",learnBtn:"🎓 学习如何使用工厂"},
+ hi:{question:"आप कौन-सा ऐप बनाना चाहते हैं?",placeholder:"लिखें — या माइक दबाकर बोलें…",send:"भेजें",tagline:"बताइए। अपनाइए। मिनटों में लाइव।",featuresLabel:"सुविधाएँ",mBuild:"⚙ बनाएँ",mApps:"🔧 आपके ऐप",mMarket:"🛒 मार्केटप्लेस",mEarn:"🤝 हमारे साथ कमाएँ",mDomain:"🌐 डोमेन",mAcademy:"📺 अकादमी",mVideos:"🎬 संदर्भ वीडियो",mCertify:"🔏 अपने काम के मालिक बनें",tLogin:"लॉगिन",tMarket:"मार्केटप्लेस",tRevenue:"राजस्व साझा",tAffiliate:"एफिलिएट",tTerms:"शर्तें",tPrivacy:"गोपनीयता",tRules:"नियम",learnBtn:"🎓 फ़ैक्टरी का उपयोग सीखें"},
+ es:{question:"¿Qué aplicación te gustaría crear?",placeholder:"Escríbelo — o pulsa el micrófono y dilo…",send:"ENVIAR",tagline:"Descríbelo. Tuyo. En vivo en minutos.",featuresLabel:"FUNCIONES",mBuild:"⚙ Crear",mApps:"🔧 Tus apps",mMarket:"🛒 Mercado",mEarn:"🤝 Gana con nosotros",mDomain:"🌐 Dominio",mAcademy:"📺 Academia",mVideos:"🎬 Vídeos de referencia",mCertify:"🔏 Tu obra, tuya",tLogin:"Entrar",tMarket:"Mercado",tRevenue:"Reparto de ingresos",tAffiliate:"Afiliado",tTerms:"Términos",tPrivacy:"Privacidad",tRules:"Reglas",learnBtn:"🎓 Aprende a usar la Fábrica"},
+ ar:{question:"ما التطبيق الذي تريد إنشاءه؟",placeholder:"اكتبه — أو اضغط الميكروفون وقله…",send:"إرسال",tagline:"صِفه. امتلكه. مباشر خلال دقائق.",featuresLabel:"الميزات",mBuild:"⚙ إنشاء",mApps:"🔧 تطبيقاتك",mMarket:"🛒 السوق",mEarn:"🤝 اربح معنا",mDomain:"🌐 نطاق",mAcademy:"📺 الأكاديمية",mVideos:"🎬 فيديوهات تعريفية",mCertify:"🔏 امتلك عملك",tLogin:"دخول",tMarket:"السوق",tRevenue:"تقاسم الإيرادات",tAffiliate:"شريك",tTerms:"الشروط",tPrivacy:"الخصوصية",tRules:"القواعد",learnBtn:"🎓 تعلّم استخدام المصنع"},
+ fr:{question:"Quelle application voulez-vous créer ?",placeholder:"Écrivez-le — ou appuyez sur le micro et dites-le…",send:"ENVOYER",tagline:"Décrivez. Possédez. En ligne en minutes.",featuresLabel:"FONCTIONS",mBuild:"⚙ Créer",mApps:"🔧 Vos apps",mMarket:"🛒 Marché",mEarn:"🤝 Gagnez avec nous",mDomain:"🌐 Domaine",mAcademy:"📺 Académie",mVideos:"🎬 Vidéos de référence",mCertify:"🔏 Votre œuvre à vous",tLogin:"Connexion",tMarket:"Marché",tRevenue:"Partage des revenus",tAffiliate:"Affilié",tTerms:"Conditions",tPrivacy:"Confidentialité",tRules:"Règles",learnBtn:"🎓 Apprendre à utiliser la Factory"},
+ pt:{question:"Que aplicativo você gostaria de criar?",placeholder:"Digite — ou toque no microfone e diga…",send:"ENVIAR",tagline:"Descreva. Seu. No ar em minutos.",featuresLabel:"RECURSOS",mBuild:"⚙ Criar",mApps:"🔧 Seus apps",mMarket:"🛒 Mercado",mEarn:"🤝 Ganhe conosco",mDomain:"🌐 Domínio",mAcademy:"📺 Academia",mVideos:"🎬 Vídeos de referência",mCertify:"🔏 Sua obra é sua",tLogin:"Entrar",tMarket:"Mercado",tRevenue:"Partilha de receita",tAffiliate:"Afiliado",tTerms:"Termos",tPrivacy:"Privacidade",tRules:"Regras",learnBtn:"🎓 Aprenda a usar a Fábrica"},
+ ru:{question:"Какое приложение вы хотите создать?",placeholder:"Напишите — или нажмите микрофон и скажите…",send:"ОТПРАВИТЬ",tagline:"Опишите. Владейте. В сети за минуты.",featuresLabel:"ФУНКЦИИ",mBuild:"⚙ Создать",mApps:"🔧 Ваши приложения",mMarket:"🛒 Маркетплейс",mEarn:"🤝 Зарабатывайте с нами",mDomain:"🌐 Домен",mAcademy:"📺 Академия",mVideos:"🎬 Обучающие видео",mCertify:"🔏 Ваша работа — ваша",tLogin:"Вход",tMarket:"Маркетплейс",tRevenue:"Раздел дохода",tAffiliate:"Партнёр",tTerms:"Условия",tPrivacy:"Конфиденциальность",tRules:"Правила",learnBtn:"🎓 Как пользоваться Фабрикой"},
+ ja:{question:"どんなアプリを作りたいですか？",placeholder:"入力 — またはマイクを押して話してください…",send:"送信",tagline:"説明する。所有する。数分で公開。",featuresLabel:"機能",mBuild:"⚙ 作成",mApps:"🔧 あなたのアプリ",mMarket:"🛒 マーケット",mEarn:"🤝 一緒に稼ぐ",mDomain:"🌐 ドメイン",mAcademy:"📺 アカデミー",mVideos:"🎬 紹介動画",mCertify:"🔏 作品を守る",tLogin:"ログイン",tMarket:"マーケット",tRevenue:"収益分配",tAffiliate:"アフィリエイト",tTerms:"規約",tPrivacy:"プライバシー",tRules:"ルール",learnBtn:"🎓 ファクトリーの使い方"},
+ de:{question:"Welche App möchten Sie erstellen?",placeholder:"Tippen — oder das Mikrofon drücken und sprechen…",send:"SENDEN",tagline:"Beschreiben. Besitzen. In Minuten live.",featuresLabel:"FUNKTIONEN",mBuild:"⚙ Erstellen",mApps:"🔧 Ihre Apps",mMarket:"🛒 Marktplatz",mEarn:"🤝 Mit uns verdienen",mDomain:"🌐 Domain",mAcademy:"📺 Akademie",mVideos:"🎬 Referenzvideos",mCertify:"🔏 Ihr Werk gehört Ihnen",tLogin:"Anmelden",tMarket:"Marktplatz",tRevenue:"Umsatzbeteiligung",tAffiliate:"Partner",tTerms:"Bedingungen",tPrivacy:"Datenschutz",tRules:"Regeln",learnBtn:"🎓 Die Factory lernen"}
 };
 function applyHeroLang(lang){
   const d=HERO_I18N[lang]||HERO_I18N.en;
@@ -4253,6 +4256,13 @@ function gearMenuBuild(){
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',gearMenuBuild); else gearMenuBuild();
 </script>
 
+  <div id="learnFilm" style="display:none;position:fixed;inset:0;z-index:9500;background:rgba(5,5,7,.94);">
+    <div style="max-width:560px;margin:6vh auto 0;background:#0a0a0c;border:1px solid #f0a500;border-radius:14px;overflow:hidden;position:relative;">
+      <div id="learnStage" style="width:100%;aspect-ratio:16/8;display:flex;align-items:center;justify-content:center;"></div>
+      <div id="learnCaption" style="padding:12px 16px;font-size:13px;color:#ccc;line-height:1.65;min-height:56px;text-align:center;"></div>
+      <button onclick="learnClose()" style="position:absolute;top:10px;right:10px;padding:7px 14px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer;">✕ CLOSE</button>
+    </div>
+  </div>
   <button type="button" id="fcRevBtn" class="hidden" onclick="revOpen()" title="Revenue Agent" style="position:fixed;right:18px;bottom:80px;z-index:10001;background:#0d0d0f;border:1px solid #8f8;color:#8f8;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,0.6);">📈</button>
   <div id="revPanel" class="hidden" style="position:fixed;inset:0;z-index:10003;background:#0a0a0c;color:#eee;overflow-y:auto;padding:22px 16px 60px;">
     <div style="max-width:680px;margin:0 auto;">
@@ -5669,6 +5679,51 @@ window.fcPatSuggest = function(){
     outs.push('£'+cost+'→£'+sug);
   });
   document.getElementById('fcPatSuggestOut').textContent='Suggested (cost→price at '+Math.round(m*100)+'% margin, rounded up): '+outs.join('  ·  ')+' — press Save all to make them live.';
+};
+</script>
+
+
+<script>
+// ---------- LEARN THE FACTORY: the guided tour film ----------
+const LEARN_SCENES=[
+ {cap:"Welcome to The Factory. One golden box is the heart: say what app you want. SEND talks it through with our host; BUILD makes it real \u2014 live on the web in about ninety seconds.",
+  svg:'<svg viewBox="0 0 360 180"><g style="animation:invPulse 1.8s ease-in-out infinite;transform-origin:180px 84px;"><rect x="70" y="40" width="220" height="88" rx="14" fill="none" stroke="#f0a500" stroke-width="3"/><text x="180" y="72" fill="#f0a500" font-size="13" text-anchor="middle" font-weight="bold">What app would you like?</text><rect x="92" y="86" width="110" height="22" rx="6" fill="none" stroke="#5a5a66" stroke-width="2"/><rect x="210" y="86" width="58" height="22" rx="6" fill="#f0a500"/><text x="222" y="101" fill="#111" font-size="10" font-weight="bold">SEND</text></g><text x="180" y="158" fill="#8f8" font-size="11" text-anchor="middle">\u2192 live in ~90 seconds</text></svg>'},
+ {cap:"On your phone, the menu is the slim strip along the very top \u2014 slide it sideways with your thumb and every room of the Factory appears: Build, Your apps, Marketplace, Earn with us, Domain, Academy, Own your work, Reference videos.",
+  svg:'<svg viewBox="0 0 360 180"><rect x="40" y="30" width="280" height="30" rx="8" fill="none" stroke="#f0a500" stroke-width="2.5"/><text x="56" y="50" fill="#ccc" font-size="10">\u2699 Build \u00b7 \ud83d\udd27 Apps \u00b7 \ud83d\uded2 Market \u00b7 \ud83e\udd1d Earn\u2026</text><g style="animation:invSlide 1.4s ease-in-out infinite;"><path d="M120 90 h100" stroke="#8f8" stroke-width="3"/><path d="M212 82 l16 8 l-16 8 z" fill="#8f8"/><circle cx="106" cy="90" r="12" fill="none" stroke="#8f8" stroke-width="2.5"/></g><text x="180" y="130" fill="#999" font-size="11" text-anchor="middle">slide the strip \u2192 the whole Factory</text></svg>'},
+ {cap:"Your apps is your estate: everything you built, each with its deed. Change any app by simply telling it what to change \u2014 and the Contacts button holds every customer your app has gathered, downloadable any time.",
+  svg:'<svg viewBox="0 0 360 180"><rect x="60" y="36" width="120" height="80" rx="8" fill="none" stroke="#f0a500" stroke-width="2.5"/><path d="M74 58 h92 M74 76 h70 M74 94 h84" stroke="#5a5a66" stroke-width="2.5"/><g style="animation:invPulse 1.7s ease-in-out infinite;transform-origin:250px 76px;"><circle cx="236" cy="62" r="10" fill="none" stroke="#ffd766" stroke-width="2.5"/><circle cx="266" cy="62" r="10" fill="none" stroke="#ffd766" stroke-width="2.5"/><path d="M220 96 q16 -16 32 0 M250 96 q16 -16 32 0" fill="none" stroke="#ffd766" stroke-width="2.5"/><text x="251" y="120" fill="#8f8" font-size="10" text-anchor="middle">\ud83d\udcc7 Contacts \u2192 CSV</text></g></svg>'},
+ {cap:"The Marketplace sells ready apps and your inventions. Own your work stamps any creation into the Bitcoin clock \u2014 dated, yours, forever \u2014 and the patent route with prices is one tick away.",
+  svg:'<svg viewBox="0 0 360 180"><rect x="56" y="44" width="110" height="76" rx="10" fill="none" stroke="#f0a500" stroke-width="2.5"/><text x="111" y="72" fill="#f0a500" font-size="11" text-anchor="middle" font-weight="bold">\ud83d\uded2 Market</text><text x="111" y="94" fill="#999" font-size="9" text-anchor="middle">apps \u00b7 inventions</text><g style="animation:invPulse 1.8s ease-in-out infinite;transform-origin:250px 82px;"><circle cx="250" cy="82" r="30" fill="none" stroke="#ffd766" stroke-width="2.5"/><text x="250" y="78" fill="#ffd766" font-size="10" text-anchor="middle">\ud83d\udd0f STAMP</text><text x="250" y="94" fill="#8f8" font-size="8" text-anchor="middle">Bitcoin-dated</text></g></svg>'},
+ {cap:"Earn with us pays you for bringing others. Domain gives your app a real address. The Academy teaches with the founder\u2019s videos. And the language menu speaks ten tongues \u2014 the whole Factory follows your choice.",
+  svg:'<svg viewBox="0 0 360 180"><g style="animation:invFade 1s ease forwards;"><circle cx="90" cy="70" r="24" fill="none" stroke="#8f8" stroke-width="2.5"/><text x="90" y="76" fill="#8f8" font-size="14" text-anchor="middle">\u00a3</text></g><g style="animation:invFade 1s ease forwards;animation-delay:.3s;opacity:0;"><circle cx="180" cy="70" r="24" fill="none" stroke="#7fdcff" stroke-width="2.5"/><text x="180" y="76" fill="#7fdcff" font-size="12" text-anchor="middle">\ud83c\udf10</text></g><g style="animation:invFade 1s ease forwards;animation-delay:.6s;opacity:0;"><circle cx="270" cy="70" r="24" fill="none" stroke="#ffd766" stroke-width="2.5"/><text x="270" y="76" fill="#ffd766" font-size="12" text-anchor="middle">\ud83d\udcfa</text></g><text x="180" y="135" fill="#999" font-size="10" text-anchor="middle">earn \u00b7 domain \u00b7 academy \u00b7 10 languages</text></svg>'},
+ {cap:"That is the whole Factory: describe it, own it, live in minutes \u2014 built with care, priced with honesty, and always with a clear way out. Now press the box and make something.",
+  svg:'<svg viewBox="0 0 360 180"><g style="animation:invPulse 1.8s ease-in-out infinite;transform-origin:180px 80px;"><circle cx="180" cy="80" r="34" fill="none" stroke="#8f8" stroke-width="3"/><path d="M162 80 l13 13 l24 -26" fill="none" stroke="#8f8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></g><text x="180" y="150" fill="#f0a500" font-size="12" text-anchor="middle" font-weight="bold">describe \u00b7 own \u00b7 live</text></svg>'}
+];
+let learnOn=false, learnAudio=null, learnTimer=null;
+function learnShow(i){
+  document.getElementById('learnStage').innerHTML='<div style="width:94%;max-width:520px;opacity:0;animation:invFade .7s ease forwards;">'+LEARN_SCENES[i].svg+'</div>';
+  document.getElementById('learnCaption').textContent=LEARN_SCENES[i].cap;
+}
+async function learnVoice(text){
+  try{
+    const r=await fetch(SB_URL+'/functions/v1/voice-speak',{method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+(session?session.access_token:SB_ANON)},
+      body:JSON.stringify({text:text})});
+    if(!r.ok) throw new Error('tts');
+    const blob=await r.blob(); if(blob.size<200) throw new Error('empty');
+    return new Promise(function(res){ learnAudio=new Audio(URL.createObjectURL(blob)); learnAudio.onended=res; learnAudio.onerror=res; learnAudio.play().catch(res); });
+  }catch(_){ return new Promise(function(res){ learnTimer=setTimeout(res,7000); }); }
+}
+window.learnOpen = async function(){
+  document.getElementById('learnFilm').style.display='block';
+  learnOn=true;
+  for(let i=0;i<LEARN_SCENES.length&&learnOn;i++){ learnShow(i); await learnVoice(LEARN_SCENES[i].cap); }
+  learnOn=false;
+};
+window.learnClose = function(){
+  learnOn=false;
+  if(learnAudio){ try{learnAudio.pause();}catch(_){} } if(learnTimer) clearTimeout(learnTimer);
+  document.getElementById('learnFilm').style.display='none';
 };
 </script>
 
