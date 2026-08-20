@@ -485,7 +485,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v21b</div>
+        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v21c</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;">
@@ -3680,7 +3680,12 @@ let gHoldFrame='rest';
     const [prev,ps,cur,cs,f]=guideStateAt(gSegs,gAudio.currentTime);
     const t=gAudio.currentTime;
     const prevName=guideClipFrame(prev,t-ps), curName=guideClipFrame(cur,t-cs);
-    if(f>=1||prevName===curName){
+    if(G_STEADY){
+      // phones: pure snap frames, zero blending — every shape lands whole and opaque
+      const nm=(f>=0.5)?curName:prevName;
+      guideDrawSprite(nm,1,X,Y,W,H);
+      gHoldFrame=nm;
+    }else if(f>=1||prevName===curName){
       guideDrawSprite(curName,1,X,Y,W,H);
       gHoldFrame=curName;
     }else{
