@@ -488,7 +488,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v28</div>
+        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v29</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;display:flex;gap:8px;justify-content:center;">
@@ -5780,10 +5780,17 @@ window.guidePlayAck = function(){
 window.gAvatarOff = (localStorage.getItem('factory_avatar_off')==='1');
 window.guidePlayGreeting = function(){
   const el=document.getElementById('guideFilm'); if(!el) return;
+  const clip = window.session ? 'engine/greeting-neural.mp4?v27' : 'engine/greeting-login.mp4?v28';
   try{
-    el.src='engine/greeting-neural.mp4?v26'; el.muted=false; el.loop=false;
+    el.src=clip; el.muted=false; el.loop=false;
     el.style.display='block'; el.play().catch(function(){});
   }catch(_){}
+  // signed-out: also show the words + gentle nudge to the login page
+  if(!window.session){
+    gst('Please log in or register to build and keep your apps.');
+    const rb=document.getElementById('heroReply');
+    if(rb){ rb.textContent='👋 Welcome! Log in or register (top-right) to start building — you get free builds to begin, and your apps are saved to your account.'; rb.style.display='block'; }
+  }
 };
 window.toggleAvatar = function(){
   const btn=document.getElementById('avatarToggle');
