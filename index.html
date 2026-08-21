@@ -488,7 +488,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v23</div>
+        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v24</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;">
@@ -3809,9 +3809,18 @@ function guidePlay(audioP,text){
   return new Promise(async function(res){
     const d=await audioP;
     if(!d||!d.audioB64){ gst('Voice unavailable — she says: '+text); res(); return; }
-    // Film-mode: if this sentence's render already arrived, play the clip instead.
-    // No waiting — a clip that is not here yet loses to the composite voice.
-    if(d.__film&&d.__film.clip){ guidePlayFilm(d.__film.clip).then(res); return; }
+    // Film-mode: her true neural face. When the engine is on we WAIT for this
+    // sentence's clip (up to ~14s) rather than snapping to the composite puppet.
+    if(d.__film){
+      if(!d.__film.clip && !d.__film.failed){
+        gst('One moment — she is speaking…');
+        const t0=Date.now();
+        while(Date.now()-t0<14000 && !d.__film.clip && !d.__film.failed){
+          await new Promise(function(r){setTimeout(r,300);});
+        }
+      }
+      if(d.__film.clip){ guidePlayFilm(d.__film.clip).then(res); return; }
+    }
     gOutFilm=null;
     if(gFilmEl&&gFilmEl.style.display!=='none'){ try{gFilmEl.pause();}catch(_){} gFilmEl.style.display='none'; }
     guideSilenceOthers();
