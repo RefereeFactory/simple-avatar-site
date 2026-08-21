@@ -488,7 +488,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v34</div>
+        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v35</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;display:flex;gap:8px;justify-content:center;">
@@ -3805,7 +3805,7 @@ function guidePlayFilm(url){
   });
 }
 function guideIdleLine(){
-  if(gFilmMode) return 'premium renderer active — some replies arrive as film a few seconds behind the voice';
+  if(gFilmMode) return 'We are working on the speed of your assistant.';
   return gMicOn?'Listening — just talk.':'Type in the box above and press SEND.';
 }
 function guideSilenceOthers(){
