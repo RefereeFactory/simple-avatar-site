@@ -488,7 +488,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v31</div>
+        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v33</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;display:flex;gap:8px;justify-content:center;">
@@ -3679,7 +3679,7 @@ let gHoldFrame='rest';
   // NEURAL MODE: the puppet is switched off at the source. The composite canvas
   // shows ONLY her rest face; her real lips live in the neural film on top. No
   // viseme animation can run here, so the puppet distortion cannot appear at all.
-  if(window.gFilmMode){
+  if(gFilmMode){
     const rn=guideClipFrame('rest',0);
     guideDrawSprite(rn,1,X,Y,W,H);
     if(gBlinkStart>0&&gMeta.blink){
@@ -3743,7 +3743,7 @@ function guideFetchVoice(text){
 // the pod readiness check still gates, so with no pod it just falls back.
 const GUIDE_OE_FORCED=new URLSearchParams(location.search).get('enginepod');
 const gFilmEl=document.getElementById('guideFilm');
-let gFilmMode=false, gFilmSeq=0, gOutFilm=null, gFilmBlobs=[];
+window.gFilmMode=false; let gFilmSeq=0, gOutFilm=null, gFilmBlobs=[];
 function guidePod(body){
   return fetch(GUIDE_SB+'/functions/v1/gpu-desk',{method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+GUIDE_ANON},
@@ -3761,12 +3761,9 @@ async function guideEngineCheck(){
       const mode=(le&&le.value&&le.value.mode);
       if(mode==='rented'||mode==='off') return;   // explicit opt-out only
     }
-    const {data:oe}=await sb2.from('site_settings').select('value').eq('key','own_engine').maybeSingle();
-    if(!oe||!oe.value||!oe.value.podId) return;
-    if(oe.value.state==='ready'){ gFilmMode=true; return; }
-    // settings row not (yet) marked ready — ask the pod itself through the proxy
-    const r=await guidePod({op:'pod',action:'state'});
-    if(r.ok){ const s=await r.json().catch(function(){return {};}); if(s.ready===true) gFilmMode=true; }
+    // Ask the ENGINE itself — the authoritative source — not a settings mirror.
+    const r=await guidePod({op:'engine',action:'status'});
+    if(r.ok){ const s=await r.json().catch(function(){return {};}); if(s.running===true && s.ready===true) gFilmMode=true; }
   }catch(_){}
 }
 // Submit one sentence's mp3 to the pod and poll for the clip in the background.
@@ -3936,7 +3933,7 @@ async function guideEnsureStarted(){
   }
   // No greeting monologue — she answers what the user asked.
   // Background engine check (5s ceiling) may enable film mode later.
-  Promise.race([guideEngineCheck(), new Promise(function(r){setTimeout(r,5000);})]).catch(function(){});
+  (async function(){ for(let i=0;i<20 && !gFilmMode;i++){ try{ await guideEngineCheck(); }catch(_){} if(gFilmMode) break; await new Promise(function(r){setTimeout(r,3000);}); } })();
 }
 window.sayToHost=async function(){
   const el=document.getElementById('liveIn'); const t=el.value.trim(); if(!t) return; el.value='';
