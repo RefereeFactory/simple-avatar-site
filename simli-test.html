@@ -25,8 +25,9 @@
   </div>
   <div id="log">Ready. Press START FACE — it will ask for your Simli API key once (typed here, never saved to any file).</div>
 
-<script type="module">
-import { SimliClient } from "https://cdn.jsdelivr.net/npm/simli-client@3.0.2/+esm";
+<script src="simli-sdk.js?v1"></script>
+<script>
+const SimliClient = window.SimliClient;
 const log = (m)=>{ document.getElementById('log').textContent += "\n"+m; };
 const FACE_ID = "c7451e55-ea04-41c8-ab47-bdca3e4a03d8"; // Joy-like face
 let simli = null, apiKey = null;
