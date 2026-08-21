@@ -488,7 +488,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v29</div>
+        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v30</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;display:flex;gap:8px;justify-content:center;">
@@ -3784,6 +3784,7 @@ function guideFilmJob(audioB64){
 function guidePlayFilm(url){
   return new Promise(function(res){
     if(!gFilmEl){ res(); return; }
+    try{ if(window.gAudio){ gAudio.pause(); } }catch(_){}
     gOutFilm=gFilmEl;
     guideSilenceOthers();
     gMicMuted=true;
@@ -3931,6 +3932,7 @@ window.sayToHost=async function(){
   guideUserText(t);
 };
 async function guideUserText(text){
+  try{ guideStopSpeech(); }catch(_){}
   gChat.push({role:'user',content:text});
   gst('Thinking…');
   const replyBox=document.getElementById('heroReply');
@@ -5764,11 +5766,12 @@ window.guidePlayAck = function(){
   if(!gFilmMode) return;                 // only when the neural engine is her face
   const el=document.getElementById('guideFilm'); if(!el) return;
   const n=1+Math.floor(Math.random()*10);
+  try{ guideStopSpeech(); }catch(_){}
   try{
     el.src='engine/acks/ack'+n+'.mp4?v25';
     el.muted=false; el.style.display='block'; el.loop=false;
     window.gAckPlaying=true;
-    el.onended=function(){ window.gAckPlaying=false; };
+    el.onended=function(){ window.gAckPlaying=false; el.style.display='none'; };
     el.play().catch(function(){ window.gAckPlaying=false; });
   }catch(_){ window.gAckPlaying=false; }
 };
@@ -5781,8 +5784,10 @@ window.gAvatarOff = (localStorage.getItem('factory_avatar_off')==='1');
 window.guidePlayGreeting = function(){
   const el=document.getElementById('guideFilm'); if(!el) return;
   const clip = window.session ? 'engine/greeting-neural.mp4?v27' : 'engine/greeting-login.mp4?v28';
+  try{ guideStopSpeech(); }catch(_){}
   try{
     el.src=clip; el.muted=false; el.loop=false;
+    el.onended=function(){ el.style.display='none'; };
     el.style.display='block'; el.play().catch(function(){});
   }catch(_){}
   // signed-out: also show the words + gentle nudge to the login page
@@ -5807,6 +5812,19 @@ window.toggleAvatar = function(){
     if(stage) stage.style.display='block';
     gst('Avatar on.');
   }
+};
+</script>
+
+
+<script>
+// ---------- ONE VOICE AT A TIME: kill every prior speech before a new one ----------
+window.guideStopSpeech = function(){
+  try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(_){}
+  try{ if(window.gAudio){ gAudio.pause(); gAudio.currentTime=0; } }catch(_){}
+  var f=document.getElementById('guideFilm');
+  try{ if(f){ f.onended=null; f.onerror=null; f.pause(); f.removeAttribute('src'); f.load&&f.load(); f.style.display='none'; } }catch(_){}
+  (window.__audioRegistry||[]).forEach(function(el){ try{ el.pause(); }catch(_){} });
+  window.gPlaying=false; window.gOutFilm=null;
 };
 </script>
 
