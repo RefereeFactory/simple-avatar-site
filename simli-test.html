@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simli face test — The Factory</title>
+<style>
+  body{background:#0a0a0c;color:#eee;font-family:system-ui,sans-serif;margin:0;padding:20px;text-align:center;}
+  h1{color:#f0a500;font-size:18px;}
+  #stage{max-width:380px;margin:14px auto;border-radius:16px;overflow:hidden;background:#111;aspect-ratio:1;}
+  video{width:100%;height:100%;object-fit:cover;background:#000;display:block;}
+  button{padding:12px 20px;margin:6px;background:#f0a500;border:none;color:#111;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;}
+  button.sec{background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;}
+  #log{max-width:380px;margin:10px auto;font-size:12px;color:#8f8;text-align:left;background:#0d0d0f;border:1px solid #2c2c33;border-radius:10px;padding:10px;min-height:60px;white-space:pre-wrap;}
+  input{padding:10px;width:280px;max-width:80vw;background:#0d0d0f;border:1px solid #2c2c33;border-radius:8px;color:#eee;font-size:13px;}
+</style>
+</head>
+<body>
+  <h1>🎭 Simli face test — Joy-like face</h1>
+  <div id="stage"><video id="v" autoplay playsinline></video><audio id="a" autoplay></audio></div>
+  <div>
+    <button id="startBtn" onclick="startFace()">▶ START FACE</button>
+    <button class="sec" onclick="sayHi()">🔊 SAY HELLO</button>
+    <button class="sec" onclick="stopFace()">■ STOP</button>
+  </div>
+  <div id="log">Ready. Press START FACE — it will ask for your Simli API key once (typed here, never saved to any file).</div>
+
+<script type="module">
+import { SimliClient } from "https://cdn.jsdelivr.net/npm/simli-client@3.0.2/+esm";
+const log = (m)=>{ document.getElementById('log').textContent += "\n"+m; };
+const FACE_ID = "c7451e55-ea04-41c8-ab47-bdca3e4a03d8"; // Joy-like face
+let simli = null, apiKey = null;
+
+window.startFace = async function(){
+  try{
+    apiKey = apiKey || prompt("Paste your Simli API key (typed once, never stored):");
+    if(!apiKey){ log("No key entered."); return; }
+    log("Initializing SimliClient…");
+    simli = new SimliClient();
+    simli.Initialize({
+      apiKey: apiKey,
+      faceID: FACE_ID,
+      handleSilence: true,
+      maxSessionLength: 3600,
+      maxIdleTime: 300,
+      videoRef: document.getElementById('v'),
+      audioRef: document.getElementById('a'),
+      enableConsoleLogs: true,
+    });
+    simli.on("connected", ()=> log("✅ CONNECTED — her face should be live now."));
+    simli.on("disconnected", ()=> log("disconnected."));
+    simli.on("failed", (e)=> log("❌ failed: "+JSON.stringify(e)));
+    await simli.start();
+    log("start() called — waiting for the WebRTC connection…");
+  }catch(e){ log("ERROR: "+(e.message||e)); }
+};
+
+// send a short spoken line as PCM16 @16kHz so her mouth moves
+window.sayHi = async function(){
+  if(!simli){ log("Press START FACE first."); return; }
+  try{
+    log("Fetching a spoken line from the Factory voice…");
+    const ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhbnZia2liamdjbnFvd2p0YXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NzE0NDYsImV4cCI6MjA5OTM0NzQ0Nn0.TLskVoTaYI90avy09IuM_kkKvAYUMETTntZkn2M807I";
+    const r = await fetch("https://canvbkibjgcnqowjtarf.supabase.co/functions/v1/voice-speak", {
+      method:"POST", headers:{"Content-Type":"application/json","Authorization":"Bearer "+ANON,"apikey":ANON},
+      body: JSON.stringify({ text:"Hello sir, this is my real time face, live from the Factory.", format:"pcm24" })
+    });
+    if(!r.ok){ log("voice-speak "+r.status+": "+(await r.text()).slice(0,120)); return; }
+    const j = await r.json();
+    if(!j.chunks){ log("no audio chunks: "+JSON.stringify(j).slice(0,120)); return; }
+    // concat base64 chunks -> bytes (PCM16 @24kHz)
+    let total=0; const parts=j.chunks.map(function(c){ const bin=atob(c); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i); total+=u.length; return u; });
+    const all=new Uint8Array(total); let off=0; parts.forEach(function(u){ all.set(u,off); off+=u.length; });
+    const inI16=new Int16Array(all.buffer);
+    // downsample 24k -> 16k for Simli
+    const outLen=Math.floor(inI16.length*16000/24000);
+    const out=new Int16Array(outLen);
+    for(let i=0;i<outLen;i++){ out[i]=inI16[Math.floor(i*24000/16000)]; }
+    simli.sendAudioData(new Uint8Array(out.buffer));
+    log("Sent "+out.length+" samples at 16kHz — her mouth should move.");
+  }catch(e){ log("say ERROR: "+(e.message||e)); }
+};
+
+window.stopFace = function(){ try{ simli && simli.close(); log("stopped."); }catch(e){} };
+</script>
+</body>
+</html>
