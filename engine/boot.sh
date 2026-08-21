@@ -29,6 +29,19 @@ pip install -q -r req_notorch.txt 2>&1 | tail -3
 pip install -q -U openmim 2>&1 | tail -1
 mim install mmengine "mmcv==2.1.0" "mmdet>=3.1.0" "mmpose>=1.1.0" 2>&1 | tail -3
 
+# FAST BOOT: if the persistent volume already holds the models, skip the ~18-min fill
+if [ -f /workspace/models/.factory_ready ]; then
+  echo "warm boot: models present on volume — skipping download"
+  cd /workspace/MuseTalk 2>/dev/null || true
+  wget -q "$SITE/engine/presence.mp4" -O /workspace/presence.mp4
+  wget -q "$SITE/engine/worker.py" -O /workspace/worker.py
+  mkdir -p /workspace/jobs /workspace/out
+  cd /workspace/MuseTalk
+  nohup python3 /workspace/worker.py > /workspace/worker.log 2>&1 &
+  echo "WARM BOOT DONE"
+  exit 0
+fi
+
 state weights
 pip install -q -U "huggingface_hub[hf_transfer]" 2>&1 | tail -1
 export HF_HUB_ENABLE_HF_TRANSFER=1
@@ -59,4 +72,5 @@ mkdir -p /workspace/jobs /workspace/out
 # The worker sets state.json to ready:true itself once models + avatar are loaded.
 cd /workspace/MuseTalk
 nohup python3 /workspace/worker.py > /workspace/worker.log 2>&1 &
-echo "BOOT DONE rc=$?"
+touch /workspace/models/.factory_ready
+echo "COLD BOOT DONE rc=$? — models now cached on volume for fast reboots"
