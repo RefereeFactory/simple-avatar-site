@@ -462,7 +462,7 @@
           </div>
           <button onclick="heroBuild()" data-t="buildBtn" style="margin-top:10px;width:100%;max-width:440px;padding:12px;background:linear-gradient(135deg,#f0a500,#d48800);border:none;color:#111;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;">⚙ BUILD</button>
           <div id="liveStatus" style="color:#8f8;font-size:12.5px;min-height:18px;margin-top:12px;"></div>
-          <div id="heroBuildBar" style="display:none;margin-top:14px;">
+          <div id="heroBuildBar" style="display:block;margin-top:14px;opacity:.55;">
             <div style="display:flex;gap:6px;">
               <div class="hstep" id="hs1" data-t="stQueued" style="flex:1;padding:8px 4px;border:1px solid #2c2c33;border-radius:8px;font-size:11.5px;color:#777;background:#0d0d0f;">Queued</div>
               <div class="hstep" id="hs2" data-t="stBuilding" style="flex:1;padding:8px 4px;border:1px solid #2c2c33;border-radius:8px;font-size:11.5px;color:#777;background:#0d0d0f;">Building</div>
@@ -488,11 +488,12 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v26</div>
+        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v27</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
-      <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;">
+      <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;display:flex;gap:8px;justify-content:center;">
         <button class="terms-btn" onclick="stopLiveHost()" style="cursor:pointer;">END</button>
+        <button id="avatarToggle" onclick="toggleAvatar()" style="cursor:pointer;padding:8px 14px;background:#0d0d0f;border:1px solid #2c2c33;color:#bbb;border-radius:8px;font-size:12.5px;">🙈 Remove avatar</button>
       </div>
 
       <button id="revealBtn" onclick="showPage('plans')" style="margin-top:26px;padding:12px 26px;background:transparent;border:1px solid #444;color:#999;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;">See available purchase plans →</button>
@@ -3905,9 +3906,12 @@ window.stopLiveHost=function(){
 let gStarted=false;
 async function guideEnsureStarted(){
   if(gStarted) return; gStarted=true;
+  document.getElementById('liveControls').style.display='flex';
+  var _atg=document.getElementById('avatarToggle'); if(_atg) _atg.textContent = window.gAvatarOff ? '👤 Show avatar' : '🙈 Remove avatar';
+  if(window.gAvatarOff){ gStarted=true; return; }   // text-only mode: no face, faster
   // She steps out the moment the conversation starts — SEND or mic alike.
   document.getElementById('guideStage').style.display='block';
-  document.getElementById('liveControls').style.display='block';
+  try{ setTimeout(function(){ guidePlayGreeting(); }, 500); }catch(_){}
   if(G_STEADY){ var br=document.getElementById('guideBreather'); if(br) br.style.animation='none'; }
   // size the mouth canvas only AFTER layout settles — sizing while hidden warps the face
   if(typeof guideFit==='function'){
@@ -4652,11 +4656,11 @@ window.heroBuild = async function(){
   const bar = document.getElementById('heroBuildBar');
   if(!session){
     if(t) localStorage.setItem('factory_pending_build', JSON.stringify({ src:'hero', desc:t }));
-    bar.style.display='block'; heroStep(0); heroMsg('bSignin','Sign in first — press Login, top right.'); showPage('account'); return;
+    bar.style.display='block'; bar.style.opacity='1'; heroStep(0); heroMsg('bSignin','Sign in first — press Login, top right.'); showPage('account'); return;
   }
-  if(!t){ heroMsg('bDescribe','Describe your app in the box first.'); bar.style.display='block'; return; }
+  if(!t){ heroMsg('bDescribe','Describe your app in the box first.'); bar.style.display='block'; bar.style.opacity='1'; return; }
   const slug = (t.toLowerCase().replace(/[^a-z0-9 ]/g,'').trim().split(/\s+/).slice(0,3).join('-') || 'app') + '-' + Math.random().toString(36).slice(2,6);
-  bar.style.display='block';
+  bar.style.display='block'; bar.style.opacity='1';
   document.getElementById('heroBuildLink').style.display='none';
   heroStep(1); heroMsg('bStart','Build started — about ninety seconds.');
   try{
@@ -5767,6 +5771,35 @@ window.guidePlayAck = function(){
     el.onended=function(){ window.gAckPlaying=false; };
     el.play().catch(function(){ window.gAckPlaying=false; });
   }catch(_){ window.gAckPlaying=false; }
+};
+</script>
+
+
+<script>
+// ---------- AVATAR GREETING + REMOVE/SHOW TOGGLE ----------
+window.gAvatarOff = (localStorage.getItem('factory_avatar_off')==='1');
+window.guidePlayGreeting = function(){
+  const el=document.getElementById('guideFilm'); if(!el) return;
+  try{
+    el.src='engine/greeting-neural.mp4?v26'; el.muted=false; el.loop=false;
+    el.style.display='block'; el.play().catch(function(){});
+  }catch(_){}
+};
+window.toggleAvatar = function(){
+  const btn=document.getElementById('avatarToggle');
+  const stage=document.getElementById('guideStage');
+  if(!window.gAvatarOff){
+    window.gAvatarOff=true; localStorage.setItem('factory_avatar_off','1');
+    try{ if(typeof stopLiveHost==='function') stopLiveHost(); }catch(_){}
+    if(stage) stage.style.display='none';
+    if(btn) btn.textContent='👤 Show avatar';
+    gst('Avatar off — replies show as text, which is faster.');
+  }else{
+    window.gAvatarOff=false; localStorage.removeItem('factory_avatar_off');
+    if(btn) btn.textContent='🙈 Remove avatar';
+    if(stage) stage.style.display='block';
+    gst('Avatar on.');
+  }
 };
 </script>
 
