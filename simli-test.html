@@ -31,7 +31,7 @@ window.startFace=async function(mode){
     apiKey=apiKey||prompt("Paste your Simli API key (typed once, never stored):");
     if(!apiKey){log("No key.");return;}
     log("Requesting session token (compose/token)…");
-    const tok=await window.generateSimliSessionToken({apiKey:apiKey, config:{faceID:FACE_ID, handleSilence:true, maxSessionLength:3600, maxIdleTime:300, enableSFU:(mode==='livekit'), model:"fasttalk"}});
+    const tok=await window.generateSimliSessionToken({apiKey:apiKey, config:{faceId:FACE_ID, faceID:FACE_ID, handleSilence:true, maxSessionLength:3600, maxIdleTime:300, enableSFU:(mode==='livekit'), model:"fasttalk"}});
     log("✅ token ok. Building client ("+mode+")…");
     let ice=null;
     if(mode==='p2p'){ log("Fetching ICE servers…"); ice=await window.generateIceServers(apiKey); log("✅ ICE ok ("+(ice?ice.length:0)+")"); }
