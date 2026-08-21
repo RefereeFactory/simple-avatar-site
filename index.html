@@ -488,7 +488,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v22a</div>
+        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v23</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;">
@@ -3739,9 +3739,13 @@ async function guideEngineCheck(){
   gFilmMode=false;
   try{
     const sb2=window.supabase.createClient(GUIDE_SB,GUIDE_ANON);
+    // Neural face is the DEFAULT now: if the own-engine pod is alive and ready,
+    // every visitor gets it. The founder can still force it off from the gear
+    // (live_engine mode 'rented'/'off'); anything else means "use the engine".
     if(!GUIDE_OE_FORCED){
       const {data:le}=await sb2.from('site_settings').select('value').eq('key','live_engine').maybeSingle();
-      if(((le&&le.value&&le.value.mode)||'rented')!=='own') return;
+      const mode=(le&&le.value&&le.value.mode);
+      if(mode==='rented'||mode==='off') return;   // explicit opt-out only
     }
     const {data:oe}=await sb2.from('site_settings').select('value').eq('key','own_engine').maybeSingle();
     if(!oe||!oe.value||!oe.value.podId) return;
