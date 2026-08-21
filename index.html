@@ -488,7 +488,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v21d</div>
+        <div style="text-align:right;font-size:9px;color:#3a3a44;padding:2px 4px;">host v22</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;">
@@ -3548,7 +3548,7 @@
 
 </script>
 <script src="visemes/meta.js"></script>
-<script src="visemes2/meta.js"></script>
+<script src="visemes2/meta.js?v22"></script>
 <script>
 // OUR OWN GUIDE — the Factory's composite presenter. Renders on the visitor's
 // device (unlimited simultaneous visitors, no per-minute rental). Voice: our
@@ -3637,7 +3637,7 @@ let gMicMuted=false, gQueue=Promise.resolve(), gQueueDepth=0;
   else names=(gMeta&&gMeta.visemes)||['rest','AI','E','O','U','MBP','FV','L','WQ','etc'];
   const blinks=(gMeta&&gMeta.blink&&gMeta.blink.frames)||[];
   names.concat(blinks).forEach(function(n){
-    const img=new Image(); img.onload=function(){ gSprites[n]=img; }; img.src=dir+'/'+n+'.png';
+    const img=new Image(); img.onload=function(){ gSprites[n]=img; }; img.src=dir+'/'+n+'.png?v22';
   });
 })();
 (function guideBlinkLoop(){
