@@ -464,10 +464,10 @@
           <div id="liveStatus" style="color:#8f8;font-size:12.5px;min-height:18px;margin-top:12px;"></div>
           <div id="heroBuildBar" style="display:block;margin-top:14px;">
             <div style="display:flex;gap:6px;">
-              <div class="hstep" id="hs1" data-t="stQueued" style="flex:1;padding:8px 4px;border:1px solid #5a4413;border-radius:8px;font-size:11.5px;color:#b8923c;background:#140f04;">Queued</div>
-              <div class="hstep" id="hs2" data-t="stBuilding" style="flex:1;padding:8px 4px;border:1px solid #5a4413;border-radius:8px;font-size:11.5px;color:#b8923c;background:#140f04;">Building</div>
-              <div class="hstep" id="hs3" data-t="stDeploying" style="flex:1;padding:8px 4px;border:1px solid #5a4413;border-radius:8px;font-size:11.5px;color:#b8923c;background:#140f04;">Deploying</div>
-              <div class="hstep" id="hs4" data-t="stLive" style="flex:1;padding:8px 4px;border:1px solid #5a4413;border-radius:8px;font-size:11.5px;color:#b8923c;background:#140f04;">Live</div>
+              <div class="hstep" id="hs1" data-t="stQueued" style="flex:1;padding:8px 4px;border:1px solid #33280c;border-radius:8px;font-size:11.5px;color:#6b5a2a;background:#120d03;">Queued</div>
+              <div class="hstep" id="hs2" data-t="stBuilding" style="flex:1;padding:8px 4px;border:1px solid #33280c;border-radius:8px;font-size:11.5px;color:#6b5a2a;background:#120d03;">Building</div>
+              <div class="hstep" id="hs3" data-t="stDeploying" style="flex:1;padding:8px 4px;border:1px solid #33280c;border-radius:8px;font-size:11.5px;color:#6b5a2a;background:#120d03;">Deploying</div>
+              <div class="hstep" id="hs4" data-t="stLive" style="flex:1;padding:8px 4px;border:1px solid #33280c;border-radius:8px;font-size:11.5px;color:#6b5a2a;background:#120d03;">Live</div>
             </div>
             <div id="heroBuildMsg" style="color:#8f8;font-size:12.5px;min-height:18px;margin-top:8px;"></div>
             <a id="heroBuildLink" target="_blank" style="display:none;color:#f0a500;font-weight:800;font-size:14px;margin-top:4px;"></a>
@@ -488,7 +488,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v35</div>
+        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v36</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;display:flex;gap:8px;justify-content:center;">
@@ -4654,9 +4654,16 @@ let heroPollTimer = null;
 function heroStep(n, failed){
   for(let i=1;i<=4;i++){
     const el=document.getElementById('hs'+i); if(!el) continue;
-    if(i<n){ el.style.background='#1a1408'; el.style.borderColor='#f0a500'; el.style.color='#f0a500'; }
-    else if(i===n && !failed){ el.style.background = (n===4?'#1a1408':'#17130a'); el.style.borderColor='#f0a500'; el.style.color='#f0a500'; }
-    else { el.style.background='#140f04'; el.style.borderColor='#5a4413'; el.style.color='#b8923c'; }
+    el.style.fontWeight='700';
+    if(i<n){                         // DONE — bright gold outline
+      el.style.background='#1a1408'; el.style.borderColor='#f0a500'; el.style.color='#f0a500'; el.style.boxShadow='none';
+    } else if(i===n && !failed){     // NOW — solid gold fill, unmistakable
+      el.style.background='#f0a500'; el.style.borderColor='#f0a500'; el.style.color='#111'; el.style.boxShadow='0 0 12px rgba(240,165,0,.55)';
+    } else if(i===n && failed){      // FAILED here — red
+      el.style.background='#2a0d0d'; el.style.borderColor='#e05555'; el.style.color='#ff9d9d'; el.style.boxShadow='none';
+    } else {                         // UPCOMING — dim
+      el.style.background='#120d03'; el.style.borderColor='#33280c'; el.style.color='#6b5a2a'; el.style.boxShadow='none';
+    }
   }
 }
 function heroMsg(key, fallback){
