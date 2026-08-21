@@ -488,7 +488,7 @@
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
         </div>
-        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v30</div>
+        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v31</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;display:flex;gap:8px;justify-content:center;">
@@ -3676,6 +3676,19 @@ let gHoldFrame='rest';
   gCx.clearRect(0,0,gCv.width,gCv.height);
   const m={x:gMeta.x/gMeta.frameW,y:gMeta.y/gMeta.frameH,w:gMeta.w/gMeta.frameW,h:gMeta.h/gMeta.frameH};
   const X=m.x*gCv.width,Y=m.y*gCv.height,W=m.w*gCv.width,H=m.h*gCv.height;
+  // NEURAL MODE: the puppet is switched off at the source. The composite canvas
+  // shows ONLY her rest face; her real lips live in the neural film on top. No
+  // viseme animation can run here, so the puppet distortion cannot appear at all.
+  if(window.gFilmMode){
+    const rn=guideClipFrame('rest',0);
+    guideDrawSprite(rn,1,X,Y,W,H);
+    if(gBlinkStart>0&&gMeta.blink){
+      const st2=Math.floor((performance.now()-gBlinkStart)/40), SEQ=[0,1,1,2];
+      if(st2>=SEQ.length) gBlinkStart=-1;
+      else{ const b=gMeta.blink; guideDrawSprite(b.frames[SEQ[st2]],1,b.x/gMeta.frameW*gCv.width,b.y/gMeta.frameH*gCv.height,b.w/gMeta.frameW*gCv.width,b.h/gMeta.frameH*gCv.height); }
+    }
+    return;
+  }
   // SMOOTH TRANSITIONS, NO GHOSTS: the outgoing frame stays fully opaque underneath
   // while the incoming frame fades in on top. One opaque base always covers the
   // mouth region, so there is never a translucent double-exposure — and never a
