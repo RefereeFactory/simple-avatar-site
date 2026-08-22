@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simli face test — The Factory</title>
+<title>Cleopatra face test — The Factory</title>
 <style>
   body{background:#0a0a0c;color:#eee;font-family:system-ui,sans-serif;margin:0;padding:20px;text-align:center;}
   h1{color:#f0a500;font-size:18px;}
@@ -10,7 +10,7 @@
   button.sec{background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;}
   #log{max-width:380px;margin:10px auto;font-size:12px;color:#8f8;text-align:left;background:#0d0d0f;border:1px solid #2c2c33;border-radius:10px;padding:10px;min-height:60px;white-space:pre-wrap;}
 </style></head><body>
-  <h1>🎭 Simli face test v3 — Joy-like face</h1>
+  <h1>🎭 Cleopatra face test — real time</h1>
   <div id="stage"><video id="v" autoplay playsinline></video><audio id="a" autoplay></audio></div>
   <div>
     <button onclick="startFace('livekit')">▶ START (LiveKit)</button>
@@ -18,34 +18,32 @@
     <button class="sec" onclick="sayHi()">🔊 SAY HELLO</button>
     <button class="sec" onclick="stopFace()">■ STOP</button>
   </div>
-  <div id="log">Ready. Press START — asks your Simli API key once (typed here, never saved).</div>
-<script src="simli-sdk.js?v3"></script>
+  <div id="log">Ready. Press START — no key needed now, the server mints the session.</div>
+<script src="simli-sdk.js?v4"></script>
 <script>
 const log=(m)=>{document.getElementById('log').textContent+="\n"+m;};
-const FACE_ID="c7451e55-ea04-41c8-ab47-bdca3e4a03d8";
 const ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhbnZia2liamdjbnFvd2p0YXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3NzE0NDYsImV4cCI6MjA5OTM0NzQ0Nn0.TLskVoTaYI90avy09IuM_kkKvAYUMETTntZkn2M807I";
-let simli=null, apiKey=null;
+const DESK="https://canvbkibjgcnqowjtarf.supabase.co/functions/v1/avatar-desk";
+let simli=null;
 
 window.startFace=async function(mode){
   try{
-    apiKey=apiKey||prompt("Paste your Simli API key (typed once, never stored):");
-    if(!apiKey){log("No key.");return;}
-    log("Requesting session token (compose/token)…");
-    const tok=await window.generateSimliSessionToken({apiKey:apiKey, config:{faceId:FACE_ID, faceID:FACE_ID, handleSilence:true, maxSessionLength:3600, maxIdleTime:300, enableSFU:(mode==='livekit'), model:"fasttalk"}});
-    log("✅ token ok. Building client ("+mode+")…");
-    let ice=null;
-    if(mode==='p2p'){ log("Fetching ICE servers…"); ice=await window.generateIceServers(apiKey); log("✅ ICE ok ("+(ice?ice.length:0)+")"); }
-    simli=new window.SimliClient(tok.session_token, document.getElementById('v'), document.getElementById('a'), ice, window.SimliLogLevel.DEBUG, mode, "websockets");
-    simli.on&&simli.on("connected",()=>log("✅✅ CONNECTED — her face is live."));
+    log("Asking the Factory server for a session ("+mode+")…");
+    const r=await fetch(DESK,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+ANON,"apikey":ANON},body:JSON.stringify({op:"websession",mode:mode})});
+    const s=await r.json();
+    if(!s.ok||!s.session_token){ log("❌ session: "+JSON.stringify(s).slice(0,160)); return; }
+    log("✅ session token ok. Building client…");
+    simli=new window.SimliClient(s.session_token, document.getElementById('v'), document.getElementById('a'), s.ice||null, window.SimliLogLevel.DEBUG, mode, "websockets");
+    simli.on&&simli.on("connected",()=>log("✅✅ CONNECTED — Cleopatra is live."));
     simli.on&&simli.on("disconnected",()=>log("disconnected."));
     simli.on&&simli.on("failed",(e)=>log("❌ failed: "+JSON.stringify(e)));
-    log("start()…"); await simli.start(); log("start() returned — waiting for connect event.");
+    log("start()…"); await simli.start(); log("start() returned — waiting for connect.");
   }catch(e){ log("ERROR: "+(e&&(e.message||JSON.stringify(e))||e)); }
 };
 window.sayHi=async function(){
   if(!simli){log("Start first.");return;}
   try{
-    const r=await fetch("https://canvbkibjgcnqowjtarf.supabase.co/functions/v1/voice-speak",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+ANON,"apikey":ANON},body:JSON.stringify({text:"Hello sir, this is my real time face, live from the Factory.",format:"pcm24"})});
+    const r=await fetch("https://canvbkibjgcnqowjtarf.supabase.co/functions/v1/voice-speak",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+ANON,"apikey":ANON},body:JSON.stringify({text:"Hello sir, this is Cleopatra, live from the Factory.",format:"pcm24"})});
     if(!r.ok){log("voice "+r.status);return;}
     const j=await r.json(); if(!j.chunks){log("no chunks");return;}
     let tot=0; const parts=j.chunks.map(c=>{const b=atob(c);const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);tot+=u.length;return u;});
