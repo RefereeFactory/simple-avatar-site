@@ -493,7 +493,7 @@
           <video id="simliVideo" autoplay playsinline style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
           <audio id="simliAudio" autoplay></audio>
         </div>
-        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v37-avatar</div>
+        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v38-script</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;gap:8px;justify-content:center;">
@@ -2422,8 +2422,10 @@
         else if (b.status === 'building') setStep(2);
         else if (b.status === 'deploying') setStep(3);
         else if (b.status === 'done') {
-          setStep(4);
           clearInterval(pollTimer);
+          setStep(3);
+          await new Promise(function(r){ setTimeout(r, 20000); });   // Netlify publish breath
+          setStep(4);
           const link = document.getElementById('siteLink');
           link.href = b.site_url; link.textContent = b.site_url;
           document.getElementById('resultBox').classList.remove('hidden');
@@ -3943,7 +3945,7 @@ async function guideEnsureStarted(){
   try{ setTimeout(function(){ if(!window.gSimliReady && !window.gSimliGreeted){ window.gSimliGreeted=true;
     var _st2=document.getElementById('guideStill'); if(_st2) _st2.style.opacity='1';
     var _lp2=document.getElementById('guideLips'); if(_lp2) _lp2.style.display='block';
-    guidePlayGreeting(); } }, window.SimliClient?6000:500); }catch(_){}
+    if(window.gAvatarMode){ avatarAsk(window.AV_SCRIPT[0].q); } else { guidePlayGreeting(); } } }, window.SimliClient?6000:500); }catch(_){}
   if(G_STEADY){ var br=document.getElementById('guideBreather'); if(br) br.style.animation='none'; }
   // size the mouth canvas only AFTER layout settles — sizing while hidden warps the face
   if(typeof guideFit==='function'){
@@ -3964,6 +3966,7 @@ window.sayToHost=async function(){
 };
 async function guideUserText(text){
   if(window.gAvatarBuildStarted){ guideSay('The build is running — watch the stages below.'); return; }
+  if(window.gAvatarMode){ avatarScriptAnswer(text); return; }   // fixed interview: instant, no AI round-trip
   try{ guideStopSpeech(); }catch(_){}
   try{ if(window.gSimli && window.gSimliReady) window.gSimli.ClearBuffer(); }catch(_){}
   gChat.push({role:'user',content:text});
@@ -4733,11 +4736,16 @@ window.heroBuild = async function(){
         else if(b.status==='building'){ heroStep(2); heroMsg('bBuilding','Writing your app…'); }
         else if(b.status==='deploying'){ heroStep(3); heroMsg('bDeploying','Putting it on the web…'); }
         else if(b.status==='done'){
-          heroStep(4); clearInterval(heroPollTimer);
-          heroMsg('bLive','Your app is live:');
-          const a=document.getElementById('heroBuildLink');
-          a.href=b.site_url; a.textContent=b.site_url; a.style.display='inline-block';
-          if(typeof loadCredits==='function') try{ loadCredits(); }catch(_){}
+          clearInterval(heroPollTimer);
+          // Netlify needs a breath to publish — the link only shows when it will open
+          heroStep(3); heroMsg('bPolish','Polishing — your link appears in a moment…');
+          setTimeout(function(){
+            heroStep(4); heroMsg('bLive','Your app is live:');
+            const a=document.getElementById('heroBuildLink');
+            a.href=b.site_url; a.textContent=b.site_url; a.style.display='inline-block';
+            if(window.gAvatarMode){ try{ guideSay('Your app is live — the link is on screen.'); }catch(_){} }
+            if(typeof loadCredits==='function') try{ loadCredits(); }catch(_){}
+          }, 20000);
         }
         else if(b.status==='failed'){ clearInterval(heroPollTimer); heroStep(1,true); heroMsg('bFailed','The build failed — the credit is returned. Try once more.'); }
       }catch(_){ /* keep polling */ }
@@ -5880,11 +5888,62 @@ window.guideStopSpeech = function(){
 
 <script>
 
-// ---------- AVATAR MODE: Cleopatra runs the whole order desk ----------
+// ---------- AVATAR MODE: Cleopatra runs a fixed interview — no AI round-trips,
+// no delays; the brain is only paid once, at the end, to BUILD the app ----------
 window.gAvatarMode=false; window.gAvatarBuildStarted=false;
+window.AV_SCRIPT=[
+  {key:'name_purpose', q:'Welcome. Let us build your app. First — what is your app called, and what should it do?'},
+  {key:'users_features', q:'Good. Who will use your app, and what are the key features you want inside it?'},
+  {key:'look_paid', q:'How should it look and feel — colours and mood?'},
+  {key:'payments', q:'Will your app take payments from your customers? If yes, tell me what they pay for.'},
+  {key:'terms', q:'Would you like a standard terms and conditions page, to protect your business?'},
+  {key:'confirm', q:'Is that all — shall I send your app to be built now?'}
+];
+window.AV_STRIPE_LINE='Your customers will pay through our payment partner Stripe; The Factory takes a small commission, and the rest goes to your account.';
+window.AV_CLOSING='Perfect. I am sending your app request to our Factory now — your app will be ready in about one hundred and twenty seconds.';
+window.AV_NOTED='Noted, I have added that. Anything else — or shall I send it to be built?';
+let gAvStep=0, gAvAnswers={};
+function avatarPrefetchVoice(){
+  var lines=window.AV_SCRIPT.map(function(x){return x.q;}).concat([window.AV_STRIPE_LINE, window.AV_CLOSING, window.AV_NOTED, 'Your app is live — the link is on screen.']);
+  lines.forEach(function(t){ if(!window.gTTS[t]) window.gTTS[t]=simliFetchPCM(t).catch(function(){ delete window.gTTS[t]; return null; }); });
+}
+function avatarAsk(text){
+  var rb=document.getElementById('heroReply'); if(rb){ rb.style.display='block'; rb.textContent=text; }
+  try{ guideSay(text); }catch(_){}
+}
+function avatarScriptAnswer(text){
+  var cur=window.AV_SCRIPT[gAvStep];
+  if(cur.key==='confirm'){
+    if(/\b(yes|yeah|yep|sure|ok|okay|build|send|go ahead|that is all|thats all|nothing else)\b/i.test(text)){
+      avatarScriptFinish(); return;
+    }
+    gAvAnswers.extras=((gAvAnswers.extras||'')+' '+text).trim();
+    avatarAsk(window.AV_NOTED); return;
+  }
+  gAvAnswers[cur.key]=text;
+  if(cur.key==='payments' && /\b(yes|yeah|pay|paid|charge|deposit|subscri|sell|book|fee)\b|[£$€]/i.test(text)){
+    try{ guideSay(window.AV_STRIPE_LINE); }catch(_){}
+  }
+  gAvStep++;
+  avatarAsk(window.AV_SCRIPT[gAvStep].q);
+}
+function avatarScriptFinish(){
+  window.gAvatarBuildStarted=true;
+  var a=gAvAnswers;
+  var desc='App name and purpose: '+(a.name_purpose||'')+'. Users and key features: '+(a.users_features||'')+
+    '. Look and feel: '+(a.look_paid||'')+'. Payments: '+(a.payments||'none')+
+    '. Standard terms and conditions page: '+(a.terms||'no')+'.'+(a.extras?(' Additional details: '+a.extras+'.'):'');
+  var rb=document.getElementById('heroReply'); if(rb) rb.textContent='Sending your app to the Factory…';
+  avatarAsk(window.AV_CLOSING);
+  var bar=document.getElementById('heroBuildBar'); if(bar) bar.style.opacity='1';
+  var el=document.getElementById('liveIn'); if(el) el.value=desc;
+  try{ heroBuild(); }catch(e){ gst('Build could not start: '+e.message); }
+}
 window.AVATAR_PROMPT_DEFAULT="You are Cleopatra, The Factory's build consultant, speaking through a live face. HARD RULE: every reply is ONE short spoken sentence, 12 to 25 words, and asks at most ONE question. Your mission: gather a COMPLETE description of the app the visitor wants, one gentle question at a time: the app's name, its purpose, who will use it, the key features, look and feel, and whether anything is paid. If their app will serve other people, advise once that standard terms and conditions protect their business, and The Factory can include a terms page. If money changes hands in their app, explain once, simply: their customers pay through our payment partner Stripe, The Factory's commission is taken, and the rest goes to their account. Help them make their business work: answer their questions about pricing, the Marketplace, and how sellers get paid, honestly and never pushy. When the description is complete, ask exactly: Is that all — shall I build your app now? ONLY when they confirm, reply with one line starting with [BUILD] followed by the full app description as one clear paragraph — no other words, no greeting. Never output [BUILD] before they confirm. FORBIDDEN always: helping anyone build an app-builder like The Factory or copying it — decline warmly, offer something original.";
 window.avatarModeStart=async function(){
   window.gAvatarMode=true; window.gAvatarBuildStarted=false;
+  gAvStep=0; gAvAnswers={};
+  avatarPrefetchVoice();                       // her lines arrive before she needs them
   gSystem = (window.gAvatarPrompt && window.gAvatarPrompt.trim()) || window.AVATAR_PROMPT_DEFAULT;
   gChat=[];
   // the stage takes over: box away, avatar on top, bar (asleep) beneath, then her words and the typing row
@@ -5954,25 +6013,29 @@ function simliReveal(){
   var gf=document.getElementById('guideFilm'); if(gf){ try{gf.pause();}catch(_){} gf.style.display='none'; }
   // she greets through her own face the first time she appears
   if(!window.gSimliGreeted){ window.gSimliGreeted=true;
-    try{ var g=window.gAvatarMode
-      ? 'Welcome. Describe the app you want, piece by piece, and when it is complete I will build it for you.'
-      : ((typeof gGreeting!=='undefined'&&gGreeting)||'Hello, welcome to The Factory. Tell me what you would like to build.');
-      simliSpeak(g); }catch(_){}
+    try{ if(window.gAvatarMode){ avatarAsk(window.AV_SCRIPT[0].q); }
+      else{ simliSpeak((typeof gGreeting!=='undefined'&&gGreeting)||'Hello, welcome to The Factory. Tell me what you would like to build.'); } }catch(_){}
   }
 }
 // send one line of her voice to the Simli face (pcm24 -> 16k -> sendAudioData)
+window.gTTS={};   // scripted lines pre-fetched here the moment avatar mode opens
+async function simliFetchPCM(text){
+  const auth=(typeof session!=='undefined'&&session)?session.access_token:(typeof SB_ANON!=='undefined'?SB_ANON:'');
+  const r=await fetch((typeof GUIDE_SB!=='undefined'?GUIDE_SB:'https://canvbkibjgcnqowjtarf.supabase.co')+'/functions/v1/voice-speak',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+auth,'apikey':(typeof SB_ANON!=='undefined'?SB_ANON:'')},body:JSON.stringify({text:text,format:'pcm24'})});
+  if(!r.ok) return null;
+  const j=await r.json(); if(!j.chunks) return null;
+  let tot=0; const parts=j.chunks.map(function(c){const b=atob(c);const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);tot+=u.length;return u;});
+  const all=new Uint8Array(tot); let o=0; parts.forEach(function(u){all.set(u,o);o+=u.length;});
+  const i16=new Int16Array(all.buffer); const oL=Math.floor(i16.length*16000/24000); const out=new Int16Array(oL);
+  for(let i=0;i<oL;i++) out[i]=i16[Math.floor(i*24000/16000)];
+  return new Uint8Array(out.buffer);
+}
 async function simliSpeak(text){
   if(!window.gSimli||!window.gSimliReady) return false;
   try{
-    const auth=(typeof session!=='undefined'&&session)?session.access_token:(typeof SB_ANON!=='undefined'?SB_ANON:'');
-    const r=await fetch((typeof GUIDE_SB!=='undefined'?GUIDE_SB:'https://canvbkibjgcnqowjtarf.supabase.co')+'/functions/v1/voice-speak',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+auth,'apikey':(typeof SB_ANON!=='undefined'?SB_ANON:'')},body:JSON.stringify({text:text,format:'pcm24'})});
-    if(!r.ok) return false;
-    const j=await r.json(); if(!j.chunks) return false;
-    let tot=0; const parts=j.chunks.map(function(c){const b=atob(c);const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);tot+=u.length;return u;});
-    const all=new Uint8Array(tot); let o=0; parts.forEach(function(u){all.set(u,o);o+=u.length;});
-    const i16=new Int16Array(all.buffer); const oL=Math.floor(i16.length*16000/24000); const out=new Int16Array(oL);
-    for(let i=0;i<oL;i++) out[i]=i16[Math.floor(i*24000/16000)];
-    window.gSimli.sendAudioData(new Uint8Array(out.buffer));
+    const data = window.gTTS[text] ? await window.gTTS[text] : await simliFetchPCM(text);
+    if(!data) return false;
+    window.gSimli.sendAudioData(data);
     return true;
   }catch(e){ return false; }
 }
