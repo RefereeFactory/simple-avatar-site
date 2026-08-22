@@ -492,7 +492,7 @@
           <video id="simliVideo" autoplay playsinline style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
           <audio id="simliAudio" autoplay></audio>
         </div>
-        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v34-simli</div>
+        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v35-simli</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;display:flex;gap:8px;justify-content:center;">
@@ -3932,7 +3932,8 @@ async function guideEnsureStarted(){
   // She steps out the moment the conversation starts — SEND or mic alike.
   document.getElementById('guideStage').style.display='block';
   try{ simliStart(); }catch(_){}                       // Cleopatra real-time face
-  try{ if(!window.SimliClient) setTimeout(function(){ guidePlayGreeting(); }, 500); }catch(_){}
+  // if she has not appeared within 6s the composite greets so nobody waits in silence
+  try{ setTimeout(function(){ if(!window.gSimliReady && !window.gSimliGreeted){ window.gSimliGreeted=true; guidePlayGreeting(); } }, window.SimliClient?6000:500); }catch(_){}
   if(G_STEADY){ var br=document.getElementById('guideBreather'); if(br) br.style.animation='none'; }
   // size the mouth canvas only AFTER layout settles — sizing while hidden warps the face
   if(typeof guideFit==='function'){
@@ -5877,20 +5878,30 @@ async function simliStart(){
     if(!sdata.ok||!sdata.session_token){ window.gSimliStarting=false; return; }
     const v=document.getElementById('simliVideo'), a=document.getElementById('simliAudio');
     const c=new window.SimliClient(sdata.session_token, v, a, sdata.ice||null, window.SimliLogLevel.DEBUG, mode, 'websockets');
-    c.on&&c.on('connected', function(){
-      window.gSimliReady=true;
-      // Cleopatra takes the stage; hide the composite still + canvas + film
-      v.style.display='block';
-      var st=document.getElementById('guideStill'); if(st) st.style.opacity='0';
-      var lp=document.getElementById('guideLips'); if(lp) lp.style.display='none';
-      var gf=document.getElementById('guideFilm'); if(gf) gf.style.display='none';
-    });
-    c.on&&c.on('failed', function(){ window.gSimliReady=false; });
-    c.on&&c.on('disconnected', function(){ window.gSimliReady=false; });
-    await c.start();
     window.gSimli=c;
+    try{ c.on&&c.on('failed', function(){ window.gSimliReady=false; }); c.on&&c.on('disconnected', function(){ window.gSimliReady=false; }); }catch(_){}
+    c.start();
+    // The bundle's 'connected' event is unreliable — the stream itself is the
+    // truth: when frames flow, she is live. Poll up to 30s.
+    for(let i=0;i<60;i++){
+      await new Promise(function(r){setTimeout(r,500);});
+      if(v.videoWidth>0 && !v.paused){ simliReveal(); break; }
+    }
   }catch(e){ /* composite stays as fallback */ }
   window.gSimliStarting=false;
+}
+function simliReveal(){
+  if(window.gSimliReady) return;
+  window.gSimliReady=true;
+  var v=document.getElementById('simliVideo');
+  v.style.display='block';
+  var st=document.getElementById('guideStill'); if(st) st.style.opacity='0';
+  var lp=document.getElementById('guideLips'); if(lp) lp.style.display='none';
+  var gf=document.getElementById('guideFilm'); if(gf){ try{gf.pause();}catch(_){} gf.style.display='none'; }
+  // she greets through her own face the first time she appears
+  if(!window.gSimliGreeted){ window.gSimliGreeted=true;
+    try{ var g=(typeof gGreeting!=='undefined'&&gGreeting)||'Hello, welcome to The Factory. Tell me what you would like to build.'; simliSpeak(g); }catch(_){}
+  }
 }
 // send one line of her voice to the Simli face (pcm24 -> 16k -> sendAudioData)
 async function simliSpeak(text){
