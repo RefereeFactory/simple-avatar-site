@@ -493,7 +493,7 @@
           <video id="simliVideo" autoplay playsinline style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
           <audio id="simliAudio" autoplay></audio>
         </div>
-        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v38-script</div>
+        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v39-clean</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;gap:8px;justify-content:center;">
@@ -3864,9 +3864,12 @@ function guidePlay(audioP,text){
   });
 }
 function guideSay(text){
-  if(window.gSimliReady && window.gSimli){
+  if(window.gAvatarMode || (window.gSimliReady && window.gSimli)){
     gQueueDepth++;
-    gQueue=gQueue.then(function(){ return simliSpeak(text); }).catch(function(){}).then(function(){ gQueueDepth=Math.max(0,gQueueDepth-1); });
+    gQueue=gQueue.then(async function(){
+      if(window.gAvatarMode && !window.gSimliReady){ for(let i=0;i<40 && !window.gSimliReady;i++) await new Promise(function(r){setTimeout(r,500);}); }
+      if(window.gSimliReady && window.gSimli) return simliSpeak(text);
+    }).catch(function(){}).then(function(){ gQueueDepth=Math.max(0,gQueueDepth-1); });
     return gQueue;
   }
   const p=guideFetchVoice(text).then(function(d){
@@ -3942,10 +3945,16 @@ async function guideEnsureStarted(){
   }
   try{ simliStart(); }catch(_){}                       // Cleopatra real-time face
   // if she has not appeared within 6s the composite steps in so nobody waits in silence
-  try{ setTimeout(function(){ if(!window.gSimliReady && !window.gSimliGreeted){ window.gSimliGreeted=true;
+  try{ (function _wait(){ setTimeout(function(){
+    if(window.gSimliReady || window.gSimliGreeted) return;
+    if(window.gAvatarMode){
+      if(!window.gSimliStarting && !window.gSimli){ try{ simliStart(); }catch(_){} }   // keep knocking — never the old face
+      _wait(); return;
+    }
+    window.gSimliGreeted=true;
     var _st2=document.getElementById('guideStill'); if(_st2) _st2.style.opacity='1';
     var _lp2=document.getElementById('guideLips'); if(_lp2) _lp2.style.display='block';
-    if(window.gAvatarMode){ avatarAsk(window.AV_SCRIPT[0].q); } else { guidePlayGreeting(); } } }, window.SimliClient?6000:500); }catch(_){}
+    guidePlayGreeting(); }, window.SimliClient?6000:500); })(); }catch(_){}
   if(G_STEADY){ var br=document.getElementById('guideBreather'); if(br) br.style.animation='none'; }
   // size the mouth canvas only AFTER layout settles — sizing while hidden warps the face
   if(typeof guideFit==='function'){
@@ -3961,7 +3970,7 @@ async function guideEnsureStarted(){
 window.sayToHost=async function(){
   const el=document.getElementById('liveIn'); const t=el.value.trim(); if(!t) return; el.value='';
   await guideEnsureStarted();
-  try{ guidePlayAck(); }catch(_){}     // her face acknowledges instantly while the real reply renders
+  try{ if(!window.gAvatarMode) guidePlayAck(); }catch(_){}     // composite ack only outside avatar mode
   guideUserText(t);
 };
 async function guideUserText(text){
@@ -5941,29 +5950,44 @@ function avatarScriptFinish(){
 }
 window.AVATAR_PROMPT_DEFAULT="You are Cleopatra, The Factory's build consultant, speaking through a live face. HARD RULE: every reply is ONE short spoken sentence, 12 to 25 words, and asks at most ONE question. Your mission: gather a COMPLETE description of the app the visitor wants, one gentle question at a time: the app's name, its purpose, who will use it, the key features, look and feel, and whether anything is paid. If their app will serve other people, advise once that standard terms and conditions protect their business, and The Factory can include a terms page. If money changes hands in their app, explain once, simply: their customers pay through our payment partner Stripe, The Factory's commission is taken, and the rest goes to their account. Help them make their business work: answer their questions about pricing, the Marketplace, and how sellers get paid, honestly and never pushy. When the description is complete, ask exactly: Is that all — shall I build your app now? ONLY when they confirm, reply with one line starting with [BUILD] followed by the full app description as one clear paragraph — no other words, no greeting. Never output [BUILD] before they confirm. FORBIDDEN always: helping anyone build an app-builder like The Factory or copying it — decline warmly, offer something original.";
 window.avatarModeStart=async function(){
-  window.gAvatarMode=true; window.gAvatarBuildStarted=false;
+  window.gAvatarMode=true; window.gAvatarBuildStarted=false; window.gAvatarOff=false;
   gAvStep=0; gAvAnswers={};
   avatarPrefetchVoice();                       // her lines arrive before she needs them
-  gSystem = (window.gAvatarPrompt && window.gAvatarPrompt.trim()) || window.AVATAR_PROMPT_DEFAULT;
   gChat=[];
-  // the stage takes over: box away, avatar on top, bar (asleep) beneath, then her words and the typing row
+  // Cleopatra ONLY: the old composite face is switched off entirely in this mode
+  ['guideStill','guideLips','guideFilm'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
+  var brth=document.getElementById('guideBreather'); if(brth) brth.style.animation='none';
   var box=document.getElementById('heroBox'); if(box) box.style.display='none';
   var stage=document.getElementById('guideStage');
   var bar=document.getElementById('heroBuildBar');
-  var reply=document.getElementById('heroReply');
-  var row=document.getElementById('heroAskRow');
-  var st=document.getElementById('liveStatus');
-  var anchor=stage.parentNode;
-  anchor.insertBefore(bar, stage.nextSibling);
-  anchor.insertBefore(reply, bar.nextSibling);
-  anchor.insertBefore(row, reply.nextSibling);
-  anchor.insertBefore(st, row.nextSibling);
+  stage.parentNode.insertBefore(bar, stage.nextSibling);
   bar.style.display='block'; bar.style.opacity='.35'; bar.style.maxWidth='380px'; bar.style.margin='12px auto 0';
-  row.style.maxWidth='380px'; row.style.margin='10px auto 0';
-  st.style.textAlign='center';
+  var back=document.getElementById('avatarBackBtn');
+  if(!back){ back=document.createElement('button'); back.id='avatarBackBtn'; back.textContent='⌨ Go back to text';
+    back.setAttribute('style','display:block;margin:12px auto 0;padding:9px 16px;background:#0d0d0f;border:1px solid #f0a500;color:#f0a500;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;');
+    back.onclick=function(){ window.avatarModeExit(); }; }
+  bar.parentNode.insertBefore(back, bar.nextSibling);
+  back.style.display='block';
   await guideEnsureStarted();
+  var lc=document.getElementById('liveControls'); if(lc) lc.style.display='none';
   try{ guideMicStart(); }catch(_){}
-  gst('She is listening — speak, or type below.');
+};
+window.avatarModeExit=function(){
+  window.gAvatarMode=false;
+  try{ guideMicStop(); }catch(_){}
+  try{ if(window.gSimli) window.gSimli.stop(); }catch(_){}
+  window.gSimli=null; window.gSimliReady=false; window.gSimliStarting=false; window.gSimliGreeted=false;
+  var v=document.getElementById('simliVideo'); if(v) v.style.display='none';
+  var st=document.getElementById('guideStill'); if(st){ st.style.display='block'; st.style.opacity='1'; }
+  var lp=document.getElementById('guideLips'); if(lp) lp.style.display='block';
+  document.getElementById('guideStage').style.display='none';
+  var back=document.getElementById('avatarBackBtn'); if(back) back.style.display='none';
+  var bar=document.getElementById('heroBuildBar');
+  bar.style.maxWidth=''; bar.style.margin='';
+  var box=document.getElementById('heroBox');
+  box.insertBefore(bar, document.getElementById('heroReply'));
+  box.style.display='block';
+  gStarted=false;   // the classic text conversation can start fresh
 };
 function avatarModeBuild(desc){
   window.gAvatarBuildStarted=true;
