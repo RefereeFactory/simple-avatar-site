@@ -402,6 +402,7 @@
 }
 </style>
 <style>@keyframes hsPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}</style>
+<script src="simli-sdk.js?v4"></script>
 </head>
 <body>
 
@@ -488,8 +489,10 @@
           </div>
           <!-- GPU film layer: shows a pod-rendered clip over the composite view when the own engine is on -->
           <video id="guideFilm" playsinline preload="auto" style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
+          <video id="simliVideo" autoplay playsinline style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
+          <audio id="simliAudio" autoplay></audio>
         </div>
-        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v37</div>
+        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v34-simli</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;display:flex;gap:8px;justify-content:center;">
@@ -3858,6 +3861,11 @@ function guidePlay(audioP,text){
   });
 }
 function guideSay(text){
+  if(window.gSimliReady && window.gSimli){
+    gQueueDepth++;
+    gQueue=gQueue.then(function(){ return simliSpeak(text); }).catch(function(){}).then(function(){ gQueueDepth=Math.max(0,gQueueDepth-1); });
+    return gQueue;
+  }
   const p=guideFetchVoice(text).then(function(d){
     if(d&&d.audioB64&&gFilmMode) d.__film=guideFilmJob(d.audioB64);   // render starts now; playback never waits for it
     return d;
@@ -3923,7 +3931,8 @@ async function guideEnsureStarted(){
   if(window.gAvatarOff){ gStarted=true; return; }   // text-only mode: no face, faster
   // She steps out the moment the conversation starts — SEND or mic alike.
   document.getElementById('guideStage').style.display='block';
-  try{ setTimeout(function(){ guidePlayGreeting(); }, 500); }catch(_){}
+  try{ simliStart(); }catch(_){}                       // Cleopatra real-time face
+  try{ if(!window.SimliClient) setTimeout(function(){ guidePlayGreeting(); }, 500); }catch(_){}
   if(G_STEADY){ var br=document.getElementById('guideBreather'); if(br) br.style.animation='none'; }
   // size the mouth canvas only AFTER layout settles — sizing while hidden warps the face
   if(typeof guideFit==='function'){
@@ -3944,6 +3953,7 @@ window.sayToHost=async function(){
 };
 async function guideUserText(text){
   try{ guideStopSpeech(); }catch(_){}
+  try{ if(window.gSimli && window.gSimliReady) window.gSimli.ClearBuffer(); }catch(_){}
   gChat.push({role:'user',content:text});
   gst('Thinking…');
   const replyBox=document.getElementById('heroReply');
@@ -5845,6 +5855,60 @@ window.guideStopSpeech = function(){
   (window.__audioRegistry||[]).forEach(function(el){ try{ el.pause(); }catch(_){} });
   window.gPlaying=false; window.gOutFilm=null;
 };
+</script>
+
+
+<script>
+// ---------- CLEOPATRA: real-time Simli face, spliced over the composite ----------
+window.gSimli=null; window.gSimliReady=false; window.gSimliStarting=false;
+const SIMLI_DESK = (typeof SB_URL!=='undefined'? SB_URL : 'https://canvbkibjgcnqowjtarf.supabase.co')+'/functions/v1/avatar-desk';
+async function simliStart(){
+  if(window.gSimli||window.gSimliStarting||!window.SimliClient) return;
+  window.gSimliStarting=true;
+  try{
+    const auth = (typeof session!=='undefined'&&session)? session.access_token : (typeof SB_ANON!=='undefined'?SB_ANON:'');
+    let r = await fetch(SIMLI_DESK,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+auth,'apikey':(typeof SB_ANON!=='undefined'?SB_ANON:'')},body:JSON.stringify({op:'websession',mode:'livekit'})});
+    let sdata = await r.json();
+    let mode='livekit';
+    if(!sdata.ok||!sdata.session_token){ // fall back to p2p
+      r = await fetch(SIMLI_DESK,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+auth,'apikey':(typeof SB_ANON!=='undefined'?SB_ANON:'')},body:JSON.stringify({op:'websession',mode:'p2p'})});
+      sdata = await r.json(); mode='p2p';
+    }
+    if(!sdata.ok||!sdata.session_token){ window.gSimliStarting=false; return; }
+    const v=document.getElementById('simliVideo'), a=document.getElementById('simliAudio');
+    const c=new window.SimliClient(sdata.session_token, v, a, sdata.ice||null, window.SimliLogLevel.DEBUG, mode, 'websockets');
+    c.on&&c.on('connected', function(){
+      window.gSimliReady=true;
+      // Cleopatra takes the stage; hide the composite still + canvas + film
+      v.style.display='block';
+      var st=document.getElementById('guideStill'); if(st) st.style.opacity='0';
+      var lp=document.getElementById('guideLips'); if(lp) lp.style.display='none';
+      var gf=document.getElementById('guideFilm'); if(gf) gf.style.display='none';
+    });
+    c.on&&c.on('failed', function(){ window.gSimliReady=false; });
+    c.on&&c.on('disconnected', function(){ window.gSimliReady=false; });
+    await c.start();
+    window.gSimli=c;
+  }catch(e){ /* composite stays as fallback */ }
+  window.gSimliStarting=false;
+}
+// send one line of her voice to the Simli face (pcm24 -> 16k -> sendAudioData)
+async function simliSpeak(text){
+  if(!window.gSimli||!window.gSimliReady) return false;
+  try{
+    const auth=(typeof session!=='undefined'&&session)?session.access_token:(typeof SB_ANON!=='undefined'?SB_ANON:'');
+    const r=await fetch((typeof GUIDE_SB!=='undefined'?GUIDE_SB:'https://canvbkibjgcnqowjtarf.supabase.co')+'/functions/v1/voice-speak',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+auth,'apikey':(typeof SB_ANON!=='undefined'?SB_ANON:'')},body:JSON.stringify({text:text,format:'pcm24'})});
+    if(!r.ok) return false;
+    const j=await r.json(); if(!j.chunks) return false;
+    let tot=0; const parts=j.chunks.map(function(c){const b=atob(c);const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);tot+=u.length;return u;});
+    const all=new Uint8Array(tot); let o=0; parts.forEach(function(u){all.set(u,o);o+=u.length;});
+    const i16=new Int16Array(all.buffer); const oL=Math.floor(i16.length*16000/24000); const out=new Int16Array(oL);
+    for(let i=0;i<oL;i++) out[i]=i16[Math.floor(i*24000/16000)];
+    window.gSimli.sendAudioData(new Uint8Array(out.buffer));
+    return true;
+  }catch(e){ return false; }
+}
+window.simliStart=simliStart; window.simliSpeak=simliSpeak;
 </script>
 
 </body>
