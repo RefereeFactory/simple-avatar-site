@@ -493,7 +493,7 @@
           <video id="simliVideo" autoplay playsinline style="display:none;position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;background:#000;"></video>
           <audio id="simliAudio" autoplay></audio>
         </div>
-        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v39-clean</div>
+        <div style="text-align:center;font-size:11px;font-weight:800;color:#f0a500;background:#1a1408;padding:3px 4px;letter-spacing:1px;">host v40</div>
       </div>
       <style>@keyframes guideBreathe{0%,100%{transform:scale(1.004)}50%{transform:scale(1.009)}}</style>
       <div id="liveControls" style="display:none;margin:10px auto 0;max-width:440px;gap:8px;justify-content:center;">
@@ -5957,6 +5957,10 @@ window.avatarModeStart=async function(){
   // Cleopatra ONLY: the old composite face is switched off entirely in this mode
   ['guideStill','guideLips','guideFilm'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
   var brth=document.getElementById('guideBreather'); if(brth) brth.style.animation='none';
+  // the old still gave the stage its height — give the stage her square shape directly
+  var outer=document.querySelector('#guideStage > div');
+  if(outer){ outer.style.aspectRatio='1 / 1'; outer.style.background='#0d0d0f';
+    setTimeout(function(){ if(outer.clientHeight<40) outer.style.height=outer.clientWidth+'px'; }, 350); }
   var box=document.getElementById('heroBox'); if(box) box.style.display='none';
   var stage=document.getElementById('guideStage');
   var bar=document.getElementById('heroBuildBar');
@@ -5982,6 +5986,8 @@ window.avatarModeExit=function(){
   var lp=document.getElementById('guideLips'); if(lp) lp.style.display='block';
   document.getElementById('guideStage').style.display='none';
   var back=document.getElementById('avatarBackBtn'); if(back) back.style.display='none';
+  var outer=document.querySelector('#guideStage > div');
+  if(outer){ outer.style.aspectRatio=''; outer.style.height=''; outer.style.background=''; }
   var bar=document.getElementById('heroBuildBar');
   bar.style.maxWidth=''; bar.style.margin='';
   var box=document.getElementById('heroBox');
@@ -6022,7 +6028,8 @@ async function simliStart(){
     // truth: when frames flow, she is live. Poll up to 30s.
     for(let i=0;i<60;i++){
       await new Promise(function(r){setTimeout(r,500);});
-      if(v.videoWidth>0 && !v.paused){ simliReveal(); break; }
+      if(v.paused && v.videoWidth>0){ try{ v.play(); }catch(_){} }
+      if(v.videoWidth>0 && (!v.paused || v.readyState>=2)){ simliReveal(); break; }
     }
   }catch(e){ /* composite stays as fallback */ }
   window.gSimliStarting=false;
